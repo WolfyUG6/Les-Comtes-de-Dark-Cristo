@@ -125,27 +125,59 @@ closePublishModal.addEventListener('click', () => {
     publishModal.style.display = 'none';
 });
 
-// 2. Envoyer l'histoire dans la base de données
+// 2. Envoyer l'histoire et l'image dans la base de données
 submitStory.addEventListener('click', async () => {
     const title = document.getElementById('story-title').value;
     const synopsis = document.getElementById('story-synopsis').value;
     const genre = document.getElementById('story-genre').value;
-    const cover = document.getElementById('story-cover').value;
+    const coverInput = document.getElementById('story-cover-file');
+    const file = coverInput.files[0]; // On attrape le fichier sélectionné
 
-    // On vérifie qui est connecté pour le mettre comme auteur
+    // Vérification de connexion
     const { data: { session } } = await _supabase.auth.getSession();
-    
     if (!session) {
         alert("Vous devez être connecté pour publier.");
         return;
     }
 
+    // Vérification des champs obligatoires
     if (!title || !synopsis || !genre) {
         alert("Le titre, le synopsis et le genre sont obligatoires pour sceller une œuvre.");
         return;
     }
 
-    // On envoie le tout dans la table 'histoires' de Supabase
+    // On change le texte du bouton pendant que l'ordinateur travaille
+    submitStory.innerText = "Forgeage en cours...";
+    submitStory.disabled = true;
+
+    let imageUrl = null;
+
+    // ETAPE A : Si le joueur a mis une image, on l'envoie dans le Storage
+    if (file) {
+        // On crée un nom unique pour l'image (pour éviter que deux auteurs écrasent "couverture.jpg")
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+
+        const { data: uploadData, error: uploadError } = await _supabase.storage
+            .from('couvertures')
+            .upload(fileName, file);
+
+        if (uploadError) {
+            alert("Erreur lors de l'envoi de l'image : " + uploadError.message);
+            submitStory.innerText = "Publier";
+            submitStory.disabled = false;
+            return;
+        }
+
+        // On récupère le lien public officiel de l'image stockée
+        const { data: urlData } = _supabase.storage
+            .from('couvertures')
+            .getPublicUrl(fileName);
+        
+        imageUrl = urlData.publicUrl;
+    }
+
+    // ETAPE B : On envoie l'histoire (avec le lien de l'image) dans la table 'histoires'
     const { data, error } = await _supabase
         .from('histoires')
         .insert([
@@ -153,8 +185,8 @@ submitStory.addEventListener('click', async () => {
                 titre: title, 
                 synopsis: synopsis, 
                 genre: genre, 
-                auteur: session.user.email, // L'auteur est l'email du compte connecté
-                image_couverture: cover 
+                auteur: session.user.email,
+                image_couverture: imageUrl 
             }
         ]);
 
@@ -164,10 +196,14 @@ submitStory.addEventListener('click', async () => {
         alert("Votre œuvre a été gravée dans le sanctuaire avec succès !");
         publishModal.style.display = 'none'; // On ferme la boîte
         
-        // On vide les champs pour la prochaine fois
+        // On vide tous les champs
         document.getElementById('story-title').value = '';
         document.getElementById('story-synopsis').value = '';
         document.getElementById('story-genre').value = '';
-        document.getElementById('story-cover').value = '';
+        coverInput.value = '';
     }
+    
+    // On remet le bouton à son état normal
+    submitStory.innerText = "Publier";
+    submitStory.disabled = false;
 });
