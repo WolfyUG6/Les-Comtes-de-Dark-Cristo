@@ -17,6 +17,7 @@
         </div>
 		<div id="user-container" style="display: none; position: absolute; top: 20px; right: 20px; gap: 15px; align-items: center;">
             <span id="user-name" style="color: #e0d7c6; font-family: 'Cinzel', serif; font-size: 1rem; border-bottom: 1px solid #c4a484; padding-bottom: 2px;"></span>
+            <button id="btn-publish" class="genre-btn" style="border-color: #00aaff; color: #00aaff; box-shadow: 0 0 5px #00aaff55;">Votre Histoire</button>
             <button id="btn-profile" class="genre-btn">Mon Profil</button>
             <button id="btn-logout" class="genre-btn" style="border-color: #5d1a1a; color: #5d1a1a;">Quitter</button>
         </div>
@@ -48,7 +49,7 @@
         </p>
     </main>
 
-<div id="auth-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #111; padding: 40px; border: 1px solid #c4a484; z-index: 1000; text-align: center; box-shadow: 0 0 20px #000;">
+		<div id="auth-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #111; padding: 40px; border: 1px solid #c4a484; z-index: 1000; text-align: center; box-shadow: 0 0 20px #000;">
         <h2 style="color: #c4a484; font-family: 'Cinzel', serif; margin-top: 0;">Entrez dans le Sanctuaire</h2>
         <input type="email" id="email-input" placeholder="Votre Email" style="display: block; width: 90%; margin: 15px auto; padding: 10px; background: #0a0a0a; color: #e0d7c6; border: 1px solid #5d1a1a; font-family: 'Segoe UI', sans-serif;">
         <input type="password" id="password-input" placeholder="Votre Mot de Passe" style="display: block; width: 90%; margin: 15px auto; padding: 10px; background: #0a0a0a; color: #e0d7c6; border: 1px solid #5d1a1a; font-family: 'Segoe UI', sans-serif;">
@@ -56,6 +57,29 @@
         <div style="margin-top: 25px; display: flex; justify-content: center; gap: 15px;">
             <button id="submit-auth" class="genre-btn">Valider</button>
             <button id="close-modal" class="genre-btn" style="border-color: transparent; color: #777;">Fermer</button>
+        </div>
+    </div>
+	<div id="publish-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #111; padding: 40px; border: 1px solid #c4a484; z-index: 1000; text-align: center; box-shadow: 0 0 20px #00aaff55; width: 80%; max-width: 600px;">
+        <h2 style="color: #00aaff; font-family: 'Cinzel', serif; margin-top: 0;">Forger une Œuvre</h2>
+        
+        <input type="text" id="story-title" placeholder="Titre de l'histoire" style="display: block; width: 90%; margin: 15px auto; padding: 10px; background: #0a0a0a; color: #e0d7c6; border: 1px solid #5d1a1a; font-family: 'Segoe UI', sans-serif;">
+        
+        <textarea id="story-synopsis" placeholder="Synopsis (Résumé sombre et captivant...)" rows="5" style="display: block; width: 90%; margin: 15px auto; padding: 10px; background: #0a0a0a; color: #e0d7c6; border: 1px solid #5d1a1a; font-family: 'Segoe UI', sans-serif; resize: vertical;"></textarea>
+        
+        <select id="story-genre" style="display: block; width: 94%; margin: 15px auto; padding: 10px; background: #0a0a0a; color: #e0d7c6; border: 1px solid #5d1a1a; font-family: 'Segoe UI', sans-serif;">
+            <option value="">-- Choisissez le Genre --</option>
+            <option value="High & Low Fantasy">High & Low Fantasy</option>
+            <option value="Dark Fantasy & Grimdark">Dark Fantasy & Grimdark</option>
+            <option value="Romantasy Tragique">Romantasy Tragique</option>
+            <option value="Sci-Fi & Cyberpunk">Sci-Fi & Cyberpunk</option>
+            <option value="Horreur Psychologique">Horreur Psychologique</option>
+        </select>
+
+        <input type="text" id="story-cover" placeholder="Lien de l'image de couverture (URL web)" style="display: block; width: 90%; margin: 15px auto; padding: 10px; background: #0a0a0a; color: #e0d7c6; border: 1px solid #5d1a1a; font-family: 'Segoe UI', sans-serif;">
+        
+        <div style="margin-top: 25px; display: flex; justify-content: center; gap: 15px;">
+            <button id="submit-story" class="genre-btn" style="border-color: #00aaff;">Publier</button>
+            <button id="close-publish-modal" class="genre-btn" style="border-color: transparent; color: #777;">Annuler</button>
         </div>
     </div>
 

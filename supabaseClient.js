@@ -109,3 +109,65 @@ btnLogout.addEventListener('click', async () => {
         alert("Vous avez quitté le sanctuaire.");
     }
 });
+
+// --- PUBLICATION D'UNE HISTOIRE ---
+const btnPublish = document.getElementById('btn-publish');
+const publishModal = document.getElementById('publish-modal');
+const closePublishModal = document.getElementById('close-publish-modal');
+const submitStory = document.getElementById('submit-story');
+
+// 1. Ouvrir et fermer la boîte de publication
+btnPublish.addEventListener('click', () => {
+    publishModal.style.display = 'block';
+});
+
+closePublishModal.addEventListener('click', () => {
+    publishModal.style.display = 'none';
+});
+
+// 2. Envoyer l'histoire dans la base de données
+submitStory.addEventListener('click', async () => {
+    const title = document.getElementById('story-title').value;
+    const synopsis = document.getElementById('story-synopsis').value;
+    const genre = document.getElementById('story-genre').value;
+    const cover = document.getElementById('story-cover').value;
+
+    // On vérifie qui est connecté pour le mettre comme auteur
+    const { data: { session } } = await _supabase.auth.getSession();
+    
+    if (!session) {
+        alert("Vous devez être connecté pour publier.");
+        return;
+    }
+
+    if (!title || !synopsis || !genre) {
+        alert("Le titre, le synopsis et le genre sont obligatoires pour sceller une œuvre.");
+        return;
+    }
+
+    // On envoie le tout dans la table 'histoires' de Supabase
+    const { data, error } = await _supabase
+        .from('histoires')
+        .insert([
+            { 
+                titre: title, 
+                synopsis: synopsis, 
+                genre: genre, 
+                auteur: session.user.email, // L'auteur est l'email du compte connecté
+                image_couverture: cover 
+            }
+        ]);
+
+    if (error) {
+        alert("Erreur lors de la publication : " + error.message);
+    } else {
+        alert("Votre œuvre a été gravée dans le sanctuaire avec succès !");
+        publishModal.style.display = 'none'; // On ferme la boîte
+        
+        // On vide les champs pour la prochaine fois
+        document.getElementById('story-title').value = '';
+        document.getElementById('story-synopsis').value = '';
+        document.getElementById('story-genre').value = '';
+        document.getElementById('story-cover').value = '';
+    }
+});
