@@ -326,6 +326,9 @@ window.ouvrirOeuvre = async function(idHistoire) {
     } else {
         document.getElementById('btn-add-chapitre').style.display = 'none'; // On le cache
     }
+	
+	// --- LA LIGNE À AJOUTER EST JUSTE ICI ---
+    chargerChapitres(idHistoire);
 };
 
 // --- PUBLICATION D'UN CHAPITRE ---
@@ -374,6 +377,9 @@ submitChapitre.addEventListener('click', async () => {
     } else {
         alert("Le chapitre a été ajouté à votre œuvre !");
         chapitreModal.style.display = 'none'; // On ferme la boîte
+		
+		// --- LA LIGNE À AJOUTER EST JUSTE ICI ---
+        chargerChapitres(window.currentOeuvreId);
         
         // On vide les champs pour la prochaine fois
         document.getElementById('chapitre-numero').value = '';
@@ -385,3 +391,63 @@ submitChapitre.addEventListener('click', async () => {
     submitChapitre.innerText = "Publier le Chapitre";
     submitChapitre.disabled = false;
 });
+
+// --- AFFICHAGE DE LA LISTE DES CHAPITRES ---
+async function chargerChapitres(idHistoire) {
+    const chapitresListe = document.getElementById('chapitres-liste');
+    chapitresListe.innerHTML = '<p style="color: #c4a484; font-style: italic;">Recherche des écrits enfouis...</p>';
+
+    // On demande à Supabase tous les chapitres liés à cette histoire, triés du 1er au dernier
+    const { data: chapitres, error } = await _supabase
+        .from('chapitres')
+        .select('*')
+        .eq('histoire_id', idHistoire)
+        .order('numero', { ascending: true });
+
+    if (error) {
+        chapitresListe.innerHTML = '<p style="color: red;">Erreur de lecture : ' + error.message + '</p>';
+        return;
+    }
+
+    // Si on n'a rien trouvé
+    if (chapitres.length === 0) {
+        chapitresListe.innerHTML = '<p style="color: #777; font-style: italic;">Aucun chapitre n\'a encore été forgé pour cette œuvre.</p>';
+        return;
+    }
+
+    // Si on a trouvé des chapitres, on vide la zone et on fabrique la liste
+    chapitresListe.innerHTML = '';
+    
+    const ul = document.createElement('ul');
+    ul.style.listStyleType = 'none';
+    ul.style.padding = '0';
+    ul.style.margin = '0';
+
+    chapitres.forEach(chapitre => {
+        const li = document.createElement('li');
+        li.style.backgroundColor = '#0a0a0a';
+        li.style.border = '1px solid #333';
+        li.style.padding = '15px';
+        li.style.marginBottom = '10px';
+        li.style.display = 'flex';
+        li.style.justifyContent = 'space-between';
+        li.style.alignItems = 'center';
+
+        // Formatage de la date 
+        const datePub = new Date(chapitre.date_publication).toLocaleDateString('fr-FR');
+
+        li.innerHTML = `
+            <div style="text-align: left;">
+                <span style="color: #00aaff; font-weight: bold; margin-right: 10px;">Chapitre ${chapitre.numero}</span>
+                <span style="color: #e0d7c6;">${chapitre.titre}</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <span style="color: #555; font-size: 0.8rem;">${datePub}</span>
+                <button class="genre-btn" style="padding: 5px 15px; font-size: 0.8rem; border-color: #c4a484; color: #c4a484;" onclick="alert('La lecture du chapitre arrive à la prochaine étape !')">Lire</button>
+            </div>
+        `;
+        ul.appendChild(li);
+    });
+
+    chapitresListe.appendChild(ul);
+}
