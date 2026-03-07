@@ -39,12 +39,59 @@ submitStory.addEventListener('click', async () => {
 });
 
 // Le Studio (Mon Profil)
-document.getElementById('btn-profile').addEventListener('click', async () => {
+document.getElementById('btn-profile').addEventListener('click', () => {
     document.getElementById('stories-container').style.display = 'none';
     document.getElementById('oeuvre-page').style.display = 'none';
     document.getElementById('studio-page').style.display = 'block';
-    // ... (on pourra rajouter la suite de la logique du studio ici)
+    
+    // On invoque la magie pour charger les œuvres de l'auteur
+    chargerMesOeuvres();
 });
+
+// --- LE SORTILÈGE POUR CHARGER VOS ŒUVRES ---
+async function chargerMesOeuvres() {
+    const conteneur = document.getElementById('mes-oeuvres-liste');
+    conteneur.innerHTML = '<p style="color: #c4a484; font-style: italic;">Recherche de vos créations dans l\'Abysse...</p>';
+
+    // 1. On vérifie qui est le Bâtisseur (l'utilisateur connecté)
+    const { data: { session } } = await window._supabase.auth.getSession();
+    if (!session) return;
+
+    // 2. On fouille l'étagère (Supabase) pour trouver SES œuvres
+    const { data: mesHistoires, error } = await window._supabase
+        .from('histoires')
+        .select('*')
+        .eq('auteur', session.user.email);
+
+    if (error) {
+        conteneur.innerHTML = '<p style="color: red;">Erreur : ' + error.message + '</p>';
+        return;
+    }
+
+    // 3. Si l'auteur n'a rien écrit
+    if (mesHistoires.length === 0) {
+        conteneur.innerHTML = '<p style="color: #777; font-style: italic;">Vous n\'avez encore forgé aucune œuvre.</p>';
+        return;
+    }
+
+    // 4. On affiche chaque œuvre trouvée
+    conteneur.innerHTML = '';
+    mesHistoires.forEach(histoire => {
+        const carte = document.createElement('div');
+        carte.style.cssText = "background: #0a0a0a; border: 1px solid #5d1a1a; padding: 15px; display: flex; justify-content: space-between; align-items: center;";
+        
+        carte.innerHTML = `
+            <div>
+                <h3 style="color: #c4a484; font-family: 'Cinzel', serif; margin: 0 0 5px 0;">${histoire.titre}</h3>
+                <span style="font-size: 0.8rem; background-color: #5d1a1a; color: white; padding: 2px 6px; text-transform: uppercase;">${histoire.genre}</span>
+            </div>
+            <div>
+                <button class="genre-btn" style="border-color: #00aaff; color: #00aaff;" onclick="alert('Bientôt : Gestion des chapitres de ${histoire.titre.replace(/'/g, "\\'")}')">Gérer</button>
+            </div>
+        `;
+        conteneur.appendChild(carte);
+    });
+}
 
 // --- AJOUT DE CHAPITRE DANS L'ATELIER ---
 const submitChapitre = document.getElementById('submit-chapitre');
