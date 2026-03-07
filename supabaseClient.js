@@ -451,3 +451,72 @@ async function chargerChapitres(idHistoire) {
 
     chapitresListe.appendChild(ul);
 }
+
+// --- GESTION DU STUDIO AUTEUR (MON PROFIL) ---
+const btnProfile = document.getElementById('btn-profile');
+const studioPage = document.getElementById('studio-page');
+const btnRetourStudio = document.getElementById('btn-retour-studio');
+const mesOeuvresListe = document.getElementById('mes-oeuvres-liste');
+
+// 1. Fermer le studio et revenir à l'accueil
+btnRetourStudio.addEventListener('click', () => {
+    studioPage.style.display = 'none';
+    document.getElementById('stories-container').style.display = 'flex';
+});
+
+// 2. Ouvrir le studio
+btnProfile.addEventListener('click', async () => {
+    // On cache l'accueil et la page de lecture, on affiche le studio
+    document.getElementById('stories-container').style.display = 'none';
+    document.getElementById('oeuvre-page').style.display = 'none';
+    studioPage.style.display = 'block';
+
+    mesOeuvresListe.innerHTML = '<p style="color: #c4a484; font-style: italic;">Recherche de vos grimoires...</p>';
+
+    // On vérifie qui est connecté
+    const { data: { session } } = await _supabase.auth.getSession();
+    if (!session) return;
+
+    // On demande à Supabase UNIQUEMENT les histoires de cet auteur
+    const { data: mesHistoires, error } = await _supabase
+        .from('histoires')
+        .select('*')
+        .eq('auteur', session.user.email)
+        .order('date_publication', { ascending: false });
+
+    if (error) {
+        mesOeuvresListe.innerHTML = '<p style="color: red;">Erreur : ' + error.message + '</p>';
+        return;
+    }
+
+    if (mesHistoires.length === 0) {
+        mesOeuvresListe.innerHTML = '<p style="color: #777; font-style: italic;">Vous n\'avez forgé aucune œuvre pour le moment.</p>';
+        return;
+    }
+
+    // On affiche chaque histoire avec ses boutons d'administration
+    mesOeuvresListe.innerHTML = '';
+    mesHistoires.forEach(hist => {
+        const div = document.createElement('div');
+        div.style.backgroundColor = '#0a0a0a';
+        div.style.border = '1px solid #5d1a1a';
+        div.style.padding = '20px';
+        div.style.display = 'flex';
+        div.style.justifyContent = 'space-between';
+        div.style.alignItems = 'center';
+        div.style.boxShadow = '0 4px 10px rgba(0,0,0,0.8)';
+
+        div.innerHTML = `
+            <div style="flex: 1;">
+                <span style="font-size: 0.7rem; background-color: #5d1a1a; color: white; padding: 2px 5px; text-transform: uppercase;">${hist.genre}</span>
+                <h3 style="color: #00aaff; margin: 10px 0 5px 0; font-family: 'Cinzel', serif;">${hist.titre}</h3>
+                <span style="font-size: 0.8rem; color: #777;">👁️ 0 vues | ❤️ 0 likes</span>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="genre-btn" style="border-color: #00aaff; color: #00aaff; padding: 8px 15px; font-size: 0.8rem;" onclick="alert('Bientôt : Ouvrir le gestionnaire de cette histoire')">Gérer les chapitres</button>
+                <button class="genre-btn" style="border-color: transparent; color: #ff0055; padding: 8px 15px; font-size: 0.8rem;" onclick="alert('Bientôt : Supprimer l\'œuvre')">Supprimer</button>
+            </div>
+        `;
+        mesOeuvresListe.appendChild(div);
+    });
+});
