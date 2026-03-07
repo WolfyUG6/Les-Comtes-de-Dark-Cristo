@@ -135,3 +135,86 @@ document.getElementById('btn-retour-studio').addEventListener('click', () => {
     document.getElementById('studio-page').style.display = 'none';
     document.getElementById('stories-container').style.display = 'flex';
 });
+
+// --- GESTION DE L'ŒUVRE (Le Panneau d'Administration) ---
+
+// 1. Ouvrir le panneau de gestion pour une œuvre spécifique
+window.ouvrirGestionOeuvre = function(idHistoire, titreHistoire) {
+    const container = document.getElementById('gestion-chapitres-container');
+    container.style.display = 'block'; // On affiche la zone cachée
+    
+    // On met le titre et un bouton rouge pour supprimer TOUTE l'histoire
+    document.getElementById('gestion-titre-oeuvre').innerHTML = `
+        ${titreHistoire} 
+        <button class="genre-btn" style="border-color: red; color: red; font-size: 0.7rem; margin-left: 20px;" onclick="supprimerOeuvre(${idHistoire})">🗑️ Supprimer l'œuvre</button>
+    `;
+
+    // On charge les chapitres
+    chargerChapitresAdmin(idHistoire);
+};
+
+// 2. Charger et lister les chapitres dans l'Atelier
+window.chargerChapitresAdmin = async function(idHistoire) {
+    const liste = document.getElementById('liste-chapitres-admin');
+    liste.innerHTML = '<p style="color: #c4a484; font-style: italic;">Lecture des parchemins...</p>';
+
+    const { data: chapitres, error } = await window._supabase
+        .from('chapitres')
+        .select('*')
+        .eq('histoire_id', idHistoire)
+        .order('numero', { ascending: true });
+
+    if (error) {
+        liste.innerHTML = '<p style="color: red;">Erreur : ' + error.message + '</p>';
+        return;
+    }
+
+    if (chapitres.length === 0) {
+        liste.innerHTML = '<p style="color: #777; font-style: italic;">Aucun chapitre pour le moment.</p>';
+        return;
+    }
+
+    liste.innerHTML = '';
+    chapitres.forEach(chap => {
+        const div = document.createElement('div');
+        div.style.cssText = "background: #111; border: 1px solid #333; padding: 10px; display: flex; justify-content: space-between; align-items: center;";
+        
+        div.innerHTML = `
+            <span style="color: #e0d7c6; font-family: 'Cinzel', serif;">Chapitre ${chap.numero} : ${chap.titre}</span>
+            <div>
+                <button class="genre-btn" style="font-size: 0.7rem; margin-right: 10px; border-color: #c4a484; color: #c4a484;" onclick="alert('La modification arrive bientôt !')">Modifier</button>
+                <button class="genre-btn" style="font-size: 0.7rem; border-color: red; color: red;" onclick="supprimerChapitre(${chap.id}, ${idHistoire})">Supprimer</button>
+            </div>
+        `;
+        liste.appendChild(div);
+    });
+};
+
+// 3. Le pouvoir de Destruction : Supprimer une œuvre
+window.supprimerOeuvre = async function(idHistoire) {
+    if(confirm("Êtes-vous sûr de vouloir jeter cette œuvre dans les abysses ? Cette action est irréversible.")) {
+        const { error } = await window._supabase.from('histoires').delete().eq('id', idHistoire);
+        if(error) alert("Erreur : " + error.message);
+        else {
+            alert("L'œuvre a été consumée par les ténèbres.");
+            document.getElementById('gestion-chapitres-container').style.display = 'none';
+            chargerMesOeuvres(); // On rafraîchit la liste des œuvres
+        }
+    }
+};
+
+// 4. Le pouvoir de Destruction : Supprimer un chapitre
+window.supprimerChapitre = async function(idChapitre, idHistoire) {
+    if(confirm("Détruire ce parchemin à jamais ?")) {
+        const { error } = await window._supabase.from('chapitres').delete().eq('id', idChapitre);
+        if(error) alert("Erreur : " + error.message);
+        else {
+            chargerChapitresAdmin(idHistoire); // On rafraîchit la liste des chapitres
+        }
+    }
+};
+
+// 5. Fermer le panneau de gestion
+document.getElementById('btn-fermer-gestion').addEventListener('click', () => {
+    document.getElementById('gestion-chapitres-container').style.display = 'none';
+});
