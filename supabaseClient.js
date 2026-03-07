@@ -258,7 +258,7 @@ async function loadStories(genreFilter = null) {
             <h3 style="color: #c4a484; font-family: 'Cinzel', serif; margin: 5px 0 0 0; font-size: 1.2rem;">${histoire.titre}</h3>
             <span style="font-size: 0.8rem; color: #777;">Par Comte ${pseudo}</span>
             <p style="color: #aaa; font-size: 0.9rem; flex-grow: 1; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; margin-bottom: 0;">${histoire.synopsis}</p>
-            <button class="genre-btn" style="width: 100%; margin-top: 15px; border-color: #c4a484; color: #c4a484;">Lire l'œuvre</button>
+            <button class="genre-btn" onclick="ouvrirOeuvre(${histoire.id})" style="width: 100%; margin-top: 15px; border-color: #c4a484; color: #c4a484;">Lire l'œuvre</button>
         `;
         
         // On pose la carte sur l'étagère
@@ -277,3 +277,42 @@ genreButtons.forEach(btn => {
         loadStories(genreChoisi); // Relance la recherche avec ce filtre
     });
 });
+
+// --- GESTION DE LA PAGE DE L'ŒUVRE ---
+const oeuvrePage = document.getElementById('oeuvre-page');
+const btnRetour = document.getElementById('btn-retour');
+
+// 1. Le bouton pour revenir à l'accueil
+btnRetour.addEventListener('click', () => {
+    oeuvrePage.style.display = 'none';
+    storiesContainer.style.display = 'flex'; // On réaffiche la vitrine
+});
+
+// 2. La magie quand on clique sur "Lire l'œuvre"
+window.ouvrirOeuvre = async function(idHistoire) {
+    // On cache la vitrine, on affiche la page détaillée
+    storiesContainer.style.display = 'none';
+    oeuvrePage.style.display = 'block';
+
+    // On dit "Chargement..." le temps d'interroger la base de données
+    document.getElementById('oeuvre-titre').innerText = "Ouverture du grimoire...";
+
+    // On va chercher l'histoire précise dans Supabase grâce à son ID
+    const { data: histoire, error } = await _supabase
+        .from('histoires')
+        .select('*')
+        .eq('id', idHistoire)
+        .single(); // On précise qu'on en veut une seule
+
+    if (error) {
+        alert("Erreur de chargement : " + error.message);
+        return;
+    }
+
+    // On remplit les encadrés avec les vraies informations !
+    document.getElementById('oeuvre-cover').src = histoire.image_couverture || '';
+    document.getElementById('oeuvre-genre').innerText = histoire.genre;
+    document.getElementById('oeuvre-titre').innerText = histoire.titre;
+    document.getElementById('oeuvre-auteur').innerText = "Comte " + histoire.auteur.split('@')[0];
+    document.getElementById('oeuvre-synopsis').innerText = histoire.synopsis;
+};
