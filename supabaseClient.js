@@ -513,10 +513,71 @@ btnProfile.addEventListener('click', async () => {
                 <span style="font-size: 0.8rem; color: #777;">👁️ 0 vues | ❤️ 0 likes</span>
             </div>
             <div style="display: flex; gap: 10px;">
-                <button class="genre-btn" style="border-color: #00aaff; color: #00aaff; padding: 8px 15px; font-size: 0.8rem;" onclick="alert('Bientôt : Ouvrir le gestionnaire de cette histoire')">Gérer les chapitres</button>
+                <button class="genre-btn" style="border-color: #00aaff; color: #00aaff; padding: 8px 15px; font-size: 0.8rem;" onclick="ouvrirGestionChapitres(${hist.id}, '${hist.titre.replace(/'/g, "\\'")}')">Gérer les chapitres</button>
                 <button class="genre-btn" style="border-color: transparent; color: #ff0055; padding: 8px 15px; font-size: 0.8rem;" onclick="alert('Bientôt : Supprimer l\'œuvre')">Supprimer</button>
             </div>
         `;
         mesOeuvresListe.appendChild(div);
     });
+});
+
+// --- LOGIQUE DE GESTION DES CHAPITRES DANS LE STUDIO ---
+
+window.ouvrirGestionChapitres = async function(idHistoire, titre) {
+    const container = document.getElementById('gestion-chapitres-container');
+    const listeAdmin = document.getElementById('liste-chapitres-admin');
+    const titreHeader = document.getElementById('gestion-titre-oeuvre');
+
+    container.style.display = 'block';
+    titreHeader.innerText = "Gestion : " + titre;
+    listeAdmin.innerHTML = '<p>Chargement des chapitres...</p>';
+
+    // On va chercher les chapitres de cette histoire
+    const { data: chapitres, error } = await _supabase
+        .from('chapitres')
+        .select('*')
+        .eq('histoire_id', idHistoire)
+        .order('numero', { ascending: true });
+
+    if (error) {
+        listeAdmin.innerHTML = '<p style="color:red;">Erreur : ' + error.message + '</p>';
+        return;
+    }
+
+    listeAdmin.innerHTML = '';
+    chapitres.forEach(chap => {
+        const row = document.createElement('div');
+        row.style.cssText = "display: flex; justify-content: space-between; align-items: center; background: #111; padding: 10px 15px; border: 1px solid #333;";
+        
+        row.innerHTML = `
+            <span>Chapitre ${chap.numero} : ${chap.titre}</span>
+            <div style="display: flex; gap: 10px;">
+                <button class="genre-btn" style="font-size: 0.7rem; border-color: #c4a484;" onclick="alert('Modification bientôt disponible !')">Modifier</button>
+                <button class="genre-btn" style="font-size: 0.7rem; border-color: #ff0055; color: #ff0055;" onclick="supprimerChapitre(${chap.id}, ${idHistoire}, '${titre}')">Supprimer</button>
+            </div>
+        `;
+        listeAdmin.appendChild(row);
+    });
+};
+
+// Fonction pour supprimer un chapitre
+window.supprimerChapitre = async function(idChap, idHist, titreHist) {
+    if (confirm("Voulez-vous vraiment effacer ce chapitre des archives ?")) {
+        const { error } = await _supabase
+            .from('chapitres')
+            .delete()
+            .eq('id', idChap);
+
+        if (error) {
+            alert("Erreur lors de la suppression : " + error.message);
+        } else {
+            alert("Chapitre supprimé.");
+            ouvrirGestionChapitres(idHist, titreHist); // On rafraîchit la liste
+        }
+    }
+};
+
+// Bouton pour fermer la gestion
+document.getElementById('btn-fermer-gestion').addEventListener('click', () => {
+    document.getElementById('gestion-chapitres-container').style.display = 'none';
 });
