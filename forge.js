@@ -42,9 +42,9 @@ submitStory.addEventListener('click', async () => {
 document.getElementById('btn-profile').addEventListener('click', () => {
     document.getElementById('stories-container').style.display = 'none';
     document.getElementById('oeuvre-page').style.display = 'none';
+    document.getElementById('main-genre-menu').style.display = 'none'; // On cache les genres !
     document.getElementById('studio-page').style.display = 'block';
     
-    // On invoque la magie pour charger les œuvres de l'auteur
     chargerMesOeuvres();
 });
 
@@ -133,6 +133,7 @@ submitChapitre.addEventListener('click', async () => {
 // Quitter le Studio pour retourner aux archives
 document.getElementById('btn-retour-studio').addEventListener('click', () => {
     document.getElementById('studio-page').style.display = 'none';
+    document.getElementById('main-genre-menu').style.display = 'block'; // On les fait réapparaître !
     document.getElementById('stories-container').style.display = 'flex';
 });
 
