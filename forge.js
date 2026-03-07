@@ -45,3 +45,40 @@ document.getElementById('btn-profile').addEventListener('click', async () => {
     document.getElementById('studio-page').style.display = 'block';
     // ... (on pourra rajouter la suite de la logique du studio ici)
 });
+
+// --- AJOUT DE CHAPITRE DANS L'ATELIER ---
+const submitChapitre = document.getElementById('submit-chapitre');
+
+document.getElementById('close-chapitre-modal').addEventListener('click', () => {
+    document.getElementById('chapitre-modal').style.display = 'none';
+});
+
+submitChapitre.addEventListener('click', async () => {
+    const numero = document.getElementById('chapitre-numero').value;
+    const titre = document.getElementById('chapitre-titre').value;
+    const contenu = document.getElementById('chapitre-contenu').value;
+
+    if (!numero || !titre || !contenu) {
+        alert("Champs requis manquants.");
+        return;
+    }
+
+    submitChapitre.innerText = "Gravure...";
+    
+    const { error } = await _supabase
+        .from('chapitres')
+        .insert([{ 
+            histoire_id: window.currentOeuvreId, 
+            numero: parseInt(numero), 
+            titre, 
+            contenu 
+        }]);
+
+    if (error) alert(error.message);
+    else {
+        alert("Chapitre ajouté !");
+        document.getElementById('chapitre-modal').style.display = 'none';
+        chargerChapitres(window.currentOeuvreId); // On recharge la liste
+    }
+    submitChapitre.innerText = "Publier le Chapitre";
+});
