@@ -46,3 +46,38 @@ button:hover {
     color: white;
     box-shadow: 0 0 10px #00aaff;
 }
+
+/* Style du menu des genres */
+.genre-menu {
+    width: 100%;
+    background-color: #111; /* Noir un peu moins profond pour détacher le menu */
+    border-bottom: 1px solid #c4a484; /* Ligne cuivre rouillé */
+    padding: 15px 0;
+}
+
+.genre-menu ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.genre-btn {
+    background: transparent;
+    color: #c4a484;
+    border: 1px solid #5d1a1a;
+    padding: 8px 15px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.genre-btn:hover {
+    background: #5d1a1a;
+    color: #e0d7c6;
+    border-color: #00aaff;
+    box-shadow: 0 0 8px #00aaff;
+}
