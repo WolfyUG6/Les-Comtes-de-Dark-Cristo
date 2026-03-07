@@ -75,7 +75,8 @@
             <option value="Horreur Psychologique">Horreur Psychologique</option>
         </select>
 
-        <input type="text" id="story-cover" placeholder="Lien de l'image de couverture (URL web)" style="display: block; width: 90%; margin: 15px auto; padding: 10px; background: #0a0a0a; color: #e0d7c6; border: 1px solid #5d1a1a; font-family: 'Segoe UI', sans-serif;">
+        <input type="file" id="story-cover-file" accept="image/png, image/jpeg, image/webp" style="display: block; width: 90%; margin: 15px auto; padding: 10px; background: #0a0a0a; color: #e0d7c6; border: 1px solid #5d1a1a; font-family: 'Segoe UI', sans-serif;">
+        <p style="color: #777; font-size: 0.8rem; margin-top: -10px;">Format: JPG, PNG ou WEBP (Max 5 Mo)</p>
         
         <div style="margin-top: 25px; display: flex; justify-content: center; gap: 15px;">
             <button id="submit-story" class="genre-btn" style="border-color: #00aaff;">Publier</button>
