@@ -1,0 +1,7 @@
+// Connexion à Supabase
+const supabaseUrl = 'https://kbpefbjyuuzadssdbahl.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImticGVmYmp5dXV6YWRzc2RiYWhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4NzAzOTcsImV4cCI6MjA4ODQ0NjM5N30.XKqPt0rJO7pAL1M7PapMLf4f7uw2PQQAUhMOG-PexzI';
+
+const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+console.log("Le sanctuaire de Dark & Cristo est connecté.");
