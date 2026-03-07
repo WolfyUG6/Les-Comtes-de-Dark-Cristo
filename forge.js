@@ -86,7 +86,7 @@ async function chargerMesOeuvres() {
                 <span style="font-size: 0.8rem; background-color: #5d1a1a; color: white; padding: 2px 6px; text-transform: uppercase;">${histoire.genre}</span>
             </div>
             <div>
-                <button class="genre-btn" style="border-color: #00aaff; color: #00aaff;" onclick="alert('Bientôt : Gestion des chapitres de ${histoire.titre.replace(/'/g, "\\'")}')">Gérer</button>
+                <button class="genre-btn" style="border-color: #00aaff; color: #00aaff;" onclick="ouvrirGestionOeuvre(${histoire.id}, '${histoire.titre.replace(/'/g, "\\'")}')">Gérer</button>
             </div>
         `;
         conteneur.appendChild(carte);
