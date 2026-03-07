@@ -82,3 +82,9 @@ submitChapitre.addEventListener('click', async () => {
     }
     submitChapitre.innerText = "Publier le Chapitre";
 });
+
+// Quitter le Studio pour retourner aux archives
+document.getElementById('btn-retour-studio').addEventListener('click', () => {
+    document.getElementById('studio-page').style.display = 'none';
+    document.getElementById('stories-container').style.display = 'flex';
+});

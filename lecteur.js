@@ -1,6 +1,5 @@
 // --- LE GRIMOIRE (Lecture et affichage des chapitres) ---
 const oeuvrePage = document.getElementById('oeuvre-page');
-const storiesContainer = document.getElementById('stories-container');
 
 // Revenir à l'accueil
 document.getElementById('btn-retour').addEventListener('click', () => {
