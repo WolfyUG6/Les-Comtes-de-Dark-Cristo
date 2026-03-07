@@ -79,3 +79,33 @@ submitAuth.addEventListener('click', async () => {
         }
     }
 });
+
+// --- GESTION DE L'AFFICHAGE SELON LA CONNEXION ---
+const authContainer = document.getElementById('auth-container');
+const userContainer = document.getElementById('user-container');
+const userNameDisplay = document.getElementById('user-name');
+const btnLogout = document.getElementById('btn-logout');
+
+// Supabase écoute en permanence si quelqu'un est connecté
+_supabase.auth.onAuthStateChange((event, session) => {
+    if (session) {
+        // Un utilisateur est connecté !
+        authContainer.style.display = 'none'; // On cache les boutons de connexion
+        userContainer.style.display = 'flex'; // On affiche le menu du profil
+        
+        // On affiche temporairement le début de son mail (avant qu'il ait choisi un vrai pseudo)
+        userNameDisplay.innerText = "Comte " + session.user.email.split('@')[0]; 
+    } else {
+        // Personne n'est connecté
+        authContainer.style.display = 'flex'; // On remet les boutons normaux
+        userContainer.style.display = 'none'; // On cache le menu
+    }
+});
+
+// Action du bouton pour se déconnecter
+btnLogout.addEventListener('click', async () => {
+    const { error } = await _supabase.auth.signOut();
+    if (!error) {
+        alert("Vous avez quitté le sanctuaire.");
+    }
+});
