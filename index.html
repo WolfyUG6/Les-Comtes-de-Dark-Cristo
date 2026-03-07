@@ -74,7 +74,10 @@
                     <h3 style="color: #c4a484; border-bottom: 1px solid #333; padding-bottom: 5px;">Synopsis</h3>
                     <p id="oeuvre-synopsis" style="color: #aaa; line-height: 1.6;"></p>
 
-                    <h3 style="color: #c4a484; border-bottom: 1px solid #333; padding-bottom: 5px; margin-top: 30px;">Chapitres</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; margin-top: 30px; padding-bottom: 5px;">
+                        <h3 style="color: #c4a484; margin: 0;">Chapitres</h3>
+                        <button id="btn-add-chapitre" class="genre-btn" style="display: none; font-size: 0.8rem; border-color: #00aaff; color: #00aaff;">+ Forger un Chapitre</button>
+                    </div>
                     <div id="chapitres-liste" style="background: #111; border: 1px solid #333; padding: 20px; text-align: center; color: #777; font-style: italic;">
                         Le mécanisme des chapitres est en cours de forge...
                     </div>
@@ -115,6 +118,22 @@
         <div style="margin-top: 25px; display: flex; justify-content: center; gap: 15px;">
             <button id="submit-story" class="genre-btn" style="border-color: #00aaff;">Publier</button>
             <button id="close-publish-modal" class="genre-btn" style="border-color: transparent; color: #777;">Annuler</button>
+        </div>
+    </div>
+	
+	<div id="chapitre-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #111; padding: 30px; border: 1px solid #c4a484; z-index: 1000; text-align: center; box-shadow: 0 0 20px #00aaff55; width: 90%; max-width: 800px; height: 80vh; overflow-y: auto;">
+        <h2 style="color: #00aaff; font-family: 'Cinzel', serif; margin-top: 0;">Nouveau Chapitre</h2>
+        
+        <div style="display: flex; gap: 15px; width: 95%; margin: 15px auto;">
+            <input type="number" id="chapitre-numero" placeholder="N°" style="width: 80px; padding: 10px; background: #0a0a0a; color: #e0d7c6; border: 1px solid #5d1a1a; font-family: 'Segoe UI', sans-serif;">
+            <input type="text" id="chapitre-titre" placeholder="Titre du chapitre" style="flex: 1; padding: 10px; background: #0a0a0a; color: #e0d7c6; border: 1px solid #5d1a1a; font-family: 'Segoe UI', sans-serif;">
+        </div>
+        
+        <textarea id="chapitre-contenu" placeholder="Rédigez votre texte ici..." style="display: block; width: 95%; height: 50vh; margin: 15px auto; padding: 15px; background: #0a0a0a; color: #e0d7c6; border: 1px solid #5d1a1a; font-family: 'Segoe UI', sans-serif; resize: none;"></textarea>
+        
+        <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
+            <button id="submit-chapitre" class="genre-btn" style="border-color: #00aaff;">Publier le Chapitre</button>
+            <button id="close-chapitre-modal" class="genre-btn" style="border-color: transparent; color: #777;">Annuler</button>
         </div>
     </div>
 

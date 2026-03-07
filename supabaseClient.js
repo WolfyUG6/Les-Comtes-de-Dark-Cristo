@@ -315,4 +315,73 @@ window.ouvrirOeuvre = async function(idHistoire) {
     document.getElementById('oeuvre-titre').innerText = histoire.titre;
     document.getElementById('oeuvre-auteur').innerText = "Comte " + histoire.auteur.split('@')[0];
     document.getElementById('oeuvre-synopsis').innerText = histoire.synopsis;
+
+    // -- NOUVEAU : VÉRIFICATION DE L'AUTEUR POUR LE BOUTON D'AJOUT --
+    window.currentOeuvreId = idHistoire; // On mémorise de quelle histoire on parle
+    const { data: { session } } = await _supabase.auth.getSession();
+    
+    // Si on est connecté ET que notre email est le même que celui de l'auteur de l'histoire
+    if (session && session.user.email === histoire.auteur) {
+        document.getElementById('btn-add-chapitre').style.display = 'block'; // On affiche le bouton
+    } else {
+        document.getElementById('btn-add-chapitre').style.display = 'none'; // On le cache
+    }
 };
+
+// --- PUBLICATION D'UN CHAPITRE ---
+const btnAddChapitre = document.getElementById('btn-add-chapitre');
+const chapitreModal = document.getElementById('chapitre-modal');
+const closeChapitreModal = document.getElementById('close-chapitre-modal');
+const submitChapitre = document.getElementById('submit-chapitre');
+
+// Ouvrir / Fermer la boîte d'écriture
+btnAddChapitre.addEventListener('click', () => {
+    chapitreModal.style.display = 'block';
+});
+
+closeChapitreModal.addEventListener('click', () => {
+    chapitreModal.style.display = 'none';
+});
+
+// Envoyer le chapitre à Supabase
+submitChapitre.addEventListener('click', async () => {
+    const numero = document.getElementById('chapitre-numero').value;
+    const titre = document.getElementById('chapitre-titre').value;
+    const contenu = document.getElementById('chapitre-contenu').value;
+
+    if (!numero || !titre || !contenu) {
+        alert("Le numéro, le titre et le contenu sont obligatoires pour forger le chapitre.");
+        return;
+    }
+
+    submitChapitre.innerText = "Gravure en cours...";
+    submitChapitre.disabled = true;
+
+    // On envoie dans la table 'chapitres' avec le lien vers l'histoire actuelle (currentOeuvreId)
+    const { data, error } = await _supabase
+        .from('chapitres')
+        .insert([
+            { 
+                histoire_id: window.currentOeuvreId, 
+                numero: parseInt(numero), 
+                titre: titre, 
+                contenu: contenu 
+            }
+        ]);
+
+    if (error) {
+        alert("Erreur lors de la publication : " + error.message);
+    } else {
+        alert("Le chapitre a été ajouté à votre œuvre !");
+        chapitreModal.style.display = 'none'; // On ferme la boîte
+        
+        // On vide les champs pour la prochaine fois
+        document.getElementById('chapitre-numero').value = '';
+        document.getElementById('chapitre-titre').value = '';
+        document.getElementById('chapitre-contenu').value = '';
+    }
+    
+    // On remet le bouton à son état normal
+    submitChapitre.innerText = "Publier le Chapitre";
+    submitChapitre.disabled = false;
+});
