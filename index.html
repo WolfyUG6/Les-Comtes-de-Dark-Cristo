@@ -43,6 +43,17 @@
         </p>
     </main>
 
+<div id="auth-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #111; padding: 40px; border: 1px solid #c4a484; z-index: 1000; text-align: center; box-shadow: 0 0 20px #000;">
+        <h2 style="color: #c4a484; font-family: 'Cinzel', serif; margin-top: 0;">Entrez dans le Sanctuaire</h2>
+        <input type="email" id="email-input" placeholder="Votre Email" style="display: block; width: 90%; margin: 15px auto; padding: 10px; background: #0a0a0a; color: #e0d7c6; border: 1px solid #5d1a1a; font-family: 'Segoe UI', sans-serif;">
+        <input type="password" id="password-input" placeholder="Votre Mot de Passe" style="display: block; width: 90%; margin: 15px auto; padding: 10px; background: #0a0a0a; color: #e0d7c6; border: 1px solid #5d1a1a; font-family: 'Segoe UI', sans-serif;">
+        
+        <div style="margin-top: 25px; display: flex; justify-content: center; gap: 15px;">
+            <button id="submit-auth" class="genre-btn">Valider</button>
+            <button id="close-modal" class="genre-btn" style="border-color: transparent; color: #777;">Fermer</button>
+        </div>
+    </div>
+
     <script src="supabaseClient.js"></script>
 </body>
 </html>
