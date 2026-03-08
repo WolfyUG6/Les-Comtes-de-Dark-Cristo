@@ -78,7 +78,7 @@ document.getElementById('btn-retour-quartiers').addEventListener('click', () => 
     loadStories();
 });
 
-// --- Changement du Pseudo ---
+// --- Changement du Pseudo avec Vérification ---
 const btnSavePseudo = document.getElementById('btn-save-pseudo');
 const pseudoInput = document.getElementById('pseudo-input');
 
@@ -90,24 +90,52 @@ btnSavePseudo.addEventListener('click', async () => {
         return;
     }
 
+    btnSavePseudo.innerText = "Vérification des archives...";
+
+    // On récupère le Seigneur connecté
+    const { data: { session } } = await window._supabase.auth.getSession();
+    const userId = session.user.id;
+
+    // 1. L'INQUISITEUR : On vérifie si ce nom existe déjà dans le Registre
+    const { data: pseudoPris, error: checkError } = await window._supabase
+        .from('noms_de_plume')
+        .select('user_id')
+        .eq('pseudo', nouveauPseudo)
+        .maybeSingle();
+
+    // Si le nom est trouvé ET qu'il n'appartient pas à la personne connectée...
+    if (pseudoPris && pseudoPris.user_id !== userId) {
+        alert("Les ombres murmurent... Ce Titre de Noblesse est déjà revendiqué par un autre Seigneur !");
+        btnSavePseudo.innerText = "Graver ce nom";
+        return; // On bloque tout !
+    }
+
+    // 2. LE SCEAU : Le nom est libre (ou c'est déjà le nôtre). On le réserve officiellement !
+    // On utilise "upsert" pour insérer ou mettre à jour la ligne de l'utilisateur
+    const { error: regError } = await window._supabase
+        .from('noms_de_plume')
+        .upsert({ user_id: userId, pseudo: nouveauPseudo });
+
+    if (regError) {
+        alert("Le Registre a rejeté votre demande : " + regError.message);
+        btnSavePseudo.innerText = "Graver ce nom";
+        return;
+    }
+
+    // 3. LA GRAVURE : Maintenant qu'on a l'autorisation, on fait les mises à jour habituelles
     btnSavePseudo.innerText = "Gravure en cours...";
 
-    // 1. On met à jour le profil
-    const { error } = await window._supabase.auth.updateUser({
+    // Mise à jour du profil caché
+    await window._supabase.auth.updateUser({
         data: { pseudo: nouveauPseudo }
     });
 
-    if (error) {
-        alert("Refus du Sanctuaire : " + error.message);
-    } else {
-        // 2. LA MAGIE : On retrouve qui est connecté, et on met à jour tous ses livres !
-        const { data: { session } } = await window._supabase.auth.getSession();
-        await window._supabase.from('histoires').update({ pseudo_auteur: nouveauPseudo }).eq('auteur', session.user.email);
+    // Mise à jour de toutes ses anciennes œuvres
+    await window._supabase.from('histoires').update({ pseudo_auteur: nouveauPseudo }).eq('auteur', session.user.email);
 
-        alert("Votre nouveau titre est reconnu et vos anciennes œuvres ont été signées à nouveau !");
-        document.getElementById('user-name').innerText = "Comte " + nouveauPseudo;
-        pseudoInput.value = ''; 
-    }
+    alert("Votre nouveau titre est reconnu par le Sanctuaire !");
+    document.getElementById('user-name').innerText = "Comte " + nouveauPseudo;
+    pseudoInput.value = ''; 
     
     btnSavePseudo.innerText = "Graver ce nom";
 });
