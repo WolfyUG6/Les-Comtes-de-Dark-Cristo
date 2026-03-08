@@ -43,6 +43,7 @@ window.ouvrirOeuvre = async function(idHistoire) {
     document.getElementById('oeuvre-titre').innerText = histoire.titre;
     document.getElementById('oeuvre-auteur').innerText = "Comte " + (histoire.pseudo_auteur || histoire.auteur.split('@')[0]);
     document.getElementById('oeuvre-synopsis').innerText = histoire.synopsis;
+	document.getElementById('oeuvre-likes').innerText = histoire.likes || 0;
 
     window.currentOeuvreId = idHistoire;
     
@@ -130,9 +131,25 @@ btnSoutenir.addEventListener('click', async () => {
         alert("Erreur du Sanctuaire : " + error.message);
         btnSoutenir.innerText = "Soutenir l'œuvre";
     } else {
-        alert("L'œuvre a été ajoutée à vos lectures !");
-        btnSoutenir.innerText = "Œuvre soutenue 🩸";
-        btnSoutenir.style.backgroundColor = "#5d1a1a";
-        btnSoutenir.style.color = "white";
-    }
+            // 1. On attrape le compteur visuel et on lui ajoute +1
+            const compteurLikes = document.getElementById('oeuvre-likes');
+            const nombreActuel = parseInt(compteurLikes.innerText) || 0;
+            const nouveauNombre = nombreActuel + 1;
+            compteurLikes.innerText = nouveauNombre; // Met à jour l'écran tout de suite
+
+            // 2. L'Archiviste retourne écrire ce nouveau total sur l'étagère "histoires"
+            await window._supabase
+                .from('histoires')
+                .update({ likes: nouveauNombre })
+                .eq('id', window.currentOeuvreId);
+
+            // 3. On confirme visuellement à l'utilisateur
+            alert("L'œuvre a été ajoutée à vos lectures !");
+            btnSoutenir.innerText = "Œuvre soutenue 🩸";
+            btnSoutenir.style.backgroundColor = "#5d1a1a";
+            btnSoutenir.style.color = "white";
+
+            // On désactive le bouton pour éviter de spammer les likes
+            btnSoutenir.disabled = true;
+        }
 });
