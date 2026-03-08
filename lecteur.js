@@ -134,54 +134,67 @@ btnSoutenir.addEventListener('click', async () => {
         return;
     }
 
-    // On fige le bouton pendant que l'Archiviste travaille
     btnSoutenir.innerText = "Pacte en cours...";
     btnSoutenir.disabled = true; 
 
-    // 1. On vérifie si le lecteur a DÉJÀ soutenu l'œuvre
-    const { data: exist } = await window._supabase
+    const { data: exist, error: checkError } = await window._supabase
         .from('favoris')
         .select('id')
         .eq('user_id', session.user.id)
         .eq('histoire_id', window.currentOeuvreId)
         .maybeSingle();
 
+    if (checkError) {
+        alert("Erreur de lecture des favoris : " + checkError.message);
+        btnSoutenir.disabled = false;
+        return;
+    }
+
     if (exist) {
-        // --- CAS 1 : IL ANNULE SON PACTE ---
-        // On détruit physiquement sa trace dans l'étagère 'favoris'
-        await window._supabase.from('favoris').delete().eq('id', exist.id);
+        // TENTATIVE DE SUPPRESSION
+        const { error: deleteError } = await window._supabase.from('favoris').delete().eq('id', exist.id);
+        if (deleteError) {
+            alert("Erreur de destruction du pacte : " + deleteError.message);
+            btnSoutenir.disabled = false;
+            return; // On bloque tout
+        }
         
         btnSoutenir.innerText = "Soutenir l'œuvre";
         btnSoutenir.style.backgroundColor = "transparent";
         btnSoutenir.style.color = "#ff0055";
     } else {
-        // --- CAS 2 : IL CRÉE UN PACTE ---
-        // On ajoute physiquement sa trace dans l'étagère 'favoris'
-        await window._supabase.from('favoris').insert([{ user_id: session.user.id, histoire_id: window.currentOeuvreId }]);
+        // TENTATIVE D'AJOUT
+        const { error: insertError } = await window._supabase.from('favoris').insert([{ user_id: session.user.id, histoire_id: window.currentOeuvreId }]);
+        if (insertError) {
+            alert("Erreur lors de la création du pacte : " + insertError.message);
+            btnSoutenir.innerText = "Soutenir l'œuvre"; // On remet normal
+            btnSoutenir.disabled = false;
+            return; // On bloque tout
+        }
         
         btnSoutenir.innerText = "Œuvre soutenue 🩸";
         btnSoutenir.style.backgroundColor = "#5d1a1a";
         btnSoutenir.style.color = "white";
     }
 
-    // ---------------------------------------------------------------------
-    // LE RECOMPTAGE ABSOLU (C'est ici que la magie opère et tue le bug)
-    // ---------------------------------------------------------------------
-    
-    // 2. L'Archiviste COMPTE les vraies traces restantes dans l'étagère
-    const { count, error } = await window._supabase
+    // LE RECOMPTAGE
+    const { count, error: countError } = await window._supabase
         .from('favoris')
-        .select('*', { count: 'exact', head: true }) // head: true permet de compter sans charger toutes les données
+        .select('*', { count: 'exact', head: true })
         .eq('histoire_id', window.currentOeuvreId);
+
+    if (countError) {
+        alert("Erreur lors du recomptage : " + countError.message);
+    }
 
     const vraiTotal = count || 0;
 
-    // 3. On met à jour l'étagère de l'histoire avec ce compte exact
-    await window._supabase.from('histoires').update({ likes: vraiTotal }).eq('id', window.currentOeuvreId);
+    // MISE À JOUR DU TABLEAU DES HISTOIRES
+    const { error: updateError } = await window._supabase.from('histoires').update({ likes: vraiTotal }).eq('id', window.currentOeuvreId);
+    if (updateError) {
+        alert("Erreur lors de la mise à jour du compteur global : " + updateError.message);
+    }
     
-    // 4. On affiche ce compte exact sur l'écran
     document.getElementById('oeuvre-likes').innerText = vraiTotal;
-
-    // On libère le bouton
     btnSoutenir.disabled = false; 
 });
