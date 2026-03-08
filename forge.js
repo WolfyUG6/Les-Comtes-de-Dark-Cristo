@@ -55,10 +55,11 @@ document.getElementById('btn-lectures').addEventListener('click', () => {
 
 // 2. La Forge (Le Studio de l'Auteur)
 document.getElementById('btn-atelier').addEventListener('click', () => {
-    // 1. On cache l'accueil
+    // 1. On cache l'accueil ET les quartiers
     document.getElementById('stories-container').style.display = 'none';
     document.getElementById('oeuvre-page').style.display = 'none';
     document.getElementById('main-genre-menu').style.display = 'none';
+    document.getElementById('quartiers-page').style.display = 'none'; // <-- LA LIGNE MAGIQUE EST ICI
     
     // 2. Gestion du logo : on cache le grand central, on affiche le petit en haut à gauche
     document.getElementById('hero-logo-area').style.display = 'none';
