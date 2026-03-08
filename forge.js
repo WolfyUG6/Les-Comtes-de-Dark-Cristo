@@ -30,7 +30,15 @@ submitStory.addEventListener('click', async () => {
         }
     }
 
-    const { error } = await _supabase.from('histoires').insert([{ titre: title, synopsis, genre, auteur: session.user.email, image_couverture: imageUrl }]);
+    const monPseudo = session.user.user_metadata?.pseudo || session.user.email.split('@')[0];
+    const { error } = await _supabase.from('histoires').insert([{ 
+        titre: title, 
+        synopsis, 
+        genre, 
+        auteur: session.user.email, 
+        image_couverture: imageUrl,
+        pseudo_auteur: monPseudo 
+    }]);
     if (error) alert(error.message);
     else {
         alert("Œuvre gravée !");

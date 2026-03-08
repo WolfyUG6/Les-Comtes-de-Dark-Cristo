@@ -41,7 +41,7 @@ window.ouvrirOeuvre = async function(idHistoire) {
     document.getElementById('oeuvre-cover').src = histoire.image_couverture || '';
     document.getElementById('oeuvre-genre').innerText = histoire.genre;
     document.getElementById('oeuvre-titre').innerText = histoire.titre;
-    document.getElementById('oeuvre-auteur').innerText = "Comte " + histoire.auteur.split('@')[0];
+    document.getElementById('oeuvre-auteur').innerText = "Comte " + (histoire.pseudo_auteur || histoire.auteur.split('@')[0]);
     document.getElementById('oeuvre-synopsis').innerText = histoire.synopsis;
 
     window.currentOeuvreId = idHistoire;

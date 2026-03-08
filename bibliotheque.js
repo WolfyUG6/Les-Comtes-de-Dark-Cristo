@@ -32,7 +32,7 @@ async function loadStories(genreFilter = null) {
             ? `<img src="${histoire.image_couverture}" alt="${histoire.titre}" style="width: 100%; height: 380px; object-fit: cover; border: 1px solid #333;">` 
             : `<div style="width: 100%; height: 380px; background-color: #111; border: 1px solid #333; display: flex; align-items: center; justify-content: center; color: #555;">Pas de couverture</div>`;
 
-        const pseudo = histoire.auteur.split('@')[0];
+        const pseudo = histoire.pseudo_auteur || histoire.auteur.split('@')[0];
 
         card.innerHTML = `
             ${imgHtml}
