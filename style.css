@@ -81,3 +81,14 @@ button:hover {
     border-color: #00aaff;
     box-shadow: 0 0 8px #00aaff;
 }
+
+.top-bar {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    justify-content: space-between; /* Pour que le mini-logo soit à gauche et les boutons à droite */
+    align-items: center;
+    z-index: 100;
+}

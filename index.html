@@ -10,28 +10,34 @@
 </head>
 <body>
 
-    <header>
-		<div id="auth-container" style="position: absolute; top: 20px; right: 20px; display: flex; gap: 10px;">
+    <header id="main-header">
+    <div class="top-bar" style="position: absolute; top: 20px; left: 20px; right: 20px; display: flex; justify-content: space-between; align-items: center;">
+        
+        <div id="mini-logo" style="display: none; align-items: center; gap: 10px;">
+            <img src="Logo.png" alt="Logo" style="height: 40px;">
+            <span style="font-family: 'Cinzel', serif; color: #c4a484; font-size: 0.8rem;">Les Comtes de Dark & Cristo</span>
+        </div>
+        
+        <div id="auth-container" style="display: flex; gap: 10px;">
             <button id="btn-login" class="genre-btn">Se connecter</button>
             <button id="btn-signup" class="genre-btn" style="background-color: #5d1a1a; color: white;">Créer un compte</button>
         </div>
-		<div id="user-container" style="display: none; position: absolute; top: 20px; right: 20px; gap: 15px; align-items: center;">
-            <span id="user-name" style="color: #e0d7c6; font-family: 'Cinzel', serif; font-size: 1rem; border-bottom: 1px solid #c4a484; padding-bottom: 2px;"></span>
-            <button id="btn-publish" class="genre-btn" style="border-color: #00aaff; color: #00aaff; box-shadow: 0 0 5px #00aaff55;">Votre Histoire</button>
+        
+        <div id="user-container" style="display: none; gap: 15px; align-items: center;">
+            <span id="user-name" style="color: #e0d7c6; font-family: 'Cinzel', serif; font-size: 0.9rem;"></span>
+            <button id="btn-publish" class="genre-btn" style="border-color: #00aaff; color: #00aaff;">Votre Histoire</button>
             <button id="btn-profile" class="genre-btn">Mon Profil</button>
             <button id="btn-logout" class="genre-btn" style="border-color: #5d1a1a; color: #5d1a1a;">Quitter</button>
         </div>
+    </div>
+
+    <div id="hero-logo-area">
         <div id="logo-container">
-            <img src="Logo.png" alt="Les Comtes de Dark & Cristo">
+            <img src="Logo.png" alt="Les Comtes de Dark & Cristo" style="max-width: 300px;">
         </div>
-        <h1>Les Comtes de Dark & Cristo</h1>
-        
-        <div class="language-picker">
-            <button onclick="alert('Français sélectionné')">FR</button>
-            <button onclick="alert('English selected')">EN</button>
-            <button onclick="alert('日本語を選択')">JP</button>
-        </div>
-    </header>
+        <h1 style="color: #c4a484; font-size: 2.5rem; text-transform: uppercase; letter-spacing: 5px;">Les Comtes de Dark & Cristo</h1>
+    </div>
+</header>
 	
 	<nav id="main-genre-menu" class="genre-menu">
         <ul>
