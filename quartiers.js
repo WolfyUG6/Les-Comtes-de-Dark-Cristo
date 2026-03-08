@@ -73,6 +73,9 @@ document.getElementById('btn-retour-quartiers').addEventListener('click', () => 
     document.getElementById('hero-logo-area').style.display = 'block';
     document.getElementById('main-genre-menu').style.display = 'block';
     document.getElementById('stories-container').style.display = 'flex';
+    
+    // NOUVEAU : On ordonne à l'Archiviste de relire les étagères pour mettre à jour les pseudos !
+    loadStories();
 });
 
 // --- Changement du Pseudo ---
