@@ -32,8 +32,13 @@ window.ouvrirOeuvre = async function(idHistoire) {
     document.getElementById('oeuvre-auteur').innerText = "Comte " + (histoire.pseudo_auteur || histoire.auteur.split('@')[0]);
     document.getElementById('oeuvre-synopsis').innerText = histoire.synopsis;
     
-    // On n'oublie pas d'afficher le nombre de likes !
-    document.getElementById('oeuvre-likes').innerText = histoire.likes || 0;
+    // --- L'ARCHIVISTE COMPTE DIRECTEMENT LES PACTES DANS LES FAVORIS ---
+    const { count: totalLikes } = await window._supabase
+        .from('favoris')
+        .select('*', { count: 'exact', head: true })
+        .eq('histoire_id', idHistoire);
+        
+    document.getElementById('oeuvre-likes').innerText = totalLikes || 0;
 
     window.currentOeuvreId = idHistoire;
     
@@ -137,64 +142,36 @@ btnSoutenir.addEventListener('click', async () => {
     btnSoutenir.innerText = "Pacte en cours...";
     btnSoutenir.disabled = true; 
 
-    const { data: exist, error: checkError } = await window._supabase
+    // 1. On vérifie si le pacte existe déjà
+    const { data: exist } = await window._supabase
         .from('favoris')
         .select('id')
         .eq('user_id', session.user.id)
         .eq('histoire_id', window.currentOeuvreId)
         .maybeSingle();
 
-    if (checkError) {
-        alert("Erreur de lecture des favoris : " + checkError.message);
-        btnSoutenir.disabled = false;
-        return;
-    }
-
     if (exist) {
-        // TENTATIVE DE SUPPRESSION
-        const { error: deleteError } = await window._supabase.from('favoris').delete().eq('id', exist.id);
-        if (deleteError) {
-            alert("Erreur de destruction du pacte : " + deleteError.message);
-            btnSoutenir.disabled = false;
-            return; // On bloque tout
-        }
-        
+        // On détruit sa trace
+        await window._supabase.from('favoris').delete().eq('id', exist.id);
         btnSoutenir.innerText = "Soutenir l'œuvre";
         btnSoutenir.style.backgroundColor = "transparent";
         btnSoutenir.style.color = "#ff0055";
     } else {
-        // TENTATIVE D'AJOUT
-        const { error: insertError } = await window._supabase.from('favoris').insert([{ user_id: session.user.id, histoire_id: window.currentOeuvreId }]);
-        if (insertError) {
-            alert("Erreur lors de la création du pacte : " + insertError.message);
-            btnSoutenir.innerText = "Soutenir l'œuvre"; // On remet normal
-            btnSoutenir.disabled = false;
-            return; // On bloque tout
-        }
-        
+        // On crée sa trace
+        await window._supabase.from('favoris').insert([{ user_id: session.user.id, histoire_id: window.currentOeuvreId }]);
         btnSoutenir.innerText = "Œuvre soutenue 🩸";
         btnSoutenir.style.backgroundColor = "#5d1a1a";
         btnSoutenir.style.color = "white";
     }
 
-    // LE RECOMPTAGE
-    const { count, error: countError } = await window._supabase
+    // 2. L'Archiviste recompte le vrai nombre de pactes dans l'étagère favoris
+    const { count } = await window._supabase
         .from('favoris')
         .select('*', { count: 'exact', head: true })
         .eq('histoire_id', window.currentOeuvreId);
 
-    if (countError) {
-        alert("Erreur lors du recomptage : " + countError.message);
-    }
+    // 3. On affiche le résultat sans toucher à l'histoire !
+    document.getElementById('oeuvre-likes').innerText = count || 0;
 
-    const vraiTotal = count || 0;
-
-    // MISE À JOUR DU TABLEAU DES HISTOIRES
-    const { error: updateError } = await window._supabase.from('histoires').update({ likes: vraiTotal }).eq('id', window.currentOeuvreId);
-    if (updateError) {
-        alert("Erreur lors de la mise à jour du compteur global : " + updateError.message);
-    }
-    
-    document.getElementById('oeuvre-likes').innerText = vraiTotal;
     btnSoutenir.disabled = false; 
 });
