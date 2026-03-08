@@ -44,6 +44,36 @@ window.ouvrirOeuvre = async function(idHistoire) {
     document.getElementById('oeuvre-auteur').innerText = "Comte " + (histoire.pseudo_auteur || histoire.auteur.split('@')[0]);
     document.getElementById('oeuvre-synopsis').innerText = histoire.synopsis;
 	document.getElementById('oeuvre-likes').innerText = histoire.likes || 0;
+	
+	// --- NOUVEAU : GESTION DU BOUTON SOUTENIR ---
+    const btnSoutenir = document.getElementById('btn-soutenir');
+    
+    // 1. On remet le bouton à neuf par défaut (très important si on passe d'une histoire à l'autre)
+    btnSoutenir.innerText = "Soutenir l'œuvre";
+    btnSoutenir.style.backgroundColor = "transparent";
+    btnSoutenir.style.color = "#ff0055";
+    btnSoutenir.disabled = false;
+
+    // 2. On vérifie si notre lecteur connecté a déjà posé son sceau sur CE livre
+    const { data: { session: sessionActuelle } } = await window._supabase.auth.getSession();
+    
+    if (sessionActuelle) {
+        const { data: aDejaSoutenu } = await window._supabase
+            .from('favoris')
+            .select('id')
+            .eq('user_id', sessionActuelle.user.id)
+            .eq('histoire_id', idHistoire)
+            .maybeSingle(); // maybeSingle évite une erreur rouge si ça ne trouve rien
+
+        // Si l'Archiviste trouve une trace de son passage...
+        if (aDejaSoutenu) {
+            // On bloque la magie !
+            btnSoutenir.innerText = "Œuvre soutenue 🩸";
+            btnSoutenir.style.backgroundColor = "#5d1a1a";
+            btnSoutenir.style.color = "white";
+            btnSoutenir.disabled = true; // Empêche de recliquer
+        }
+    }
 
     window.currentOeuvreId = idHistoire;
     
