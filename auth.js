@@ -82,6 +82,15 @@ window._supabase.auth.onAuthStateChange((event, session) => {
         if(authContainer) authContainer.style.display = 'none';
         if(userContainer) userContainer.style.display = 'flex';
         if(userNameDisplay) userNameDisplay.innerText = "Comte " + session.user.email.split('@')[0];
+        
+        // --- NOUVEAU : Chargement de l'avatar ---
+        const avatarUrl = session.user.user_metadata?.avatar_url || 'default-avatar.png';
+        const headerAvatar = document.getElementById('header-avatar');
+        const previewAvatar = document.getElementById('profile-avatar-preview');
+        
+        if (headerAvatar) headerAvatar.src = avatarUrl;
+        if (previewAvatar) previewAvatar.src = avatarUrl;
+
     } else {
         if(authContainer) authContainer.style.display = 'flex';
         if(userContainer) userContainer.style.display = 'none';
