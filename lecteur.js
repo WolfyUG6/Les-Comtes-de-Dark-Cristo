@@ -67,11 +67,9 @@ window.ouvrirOeuvre = async function(idHistoire) {
 
         // Si l'Archiviste trouve une trace de son passage...
         if (aDejaSoutenu) {
-            // On bloque la magie !
             btnSoutenir.innerText = "Œuvre soutenue 🩸";
             btnSoutenir.style.backgroundColor = "#5d1a1a";
             btnSoutenir.style.color = "white";
-            btnSoutenir.disabled = true; // Empêche de recliquer
         }
     }
 
@@ -135,51 +133,69 @@ async function chargerChapitres(idHistoire) {
     chapitresListe.appendChild(ul);
 }
 
-// --- LE POUVOIR DE SOUTIEN (Ajouter aux lectures) ---
+// --- LE POUVOIR DE SOUTIEN (Ajouter ou Retirer) ---
 const btnSoutenir = document.getElementById('btn-soutenir');
 
 btnSoutenir.addEventListener('click', async () => {
-    // 1. On vérifie qui est le lecteur connecté
     const { data: { session } } = await window._supabase.auth.getSession();
-
+    
     if (!session) {
         alert("Les ombres refusent votre requête : vous devez être connecté pour soutenir une œuvre.");
         return;
     }
 
-    btnSoutenir.innerText = "Sceau en cours...";
+    // On fige le bouton pendant que l'Archiviste travaille pour éviter les double-clics frénétiques
+    btnSoutenir.innerText = "Pacte en cours...";
+    btnSoutenir.disabled = true; 
 
-    // 2. On grave le lien entre l'utilisateur et l'œuvre dans la table favoris
-    const { error } = await window._supabase
+    // 1. On vérifie si le pacte existe déjà
+    const { data: exist } = await window._supabase
         .from('favoris')
-        .insert([{ 
-            user_id: session.user.id, 
-            histoire_id: window.currentOeuvreId 
-        }]);
+        .select('id')
+        .eq('user_id', session.user.id)
+        .eq('histoire_id', window.currentOeuvreId)
+        .maybeSingle();
 
-    if (error) {
-        alert("Erreur du Sanctuaire : " + error.message);
+    const compteurLikes = document.getElementById('oeuvre-likes');
+    let nombreActuel = parseInt(compteurLikes.innerText) || 0;
+
+    if (exist) {
+        // --- CAS 1 : IL AVAIT DÉJÀ LIKÉ, ON ANNULE LE PACTE ---
+        
+        // A. On efface la trace dans l'étagère favoris
+        await window._supabase.from('favoris').delete().eq('id', exist.id);
+        
+        // B. On fait -1 sur l'affichage (sans jamais descendre sous 0)
+        nombreActuel = Math.max(0, nombreActuel - 1);
+        compteurLikes.innerText = nombreActuel;
+        
+        // C. On met à jour le total sur l'étagère histoires
+        await window._supabase.from('histoires').update({ likes: nombreActuel }).eq('id', window.currentOeuvreId);
+
+        // D. On remet le bouton à son état d'origine
         btnSoutenir.innerText = "Soutenir l'œuvre";
+        btnSoutenir.style.backgroundColor = "transparent";
+        btnSoutenir.style.color = "#ff0055";
+
     } else {
-            // 1. On attrape le compteur visuel et on lui ajoute +1
-            const compteurLikes = document.getElementById('oeuvre-likes');
-            const nombreActuel = parseInt(compteurLikes.innerText) || 0;
-            const nouveauNombre = nombreActuel + 1;
-            compteurLikes.innerText = nouveauNombre; // Met à jour l'écran tout de suite
+        // --- CAS 2 : IL N'AVAIT PAS LIKÉ, ON CRÉE LE PACTE ---
+        
+        // A. On ajoute son nom dans l'étagère favoris
+        await window._supabase.from('favoris').insert([{ user_id: session.user.id, histoire_id: window.currentOeuvreId }]);
 
-            // 2. L'Archiviste retourne écrire ce nouveau total sur l'étagère "histoires"
-            await window._supabase
-                .from('histoires')
-                .update({ likes: nouveauNombre })
-                .eq('id', window.currentOeuvreId);
+        // B. On fait +1 sur l'affichage
+        nombreActuel += 1;
+        compteurLikes.innerText = nombreActuel;
 
-            // 3. On confirme visuellement à l'utilisateur
-            alert("L'œuvre a été ajoutée à vos lectures !");
-            btnSoutenir.innerText = "Œuvre soutenue 🩸";
-            btnSoutenir.style.backgroundColor = "#5d1a1a";
-            btnSoutenir.style.color = "white";
+        // C. On met à jour le total sur l'étagère histoires
+        await window._supabase.from('histoires').update({ likes: nombreActuel }).eq('id', window.currentOeuvreId);
 
-            // On désactive le bouton pour éviter de spammer les likes
-            btnSoutenir.disabled = true;
-        }
+        // D. On change l'aspect du bouton
+        btnSoutenir.innerText = "Œuvre soutenue 🩸";
+        btnSoutenir.style.backgroundColor = "#5d1a1a";
+        btnSoutenir.style.color = "white";
+    }
+
+    // On libère le bouton pour qu'il puisse re-cliquer plus tard s'il le souhaite !
+    btnSoutenir.disabled = false; 
 });
