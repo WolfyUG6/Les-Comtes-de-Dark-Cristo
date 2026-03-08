@@ -3,7 +3,14 @@ const oeuvrePage = document.getElementById('oeuvre-page');
 
 // Revenir à l'accueil
 document.getElementById('btn-retour').addEventListener('click', () => {
+    // 1. On cache la page de l'œuvre
     oeuvrePage.style.display = 'none';
+    
+    // 2. On remet le grand logo et on cache le petit
+    document.getElementById('mini-logo').style.display = 'none';
+    document.getElementById('hero-logo-area').style.display = 'block';
+    
+    // 3. On réaffiche la liste des histoires
     storiesContainer.style.display = 'flex';
 });
 
@@ -12,9 +19,14 @@ window.ouvrirOeuvre = async function(idHistoire) {
     storiesContainer.style.display = 'none';
     oeuvrePage.style.display = 'block';
 
+    // -- NOUVEAU : On cache le grand logo et on affiche le bandeau --
+    document.getElementById('hero-logo-area').style.display = 'none';
+    document.getElementById('mini-logo').style.display = 'flex';
+
     document.getElementById('oeuvre-titre').innerText = "Ouverture du grimoire...";
 
     const { data: histoire, error } = await _supabase
+    // ... ne touche pas au reste de la fonction qui charge la base de données ...
         .from('histoires')
         .select('*')
         .eq('id', idHistoire)
