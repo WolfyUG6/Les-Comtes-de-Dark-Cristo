@@ -80,7 +80,7 @@ const btnSavePseudo = document.getElementById('btn-save-pseudo');
 const pseudoInput = document.getElementById('pseudo-input');
 
 btnSavePseudo.addEventListener('click', async () => {
-    const nouveauPseudo = pseudoInput.value.trim(); // .trim() enlève les espaces en trop
+    const nouveauPseudo = pseudoInput.value.trim();
     
     if (!nouveauPseudo) {
         alert("Veuillez inscrire un nom valide sur le parchemin.");
@@ -89,7 +89,7 @@ btnSavePseudo.addEventListener('click', async () => {
 
     btnSavePseudo.innerText = "Gravure en cours...";
 
-    // On range le nouveau pseudo dans les métadonnées de l'utilisateur
+    // 1. On met à jour le profil
     const { error } = await window._supabase.auth.updateUser({
         data: { pseudo: nouveauPseudo }
     });
@@ -97,10 +97,13 @@ btnSavePseudo.addEventListener('click', async () => {
     if (error) {
         alert("Refus du Sanctuaire : " + error.message);
     } else {
-        alert("Votre nouveau titre de noblesse est reconnu !");
-        // On met à jour l'affichage en haut à droite immédiatement
+        // 2. LA MAGIE : On retrouve qui est connecté, et on met à jour tous ses livres !
+        const { data: { session } } = await window._supabase.auth.getSession();
+        await window._supabase.from('histoires').update({ pseudo_auteur: nouveauPseudo }).eq('auteur', session.user.email);
+
+        alert("Votre nouveau titre est reconnu et vos anciennes œuvres ont été signées à nouveau !");
         document.getElementById('user-name').innerText = "Comte " + nouveauPseudo;
-        pseudoInput.value = ''; // On vide la case
+        pseudoInput.value = ''; 
     }
     
     btnSavePseudo.innerText = "Graver ce nom";
