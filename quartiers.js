@@ -55,27 +55,13 @@ btnSaveAvatar.addEventListener('click', async () => {
 
 // 2. Navigation : Ouvrir les Quartiers
 document.getElementById('btn-quartiers').addEventListener('click', () => {
-    document.getElementById('stories-container').style.display = 'none';
-    document.getElementById('oeuvre-page').style.display = 'none';
-    document.getElementById('main-genre-menu').style.display = 'none';
-    document.getElementById('studio-page').style.display = 'none'; 
-    
-    document.getElementById('hero-logo-area').style.display = 'none';
-    document.getElementById('mini-logo').style.display = 'flex';
-    
-    document.getElementById('quartiers-page').style.display = 'block';
+    window.changerDePage('quartiers');
 });
 
 // 3. Navigation : Quitter les Quartiers
 document.getElementById('btn-retour-quartiers').addEventListener('click', () => {
-    document.getElementById('quartiers-page').style.display = 'none';
-    document.getElementById('mini-logo').style.display = 'none';
-    document.getElementById('hero-logo-area').style.display = 'block';
-    document.getElementById('main-genre-menu').style.display = 'block';
-    document.getElementById('stories-container').style.display = 'flex';
-    
-    // NOUVEAU : On ordonne à l'Archiviste de relire les étagères pour mettre à jour les pseudos !
-    loadStories();
+    window.changerDePage('accueil');
+    loadStories(); // On recharge les histoires
 });
 
 // --- Changement du Pseudo avec Vérification ---

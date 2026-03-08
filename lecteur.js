@@ -3,25 +3,13 @@ const oeuvrePage = document.getElementById('oeuvre-page');
 
 // Revenir à l'accueil
 document.getElementById('btn-retour').addEventListener('click', () => {
-    // 1. On cache la page de l'œuvre
-    oeuvrePage.style.display = 'none';
-    
-    // 2. On remet le grand logo et on cache le petit
-    document.getElementById('mini-logo').style.display = 'none';
-    document.getElementById('hero-logo-area').style.display = 'block';
-    
-    // 3. On réaffiche la liste des histoires
-    storiesContainer.style.display = 'flex';
+    window.changerDePage('accueil');
 });
 
-// Ouvrir une œuvre spécifique
-window.ouvrirOeuvre = async function(idHistoire) {
-    storiesContainer.style.display = 'none';
-    oeuvrePage.style.display = 'block';
-
-    // -- NOUVEAU : On cache le grand logo et on affiche le bandeau --
-    document.getElementById('hero-logo-area').style.display = 'none';
-    document.getElementById('mini-logo').style.display = 'flex';
+// Revenir à l'accueil
+document.getElementById('btn-retour').addEventListener('click', () => {
+    window.changerDePage('accueil');
+});
 
     document.getElementById('oeuvre-titre').innerText = "Ouverture du grimoire...";
 
