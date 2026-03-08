@@ -111,3 +111,33 @@ btnSavePseudo.addEventListener('click', async () => {
     
     btnSavePseudo.innerText = "Graver ce nom";
 });
+
+// --- GESTION DES ONGLETS DANS LES QUARTIERS ---
+const btnOngletUtilisateur = document.getElementById('btn-onglet-utilisateur');
+const btnOngletLectures = document.getElementById('btn-onglet-lectures');
+const ongletUtilisateur = document.getElementById('onglet-utilisateur');
+const ongletLectures = document.getElementById('onglet-lectures');
+
+// Clic sur l'onglet "Utilisateur"
+btnOngletUtilisateur.addEventListener('click', () => {
+    ongletUtilisateur.style.display = 'block';
+    ongletLectures.style.display = 'none';
+    
+    // On allume le bouton Utilisateur en bleu, on éteint l'autre
+    btnOngletUtilisateur.style.borderColor = '#00aaff';
+    btnOngletUtilisateur.style.color = '#00aaff';
+    btnOngletLectures.style.borderColor = '#c4a484';
+    btnOngletLectures.style.color = '#c4a484';
+});
+
+// Clic sur l'onglet "Mes Lectures"
+btnOngletLectures.addEventListener('click', () => {
+    ongletUtilisateur.style.display = 'none';
+    ongletLectures.style.display = 'block';
+    
+    // On allume le bouton Mes Lectures en bleu, on éteint l'autre
+    btnOngletLectures.style.borderColor = '#00aaff';
+    btnOngletLectures.style.color = '#00aaff';
+    btnOngletUtilisateur.style.borderColor = '#c4a484';
+    btnOngletUtilisateur.style.color = '#c4a484';
+});
