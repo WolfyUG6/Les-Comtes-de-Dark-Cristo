@@ -22,8 +22,11 @@
     </div>
 
     <div id="user-container" style="display: none; position: absolute; top: 20px; right: 20px; gap: 15px; align-items: center;">
+        <img id="header-avatar" src="default-avatar.png" style="width: 30px; height: 30px; border-radius: 50%; border: 1px solid #c4a484; object-fit: cover;">
+        
         <span id="user-name" style="color: #e0d7c6; font-family: 'Cinzel', serif; font-size: 1rem; border-bottom: 1px solid #c4a484; padding-bottom: 2px;"></span>
         <button id="btn-publish" class="genre-btn" style="border-color: #00aaff; color: #00aaff; box-shadow: 0 0 5px #00aaff55;">Votre Histoire</button>
+        
         <div class="dropdown" style="position: relative; display: inline-block;">
             <button id="btn-profile-main" class="genre-btn">Mon Profil ▼</button>
             <div class="dropdown-content">
@@ -32,6 +35,7 @@
                 <button id="btn-atelier" class="dropdown-item">La Forge (Auteur)</button>
             </div>
         </div>
+        
         <button id="btn-logout" class="genre-btn" style="border-color: #5d1a1a; color: #5d1a1a;">Quitter</button>
     </div>
 
@@ -117,6 +121,24 @@
                 
                 <div id="liste-chapitres-admin" style="display: flex; flex-direction: column; gap: 10px;">
                     </div>
+            </div>
+        </div>
+		
+		<div id="quartiers-page" style="display: none; padding: 40px 20px; color: #e0d7c6; max-width: 800px; margin: 0 auto;">
+            <button id="btn-retour-quartiers" class="genre-btn" style="margin-bottom: 20px;">← Retour à l'accueil</button>
+            
+            <h2 style="color: #c4a484; font-family: 'Cinzel', serif; font-size: 2rem; border-bottom: 1px solid #5d1a1a; padding-bottom: 10px; margin-top: 0;">Vos Quartiers</h2>
+            <p style="color: #777; font-style: italic;">Gérez votre apparence dans le sanctuaire.</p>
+            
+            <div style="background: #111; padding: 20px; border: 1px solid #5d1a1a; display: flex; gap: 20px; align-items: center; margin-top: 30px;">
+                <img id="profile-avatar-preview" src="default-avatar.png" style="width: 100px; height: 100px; border-radius: 50%; border: 2px solid #c4a484; object-fit: cover;">
+                
+                <div>
+                    <h3 style="color: #e0d7c6; margin-top: 0;">Votre Portrait</h3>
+                    <input type="file" id="avatar-input" accept="image/png, image/jpeg, image/webp" style="display: block; margin-bottom: 10px; background: #0a0a0a; color: #e0d7c6; border: 1px solid #333; padding: 5px; width: 100%;">
+                    <p style="font-size: 0.8rem; color: #777;">Format autorisé : JPG, PNG, WEBP. Taille maximale : 1 Mo.</p>
+                    <button id="btn-save-avatar" class="genre-btn" style="border-color: #00aaff; color: #00aaff;">Graver ce portrait</button>
+                </div>
             </div>
         </div>
 		
