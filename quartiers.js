@@ -140,4 +140,64 @@ btnOngletLectures.addEventListener('click', () => {
     btnOngletLectures.style.color = '#00aaff';
     btnOngletUtilisateur.style.borderColor = '#c4a484';
     btnOngletUtilisateur.style.color = '#c4a484';
+	
+	// L'Archiviste part chercher les livres !
+    chargerMesLectures();
 });
+
+// --- L'ARCHIVISTE PERSONNEL : Charger les œuvres soutenues ---
+async function chargerMesLectures() {
+    const conteneur = document.getElementById('liste-mes-lectures');
+    conteneur.innerHTML = '<p style="color: #c4a484; font-style: italic;">Exploration de vos archives personnelles...</p>';
+
+    const { data: { session } } = await window._supabase.auth.getSession();
+    if (!session) return;
+
+    // 1. On regarde dans l'étagère "favoris" ce que l'utilisateur aime
+    const { data: mesFavoris, error: favError } = await window._supabase
+        .from('favoris')
+        .select('histoire_id')
+        .eq('user_id', session.user.id);
+
+    if (favError) {
+        conteneur.innerHTML = '<p style="color: red;">Erreur : ' + favError.message + '</p>';
+        return;
+    }
+
+    if (mesFavoris.length === 0) {
+        conteneur.innerHTML = '<p style="color: #777; font-style: italic;">Votre table de chevet est vide.</p>';
+        return;
+    }
+
+    // 2. On récupère les identifiants de ces histoires
+    const idsHistoires = mesFavoris.map(fav => fav.histoire_id);
+
+    // 3. On va chercher les vraies histoires qui correspondent à ces ID
+    const { data: histoires, error: histError } = await window._supabase
+        .from('histoires')
+        .select('*')
+        .in('id', idsHistoires);
+
+    if (histError) {
+        conteneur.innerHTML = '<p style="color: red;">Erreur : ' + histError.message + '</p>';
+        return;
+    }
+
+    // 4. On dessine les cartes pour chaque histoire trouvée
+    conteneur.innerHTML = '';
+    histoires.forEach(histoire => {
+        const carte = document.createElement('div');
+        carte.style.cssText = "background: #0a0a0a; border: 1px solid #00aaff; padding: 15px; display: flex; justify-content: space-between; align-items: center;";
+
+        carte.innerHTML = `
+            <div>
+                <h3 style="color: #00aaff; font-family: 'Cinzel', serif; margin: 0 0 5px 0;">${histoire.titre}</h3>
+                <span style="font-size: 0.8rem; background-color: #5d1a1a; color: white; padding: 2px 6px; text-transform: uppercase;">${histoire.genre}</span>
+            </div>
+            <div>
+                <button class="genre-btn" style="border-color: #c4a484; color: #c4a484;" onclick="ouvrirOeuvre(${histoire.id})">Reprendre la lecture</button>
+            </div>
+        `;
+        conteneur.appendChild(carte);
+    });
+}

@@ -103,3 +103,36 @@ async function chargerChapitres(idHistoire) {
     });
     chapitresListe.appendChild(ul);
 }
+
+// --- LE POUVOIR DE SOUTIEN (Ajouter aux lectures) ---
+const btnSoutenir = document.getElementById('btn-soutenir');
+
+btnSoutenir.addEventListener('click', async () => {
+    // 1. On vérifie qui est le lecteur connecté
+    const { data: { session } } = await window._supabase.auth.getSession();
+
+    if (!session) {
+        alert("Les ombres refusent votre requête : vous devez être connecté pour soutenir une œuvre.");
+        return;
+    }
+
+    btnSoutenir.innerText = "Sceau en cours...";
+
+    // 2. On grave le lien entre l'utilisateur et l'œuvre dans la table favoris
+    const { error } = await window._supabase
+        .from('favoris')
+        .insert([{ 
+            user_id: session.user.id, 
+            histoire_id: window.currentOeuvreId 
+        }]);
+
+    if (error) {
+        alert("Erreur du Sanctuaire : " + error.message);
+        btnSoutenir.innerText = "Soutenir l'œuvre";
+    } else {
+        alert("L'œuvre a été ajoutée à vos lectures !");
+        btnSoutenir.innerText = "Œuvre soutenue 🩸";
+        btnSoutenir.style.backgroundColor = "#5d1a1a";
+        btnSoutenir.style.color = "white";
+    }
+});
