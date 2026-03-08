@@ -38,8 +38,20 @@ submitStory.addEventListener('click', async () => {
     }
 });
 
-// Le Studio (Mon Profil)
-document.getElementById('btn-profile').addEventListener('click', () => {
+// --- LES ACTIONS DU MENU PROFIL ---
+
+// 1. Vos Quartiers (Réglages - En travaux)
+document.getElementById('btn-quartiers').addEventListener('click', () => {
+    alert("Vos quartiers sont en cours d'aménagement...");
+});
+
+// 2. Vos Lectures (Bibliothèque - En travaux)
+document.getElementById('btn-lectures').addEventListener('click', () => {
+    alert("Votre bibliothèque est encore poussiéreuse...");
+});
+
+// 3. La Forge (Le Studio de l'Auteur)
+document.getElementById('btn-atelier').addEventListener('click', () => {
     // 1. On cache l'accueil
     document.getElementById('stories-container').style.display = 'none';
     document.getElementById('oeuvre-page').style.display = 'none';

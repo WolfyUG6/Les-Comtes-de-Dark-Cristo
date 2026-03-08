@@ -92,3 +92,48 @@ button:hover {
     align-items: center;
     z-index: 100;
 }
+
+/* --- LE MENU DÉROULANT DU PROFIL --- */
+.dropdown-content {
+    display: none; /* Caché par défaut */
+    position: absolute;
+    top: 100%; /* S'affiche juste en dessous du bouton */
+    left: 50%;
+    transform: translateX(-50%); /* Pour centrer le menu sous le bouton */
+    background-color: #0a0a0a;
+    min-width: 180px;
+    box-shadow: 0px 8px 15px rgba(0,0,0,0.9);
+    border: 1px solid #c4a484; /* Bordure Or/Cuivre */
+    z-index: 1000;
+    flex-direction: column;
+}
+
+/* Fait apparaître le menu quand on survole la zone */
+.dropdown:hover .dropdown-content {
+    display: flex;
+}
+
+/* Style des sous-boutons du menu */
+.dropdown-item {
+    background: transparent;
+    color: #e0d7c6;
+    padding: 12px 16px;
+    border: none;
+    border-bottom: 1px solid #333;
+    text-align: center;
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+/* Enlève la ligne sous le dernier bouton */
+.dropdown-item:last-child {
+    border-bottom: none;
+}
+
+/* Effet au survol des sous-boutons */
+.dropdown-item:hover {
+    background-color: #5d1a1a; /* Rouge sang */
+    color: white;
+}
