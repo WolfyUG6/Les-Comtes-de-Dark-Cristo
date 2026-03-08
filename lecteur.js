@@ -147,7 +147,15 @@ btnSoutenir.addEventListener('click', async () => {
         .maybeSingle();
 
     const compteurLikes = document.getElementById('oeuvre-likes');
-    let nombreActuel = parseInt(compteurLikes.innerText) || 0;
+
+    // L'INQUISITEUR : On regarde le VRAI chiffre actuel dans la base de données juste avant de calculer !
+    const { data: histoireActuelle } = await window._supabase
+        .from('histoires')
+        .select('likes')
+        .eq('id', window.currentOeuvreId)
+        .single();
+        
+    let vraiNombreDeLikes = histoireActuelle.likes || 0;
 
     if (exist) {
         // --- CAS 1 : IL AVAIT DÉJÀ LIKÉ, ON ANNULE LE PACTE ---
@@ -155,14 +163,16 @@ btnSoutenir.addEventListener('click', async () => {
         // A. On efface la trace dans l'étagère favoris
         await window._supabase.from('favoris').delete().eq('id', exist.id);
         
-        // B. On fait -1 sur l'affichage (sans jamais descendre sous 0)
-        nombreActuel = Math.max(0, nombreActuel - 1);
-        compteurLikes.innerText = nombreActuel;
+        // B. On calcule le nouveau total depuis le VRAI chiffre (sans descendre sous 0)
+        vraiNombreDeLikes = Math.max(0, vraiNombreDeLikes - 1);
         
         // C. On met à jour le total sur l'étagère histoires
-        await window._supabase.from('histoires').update({ likes: nombreActuel }).eq('id', window.currentOeuvreId);
+        await window._supabase.from('histoires').update({ likes: vraiNombreDeLikes }).eq('id', window.currentOeuvreId);
+        
+        // D. On met à jour l'affichage sur l'écran
+        compteurLikes.innerText = vraiNombreDeLikes;
 
-        // D. On remet le bouton à son état d'origine
+        // E. On remet le bouton à son état d'origine
         btnSoutenir.innerText = "Soutenir l'œuvre";
         btnSoutenir.style.backgroundColor = "transparent";
         btnSoutenir.style.color = "#ff0055";
@@ -173,14 +183,16 @@ btnSoutenir.addEventListener('click', async () => {
         // A. On ajoute son nom dans l'étagère favoris
         await window._supabase.from('favoris').insert([{ user_id: session.user.id, histoire_id: window.currentOeuvreId }]);
 
-        // B. On fait +1 sur l'affichage
-        nombreActuel += 1;
-        compteurLikes.innerText = nombreActuel;
-
+        // B. On calcule le nouveau total depuis le VRAI chiffre
+        vraiNombreDeLikes += 1;
+        
         // C. On met à jour le total sur l'étagère histoires
-        await window._supabase.from('histoires').update({ likes: nombreActuel }).eq('id', window.currentOeuvreId);
+        await window._supabase.from('histoires').update({ likes: vraiNombreDeLikes }).eq('id', window.currentOeuvreId);
+        
+        // D. On met à jour l'affichage sur l'écran
+        compteurLikes.innerText = vraiNombreDeLikes;
 
-        // D. On change l'aspect du bouton
+        // E. On change l'aspect du bouton
         btnSoutenir.innerText = "Œuvre soutenue 🩸";
         btnSoutenir.style.backgroundColor = "#5d1a1a";
         btnSoutenir.style.color = "white";
