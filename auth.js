@@ -81,7 +81,9 @@ window._supabase.auth.onAuthStateChange((event, session) => {
     if (session) {
         if(authContainer) authContainer.style.display = 'none';
         if(userContainer) userContainer.style.display = 'flex';
-        if(userNameDisplay) userNameDisplay.innerText = "Comte " + session.user.email.split('@')[0];
+        // On cherche le pseudo, sinon on prend l'email coupé par défaut
+        const nomAAfficher = session.user.user_metadata?.pseudo || session.user.email.split('@')[0];
+        if(userNameDisplay) userNameDisplay.innerText = "Comte " + nomAAfficher;
         
         // --- NOUVEAU : Chargement de l'avatar ---
         const avatarUrl = session.user.user_metadata?.avatar_url || 'default-avatar.png';

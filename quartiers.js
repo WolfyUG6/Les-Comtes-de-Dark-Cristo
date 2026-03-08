@@ -74,3 +74,34 @@ document.getElementById('btn-retour-quartiers').addEventListener('click', () => 
     document.getElementById('main-genre-menu').style.display = 'block';
     document.getElementById('stories-container').style.display = 'flex';
 });
+
+// --- Changement du Pseudo ---
+const btnSavePseudo = document.getElementById('btn-save-pseudo');
+const pseudoInput = document.getElementById('pseudo-input');
+
+btnSavePseudo.addEventListener('click', async () => {
+    const nouveauPseudo = pseudoInput.value.trim(); // .trim() enlève les espaces en trop
+    
+    if (!nouveauPseudo) {
+        alert("Veuillez inscrire un nom valide sur le parchemin.");
+        return;
+    }
+
+    btnSavePseudo.innerText = "Gravure en cours...";
+
+    // On range le nouveau pseudo dans les métadonnées de l'utilisateur
+    const { error } = await window._supabase.auth.updateUser({
+        data: { pseudo: nouveauPseudo }
+    });
+
+    if (error) {
+        alert("Refus du Sanctuaire : " + error.message);
+    } else {
+        alert("Votre nouveau titre de noblesse est reconnu !");
+        // On met à jour l'affichage en haut à droite immédiatement
+        document.getElementById('user-name').innerText = "Comte " + nouveauPseudo;
+        pseudoInput.value = ''; // On vide la case
+    }
+    
+    btnSavePseudo.innerText = "Graver ce nom";
+});
