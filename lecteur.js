@@ -134,11 +134,11 @@ btnSoutenir.addEventListener('click', async () => {
         return;
     }
 
-    // On fige le bouton pendant que l'Archiviste travaille pour éviter les double-clics frénétiques
+    // On fige le bouton pendant que l'Archiviste travaille
     btnSoutenir.innerText = "Pacte en cours...";
     btnSoutenir.disabled = true; 
 
-    // 1. On vérifie si le pacte existe déjà
+    // 1. On vérifie si le lecteur a DÉJÀ soutenu l'œuvre
     const { data: exist } = await window._supabase
         .from('favoris')
         .select('id')
@@ -146,58 +146,42 @@ btnSoutenir.addEventListener('click', async () => {
         .eq('histoire_id', window.currentOeuvreId)
         .maybeSingle();
 
-    const compteurLikes = document.getElementById('oeuvre-likes');
-
-    // L'INQUISITEUR : On regarde le VRAI chiffre actuel dans la base de données juste avant de calculer !
-    const { data: histoireActuelle } = await window._supabase
-        .from('histoires')
-        .select('likes')
-        .eq('id', window.currentOeuvreId)
-        .single();
-        
-    let vraiNombreDeLikes = histoireActuelle.likes || 0;
-
     if (exist) {
-        // --- CAS 1 : IL AVAIT DÉJÀ LIKÉ, ON ANNULE LE PACTE ---
-        
-        // A. On efface la trace dans l'étagère favoris
+        // --- CAS 1 : IL ANNULE SON PACTE ---
+        // On détruit physiquement sa trace dans l'étagère 'favoris'
         await window._supabase.from('favoris').delete().eq('id', exist.id);
         
-        // B. On calcule le nouveau total depuis le VRAI chiffre (sans descendre sous 0)
-        vraiNombreDeLikes = Math.max(0, vraiNombreDeLikes - 1);
-        
-        // C. On met à jour le total sur l'étagère histoires
-        await window._supabase.from('histoires').update({ likes: vraiNombreDeLikes }).eq('id', window.currentOeuvreId);
-        
-        // D. On met à jour l'affichage sur l'écran
-        compteurLikes.innerText = vraiNombreDeLikes;
-
-        // E. On remet le bouton à son état d'origine
         btnSoutenir.innerText = "Soutenir l'œuvre";
         btnSoutenir.style.backgroundColor = "transparent";
         btnSoutenir.style.color = "#ff0055";
-
     } else {
-        // --- CAS 2 : IL N'AVAIT PAS LIKÉ, ON CRÉE LE PACTE ---
-        
-        // A. On ajoute son nom dans l'étagère favoris
+        // --- CAS 2 : IL CRÉE UN PACTE ---
+        // On ajoute physiquement sa trace dans l'étagère 'favoris'
         await window._supabase.from('favoris').insert([{ user_id: session.user.id, histoire_id: window.currentOeuvreId }]);
-
-        // B. On calcule le nouveau total depuis le VRAI chiffre
-        vraiNombreDeLikes += 1;
         
-        // C. On met à jour le total sur l'étagère histoires
-        await window._supabase.from('histoires').update({ likes: vraiNombreDeLikes }).eq('id', window.currentOeuvreId);
-        
-        // D. On met à jour l'affichage sur l'écran
-        compteurLikes.innerText = vraiNombreDeLikes;
-
-        // E. On change l'aspect du bouton
         btnSoutenir.innerText = "Œuvre soutenue 🩸";
         btnSoutenir.style.backgroundColor = "#5d1a1a";
         btnSoutenir.style.color = "white";
     }
 
-    // On libère le bouton pour qu'il puisse re-cliquer plus tard s'il le souhaite !
+    // ---------------------------------------------------------------------
+    // LE RECOMPTAGE ABSOLU (C'est ici que la magie opère et tue le bug)
+    // ---------------------------------------------------------------------
+    
+    // 2. L'Archiviste COMPTE les vraies traces restantes dans l'étagère
+    const { count, error } = await window._supabase
+        .from('favoris')
+        .select('*', { count: 'exact', head: true }) // head: true permet de compter sans charger toutes les données
+        .eq('histoire_id', window.currentOeuvreId);
+
+    const vraiTotal = count || 0;
+
+    // 3. On met à jour l'étagère de l'histoire avec ce compte exact
+    await window._supabase.from('histoires').update({ likes: vraiTotal }).eq('id', window.currentOeuvreId);
+    
+    // 4. On affiche ce compte exact sur l'écran
+    document.getElementById('oeuvre-likes').innerText = vraiTotal;
+
+    // On libère le bouton
     btnSoutenir.disabled = false; 
 });
