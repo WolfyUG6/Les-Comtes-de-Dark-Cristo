@@ -40,22 +40,21 @@ submitStory.addEventListener('click', async () => {
 
 // Le Studio (Mon Profil)
 document.getElementById('btn-profile').addEventListener('click', () => {
-    // 1. On cache les éléments de la page d'accueil
+    // 1. On cache l'accueil
     document.getElementById('stories-container').style.display = 'none';
     document.getElementById('oeuvre-page').style.display = 'none';
     document.getElementById('main-genre-menu').style.display = 'none';
     
-    // 2. On change l'apparence du Header (Logo)
-    document.getElementById('hero-logo-area').style.display = 'none'; // Cache le gros logo
-    document.getElementById('mini-logo').style.display = 'flex';      // Montre le mini logo
+    // 2. Gestion du logo : on cache le grand central, on affiche le petit en haut à gauche
+    document.getElementById('hero-logo-area').style.display = 'none';
+    document.getElementById('mini-logo').style.display = 'flex';
     
-    // 3. On affiche la page Studio
+    // 3. On affiche la page studio
     document.getElementById('studio-page').style.display = 'block';
     
-    // 4. On lance le chargement des œuvres
     chargerMesOeuvres();
 });
-});
+
 
 // --- LE SORTILÈGE POUR CHARGER VOS ŒUVRES ---
 async function chargerMesOeuvres() {
@@ -141,14 +140,16 @@ submitChapitre.addEventListener('click', async () => {
 
 // Quitter le Studio pour retourner aux archives
 document.getElementById('btn-retour-studio').addEventListener('click', () => {
-    // Tes lignes originales (On range l'atelier)
+    // 1. On cache le studio
     document.getElementById('studio-page').style.display = 'none';
+    
+    // 2. Gestion du logo : on cache le petit, on réaffiche le grand central
+    document.getElementById('mini-logo').style.display = 'none';
+    document.getElementById('hero-logo-area').style.display = 'block';
+    
+    // 3. On réaffiche l'accueil
     document.getElementById('main-genre-menu').style.display = 'block';
     document.getElementById('stories-container').style.display = 'flex';
-
-    // Les nouvelles lignes (On remet le grand décor)
-    document.getElementById('hero-logo-area').style.display = 'block'; // Le gros logo revient
-    document.getElementById('mini-logo').style.display = 'none';      // Le petit logo s'en va
 });
 
 // --- GESTION DE L'ŒUVRE (Le Panneau d'Administration) ---
