@@ -6,15 +6,15 @@ document.getElementById('btn-retour').addEventListener('click', () => {
     window.changerDePage('accueil');
 });
 
-// Revenir à l'accueil
-document.getElementById('btn-retour').addEventListener('click', () => {
-    window.changerDePage('accueil');
-});
+// Ouvrir une œuvre spécifique
+window.ouvrirOeuvre = async function(idHistoire) {
+    // 1. On utilise le Chef d'Orchestre pour tout nettoyer et afficher la bonne page
+    window.changerDePage('oeuvre');
 
     document.getElementById('oeuvre-titre').innerText = "Ouverture du grimoire...";
 
-    const { data: histoire, error } = await _supabase
-    // ... ne touche pas au reste de la fonction qui charge la base de données ...
+    // 2. On va chercher l'histoire dans l'étagère Supabase
+    const { data: histoire, error } = await window._supabase
         .from('histoires')
         .select('*')
         .eq('id', idHistoire)
@@ -25,52 +25,54 @@ document.getElementById('btn-retour').addEventListener('click', () => {
         return;
     }
 
-    // Remplissage des infos
+    // 3. Remplissage des informations sur la page
     document.getElementById('oeuvre-cover').src = histoire.image_couverture || '';
     document.getElementById('oeuvre-genre').innerText = histoire.genre;
     document.getElementById('oeuvre-titre').innerText = histoire.titre;
     document.getElementById('oeuvre-auteur').innerText = "Comte " + (histoire.pseudo_auteur || histoire.auteur.split('@')[0]);
     document.getElementById('oeuvre-synopsis').innerText = histoire.synopsis;
-	document.getElementById('oeuvre-likes').innerText = histoire.likes || 0;
-	
-	// --- NOUVEAU : GESTION DU BOUTON SOUTENIR ---
-    const btnSoutenir = document.getElementById('btn-soutenir');
     
-    // 1. On remet le bouton à neuf par défaut (très important si on passe d'une histoire à l'autre)
-    btnSoutenir.innerText = "Soutenir l'œuvre";
-    btnSoutenir.style.backgroundColor = "transparent";
-    btnSoutenir.style.color = "#ff0055";
-    btnSoutenir.disabled = false;
-
-    // 2. On vérifie si notre lecteur connecté a déjà posé son sceau sur CE livre
-    const { data: { session: sessionActuelle } } = await window._supabase.auth.getSession();
-    
-    if (sessionActuelle) {
-        const { data: aDejaSoutenu } = await window._supabase
-            .from('favoris')
-            .select('id')
-            .eq('user_id', sessionActuelle.user.id)
-            .eq('histoire_id', idHistoire)
-            .maybeSingle(); // maybeSingle évite une erreur rouge si ça ne trouve rien
-
-        // Si l'Archiviste trouve une trace de son passage...
-        if (aDejaSoutenu) {
-            btnSoutenir.innerText = "Œuvre soutenue 🩸";
-            btnSoutenir.style.backgroundColor = "#5d1a1a";
-            btnSoutenir.style.color = "white";
-        }
-    }
+    // On n'oublie pas d'afficher le nombre de likes !
+    document.getElementById('oeuvre-likes').innerText = histoire.likes || 0;
 
     window.currentOeuvreId = idHistoire;
     
-    // Vérification si l'utilisateur est l'auteur pour afficher le bouton d'ajout de chapitre
-    const { data: { session } } = await _supabase.auth.getSession();
+    // 4. Vérification si l'utilisateur est l'auteur (pour le bouton "Ajouter Chapitre")
+    const { data: { session } } = await window._supabase.auth.getSession();
     if (session && session.user.email === histoire.auteur) {
         document.getElementById('btn-add-chapitre').style.display = 'block';
     } else {
         document.getElementById('btn-add-chapitre').style.display = 'none';
     }
-	
+
+    // --- 5. GESTION VISUELLE DU BOUTON SOUTENIR ---
+    const btnSoutenir = document.getElementById('btn-soutenir');
+    if (btnSoutenir) {
+        // On remet le bouton à zéro par défaut
+        btnSoutenir.innerText = "Soutenir l'œuvre";
+        btnSoutenir.style.backgroundColor = "transparent";
+        btnSoutenir.style.color = "#ff0055";
+        btnSoutenir.disabled = false;
+
+        // Si le lecteur est connecté, on vérifie s'il a déjà versé son sang (liké)
+        if (session) {
+            const { data: aDejaSoutenu } = await window._supabase
+                .from('favoris')
+                .select('id')
+                .eq('user_id', session.user.id)
+                .eq('histoire_id', idHistoire)
+                .maybeSingle();
+
+            // S'il avait déjà liké, on rougit le bouton !
+            if (aDejaSoutenu) {
+                btnSoutenir.innerText = "Œuvre soutenue 🩸";
+                btnSoutenir.style.backgroundColor = "#5d1a1a";
+                btnSoutenir.style.color = "white";
+            }
+        }
+    }
+    
+    // 6. On appelle la fonction pour charger les chapitres
     chargerChapitres(idHistoire);
 };
 
