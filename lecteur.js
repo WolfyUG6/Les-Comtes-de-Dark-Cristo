@@ -281,18 +281,22 @@ window.addEventListener('scroll', function() {
         let palierActuel = Math.floor(pourcentage / 25) * 25;
         if (pourcentage >= 99) palierActuel = 100;
 
-        if (palierActuel > (window.dernierPalierAffiche || 0) && palierActuel > 0) {
+        // L'Inquisiteur vérifie si on a franchi un palier (que ce soit vers le haut ou vers le bas)
+        if (palierActuel !== window.dernierPalierAffiche) {
             window.dernierPalierAffiche = palierActuel;
             
-            const bulle = document.getElementById('lecture-pourcentage-bulle');
-            if (bulle) {
-                bulle.innerText = palierActuel + "%"; 
-                bulle.style.display = 'block'; 
-                
-                if (timeoutBulle) clearTimeout(timeoutBulle);
-                timeoutBulle = setTimeout(() => {
-                    bulle.style.display = 'none';
-                }, 3000);
+            // On n'affiche la bulle que si on n'est pas tout en haut (0%)
+            if (palierActuel > 0) {
+                const bulle = document.getElementById('lecture-pourcentage-bulle');
+                if (bulle) {
+                    bulle.innerText = palierActuel + "%"; 
+                    bulle.style.display = 'block'; 
+                    
+                    if (timeoutBulle) clearTimeout(timeoutBulle);
+                    timeoutBulle = setTimeout(() => {
+                        bulle.style.display = 'none';
+                    }, 3000);
+                }
             }
         }
     }
