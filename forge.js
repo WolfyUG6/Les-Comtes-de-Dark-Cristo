@@ -303,6 +303,10 @@ document.getElementById('btn-save-story-edit').addEventListener('click', async (
     } else {
         alert("Les modifications ont été gravées dans la roche !");
         document.getElementById('edit-story-cover').value = ""; // On nettoie le champ de l'image
+        
+        // --- LES DEUX NOUVEAUX ORDRES POUR L'ARCHIVISTE ---
+        if (typeof loadStories === 'function') loadStories(); // Met à jour l'accueil en cachette
+        chargerMesOeuvres(); // Met à jour la liste dans l'Atelier
     }
 
     btnSave.innerText = "Graver les modifications";
