@@ -176,6 +176,17 @@ button:hover {
     line-height: 1.8;
 }
 
+/* --- LE DESTRUCTEUR DE MARGES FANTÔMES (Anti-Word) --- */
+.ql-editor p,
+.ql-editor h1,
+.ql-editor h2,
+.ql-editor h3 {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
 /* Texte fantôme (placeholder) */
 .ql-editor.ql-blank::before {
     color: #777 !important;

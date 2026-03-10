@@ -137,33 +137,6 @@ const quill = new Quill('#chapitre-contenu', {
     }
 });
 
-// --- LE FILTRE PURIFICATEUR ANTI-WORD ---
-// Intercepte le texte collé, détruit les marges invisibles, garde ton gras/italique.
-quill.clipboard.addMatcher(Node.ELEMENT_NODE, function (node, delta) {
-    delta.ops.forEach(function (op) {
-        if (op.attributes) {
-            // On prépare un conteneur propre
-            const cleanAttributes = {};
-            
-            // On sauvegarde UNIQUEMENT ta mise en forme (gras, italique, etc.)
-            if (op.attributes.bold) cleanAttributes.bold = true;
-            if (op.attributes.italic) cleanAttributes.italic = true;
-            if (op.attributes.underline) cleanAttributes.underline = true;
-            if (op.attributes.strike) cleanAttributes.strike = true;
-            if (op.attributes.list) cleanAttributes.list = op.attributes.list;
-            if (op.attributes.header) cleanAttributes.header = op.attributes.header;
-            
-            // On écrase les attributs pollués de Word par les nôtres tout propres
-            if (Object.keys(cleanAttributes).length > 0) {
-                op.attributes = cleanAttributes;
-            } else {
-                delete op.attributes; // Si c'est juste une marge Word, on la pulvérise
-            }
-        }
-    });
-    return delta;
-});
-
 document.getElementById('close-chapitre-modal').addEventListener('click', () => {
     window.changerDePage('gestion');
 });
