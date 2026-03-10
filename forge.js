@@ -115,13 +115,13 @@ async function chargerMesOeuvres() {
 const submitChapitre = document.getElementById('submit-chapitre');
 
 document.getElementById('close-chapitre-modal').addEventListener('click', () => {
-    document.getElementById('chapitre-modal').style.display = 'none';
+    window.changerDePage('gestion');
 });
 
 submitChapitre.addEventListener('click', async () => {
     const numero = document.getElementById('chapitre-numero').value;
     const titre = document.getElementById('chapitre-titre').value;
-    const contenu = document.getElementById('chapitre-contenu').value;
+    const contenu = tinymce.get('chapitre-contenu').getContent();
 
     if (!numero || !titre || !contenu) {
         alert("Champs requis manquants.");
@@ -142,7 +142,8 @@ submitChapitre.addEventListener('click', async () => {
     if (error) alert(error.message);
     else {
         alert("Chapitre ajouté !");
-        document.getElementById('chapitre-modal').style.display = 'none';
+        window.changerDePage('gestion');
+		tinymce.get('chapitre-contenu').setContent(''); // On nettoie le parchemin pour la prochaine fois
         chargerChapitres(window.currentOeuvreId); // On recharge la liste
     }
     submitChapitre.innerText = "Publier le Chapitre";
@@ -249,9 +250,9 @@ document.getElementById('btn-retour-gestion').addEventListener('click', () => {
     chargerMesOeuvres(); 
 });
 
-// Bouton Ouvrir "Ajouter un Chapitre"
+// Bouton Ouvrir "Ajouter un Chapitre" (nouvelle page)
 document.getElementById('btn-open-add-chapitre').addEventListener('click', () => {
-    document.getElementById('chapitre-modal').style.display = 'block';
+    window.changerDePage('editeur-chapitre');
 });
 
 // Bouton Sauvegarder les modifications de l'histoire (Titre, Synopsis, Image)
