@@ -245,7 +245,7 @@ window.lireChapitre = async function(idChapitre) {
 	// 5. Apparition de la Jauge de Sang
     document.getElementById('lecture-progress-container').style.display = 'block';
     document.getElementById('lecture-progress-bar').style.width = '0%';
-	window.dernierPalierAffiche = 0; // On remet la mémoire des paliers à zéro
+	window.derniereZone = 0; // On remet la mémoire des zones à zéro
 };
 
 // --- BOUTON DE RETOUR ---
@@ -278,18 +278,28 @@ window.addEventListener('scroll', function() {
         
         document.getElementById('lecture-progress-bar').style.width = pourcentage + '%';
         
-        let palierActuel = Math.floor(pourcentage / 25) * 25;
-        if (pourcentage >= 99) palierActuel = 100;
+        // On découpe l'œuvre en 4 zones
+        let zoneActuelle = Math.floor(pourcentage / 25);
+        if (pourcentage >= 99) zoneActuelle = 4; // Zone de fin absolue (100%)
 
-        // L'Inquisiteur vérifie si on a franchi un palier (que ce soit vers le haut ou vers le bas)
-        if (palierActuel !== window.dernierPalierAffiche) {
-            window.dernierPalierAffiche = palierActuel;
+        // L'Inquisiteur vérifie si on a franchi une frontière entre deux zones
+        if (zoneActuelle !== window.derniereZone) {
+            let palierFranchi;
             
-            // On n'affiche la bulle que si on n'est pas tout en haut (0%)
-            if (palierActuel > 0) {
+            if (zoneActuelle > window.derniereZone) {
+                // On descend vers les abysses : on annonce la nouvelle zone atteinte (ex: passe en zone 2 -> 50%)
+                palierFranchi = zoneActuelle * 25;
+            } else {
+                // On remonte vers la lumière : on annonce la ligne qu'on vient de repasser (ex: quitte la zone 2 par le haut -> 50%)
+                palierFranchi = window.derniereZone * 25;
+            }
+            
+            window.derniereZone = zoneActuelle; // On met à jour la mémoire du Sanctuaire
+
+            if (palierFranchi > 0 && palierFranchi <= 100) {
                 const bulle = document.getElementById('lecture-pourcentage-bulle');
                 if (bulle) {
-                    bulle.innerText = palierActuel + "%"; 
+                    bulle.innerText = palierFranchi + "%"; 
                     bulle.style.display = 'block'; 
                     
                     if (timeoutBulle) clearTimeout(timeoutBulle);
