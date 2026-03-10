@@ -160,7 +160,7 @@ window.ouvrirGestionOeuvre = async function(idHistoire) {
     window.currentOeuvreId = idHistoire; // On mémorise l'œuvre
     window.changerDePage('gestion'); // Le Chef d'Orchestre affiche la page
 
-    // On met des textes d'attente
+    // On met des textes d'attente le temps de lire la base de données
     document.getElementById('edit-story-title').value = "Recherche en cours...";
     document.getElementById('edit-story-synopsis').value = "Recherche en cours...";
 

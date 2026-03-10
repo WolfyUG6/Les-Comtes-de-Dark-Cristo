@@ -15,7 +15,8 @@ window.changerDePage = function(pageDemandee) {
     document.getElementById('oeuvre-page').style.display = 'none';
     document.getElementById('studio-page').style.display = 'none';
     document.getElementById('quartiers-page').style.display = 'none';
-	document.getElementById('creation-page').style.display = 'none';
+    document.getElementById('creation-page').style.display = 'none';
+    document.getElementById('gestion-page').style.display = 'none'; // <-- L'oubli était ici
 
     // 2. On cache tous les éléments d'en-tête (logos, menus)
     document.getElementById('hero-logo-area').style.display = 'none';
@@ -40,8 +41,12 @@ window.changerDePage = function(pageDemandee) {
         document.getElementById('quartiers-page').style.display = 'block';
         document.getElementById('mini-logo').style.display = 'flex';
     }
-	else if (pageDemandee === 'creation') {
-    document.getElementById('creation-page').style.display = 'block';
-    document.getElementById('mini-logo').style.display = 'flex';
-	}
+    else if (pageDemandee === 'creation') {
+        document.getElementById('creation-page').style.display = 'block';
+        document.getElementById('mini-logo').style.display = 'flex';
+    }
+    else if (pageDemandee === 'gestion') { // <-- Et ici !
+        document.getElementById('gestion-page').style.display = 'block';
+        document.getElementById('mini-logo').style.display = 'flex';
+    }
 };
