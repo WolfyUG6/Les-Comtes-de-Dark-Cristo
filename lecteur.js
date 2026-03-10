@@ -265,3 +265,58 @@ document.getElementById('lecture-contenu').addEventListener('scroll', function()
         // (La mécanique de la "Vue" validée à 50% viendra se loger ici...)
     }
 });
+
+// --- LE PUPITRE DU LECTEUR (Paramètres d'affichage) ---
+const boiteLecture = document.getElementById('lecture-contenu');
+const btnThemeSombre = document.getElementById('btn-theme-sombre');
+const btnThemeClair = document.getElementById('btn-theme-clair');
+const btnTextMinus = document.getElementById('btn-text-minus');
+const btnTextPlus = document.getElementById('btn-text-plus');
+const selectFont = document.getElementById('select-font');
+
+let taillePlumeActuelle = 1.1; // La taille de départ (en rem)
+
+// 1. La magie des Thèmes (Couleurs)
+btnThemeSombre.addEventListener('click', () => {
+    boiteLecture.style.background = '#050505'; // Noir abyssal
+    boiteLecture.style.color = '#e0d7c6'; // Texte beige os
+    boiteLecture.style.border = '1px solid #333';
+    // Allumer le bouton Sombre en bleu
+    btnThemeSombre.style.borderColor = '#00aaff';
+    btnThemeSombre.style.color = '#00aaff';
+    // Éteindre le bouton Clair
+    btnThemeClair.style.borderColor = '#c4a484';
+    btnThemeClair.style.color = '#c4a484';
+});
+
+btnThemeClair.addEventListener('click', () => {
+    boiteLecture.style.background = '#f5ebd9'; // Beige parchemin
+    boiteLecture.style.color = '#1a1a1a'; // Encre noire très sombre
+    boiteLecture.style.border = '1px solid #c4a484'; // Bordure cuivrée
+    // Allumer le bouton Clair en bleu
+    btnThemeClair.style.borderColor = '#00aaff';
+    btnThemeClair.style.color = '#00aaff';
+    // Éteindre le bouton Sombre
+    btnThemeSombre.style.borderColor = '#c4a484';
+    btnThemeSombre.style.color = '#c4a484';
+});
+
+// 2. La magie de la Loupe (Taille du texte)
+btnTextPlus.addEventListener('click', () => {
+    if (taillePlumeActuelle < 2.5) { // On empêche d'écrire trop gros
+        taillePlumeActuelle += 0.1;
+        boiteLecture.style.fontSize = taillePlumeActuelle + 'rem';
+    }
+});
+
+btnTextMinus.addEventListener('click', () => {
+    if (taillePlumeActuelle > 0.8) { // On empêche d'écrire trop petit
+        taillePlumeActuelle -= 0.1;
+        boiteLecture.style.fontSize = taillePlumeActuelle + 'rem';
+    }
+});
+
+// 3. La magie de la Calligraphie (Police d'écriture)
+selectFont.addEventListener('change', (event) => {
+    boiteLecture.style.fontFamily = event.target.value;
+});
