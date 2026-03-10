@@ -125,7 +125,10 @@ const quill = new Quill('#chapitre-contenu', {
             [{ 'list': 'ordered'}, { 'list': 'bullet' }],
             [{ 'align': [] }],
             ['clean'] // Bouton pour enlever le formatage
-        ]
+        ], // <-- L'ajout de cette virgule est vital pour que le code fonctionne
+        clipboard: {
+            matchVisual: false // <-- Le sortilège anti-espaces fantômes
+        }
     }
 });
 
