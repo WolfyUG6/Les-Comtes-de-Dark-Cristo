@@ -202,11 +202,44 @@ window.lireChapitre = async function(idChapitre) {
     
     // 4. LA MAGIE : On utilise innerHTML pour que le gras et l'italique s'affichent correctement !
     document.getElementById('lecture-contenu').innerHTML = chapitre.contenu;
+	
+	// 5. Apparition de la Jauge de Sang
+    document.getElementById('lecture-progress-container').style.display = 'block';
+    document.getElementById('lecture-progress-bar').style.width = '0%';
 };
 
 // --- BOUTON DE RETOUR ---
 // Permet de quitter la Salle de Lecture pour revenir à l'accueil du Grimoire (l'œuvre)
 document.getElementById('btn-retour-oeuvre').addEventListener('click', () => {
+    // On cache la jauge dans les ténèbres
+    document.getElementById('lecture-progress-container').style.display = 'none';
     // On utilise la fonction existante en lui redonnant l'ID de l'œuvre en cours
     window.ouvrirOeuvre(window.currentOeuvreId); 
+});
+
+// --- LE SORTILÈGE DE LA JAUGE DE SANG (Progression de lecture) ---
+window.addEventListener('scroll', () => {
+    const progressContainer = document.getElementById('lecture-progress-container');
+    
+    // L'œil de l'Archiviste ne s'active que si la jauge est visible (donc en pleine lecture)
+    if (progressContainer.style.display === 'block') {
+        
+        // 1. Quelle distance le lecteur a-t-il parcourue vers le bas ?
+        const hauteurDefilee = document.documentElement.scrollTop;
+        
+        // 2. Quelle est la hauteur totale du parchemin (moins la taille de l'écran visible) ?
+        const hauteurTotale = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        
+        // 3. On calcule le pourcentage d'avancée
+        let pourcentage = (hauteurDefilee / hauteurTotale) * 100;
+        
+        // On s'assure que la jauge ne déborde pas
+        if (pourcentage > 100) pourcentage = 100;
+        if (pourcentage < 0) pourcentage = 0;
+        
+        // 4. On remplit la jauge
+        document.getElementById('lecture-progress-bar').style.width = pourcentage + '%';
+        
+        // (C'est ici que l'on cachera le déclencheur de la "Vue" au-delà de 50% plus tard...)
+    }
 });
