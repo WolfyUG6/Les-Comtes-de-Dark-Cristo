@@ -137,24 +137,26 @@ const quill = new Quill('#chapitre-contenu', {
     }
 });
 
-// --- LE DOUANIER ANTI-GOUFFRES (Nettoyeur d'espaces vides) ---
+// --- LE GARDIEN DU PARCHEMIN (Nettoyage sécurisé du collage) ---
 quill.root.addEventListener('paste', function(e) {
-    // 1. On bloque l'intégration par défaut de Quill qui multiplie les sauts de ligne
+    // 1. On bloque le collage par défaut qui fait n'importe quoi avec les espaces
     e.preventDefault();
 
-    // 2. On récupère le texte brut
-    let text = (e.originalEvent || e).clipboardData.getData('text/plain');
+    // 2. On récupère le texte copié de manière sécurisée (compatible tout navigateur)
+    const clipboardData = e.clipboardData || window.clipboardData;
+    let text = clipboardData.getData('text/plain');
 
-    // 3. LA VRAIE MAGIE : Si le texte contient 3 sauts de ligne ou plus à la suite, 
-    // on écrase tout ça pour n'en garder que 2 (ce qui crée un seul espace vide propre entre les paragraphes).
+    // 3. L'Inquisiteur : On écrase les gouffres (s'il y a 3 sauts de ligne ou plus, on n'en garde que 2)
     text = text.replace(/[\r\n]{3,}/g, '\n\n');
 
-    // 4. On insère le texte proprement
-    const range = quill.getSelection();
-    if (range) {
-        quill.insertText(range.index, text);
-        quill.setSelection(range.index + text.length);
-    }
+    // 4. On FORCE la plume à trouver où est ton curseur dans l'éditeur (le "true" sauve la vie)
+    const range = quill.getSelection(true); 
+    
+    // 5. On insère le texte propre
+    quill.insertText(range.index, text);
+    
+    // 6. On remet le curseur à la fin pour que tu puisses continuer à écrire
+    quill.setSelection(range.index + text.length);
 });
 
 document.getElementById('close-chapitre-modal').addEventListener('click', () => {
