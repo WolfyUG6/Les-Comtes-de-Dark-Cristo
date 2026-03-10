@@ -133,37 +133,9 @@
             <div style="display: flex; gap: 15px; margin-top: 20px; border-bottom: 1px solid #5d1a1a; padding-bottom: 10px;">
                 <button id="btn-onglet-utilisateur" class="genre-btn" style="border-color: #00aaff; color: #00aaff;">Utilisateur</button>
                 <button id="btn-onglet-lectures" class="genre-btn" style="border-color: #c4a484; color: #c4a484;">Mes Lectures</button>
-            </div>
-			
-		<div id="creation-page" style="display: none; padding: 40px 20px; color: #e0d7c6; max-width: 800px; margin: 0 auto;">
-    <button id="btn-retour-creation" class="genre-btn" style="margin-bottom: 20px;">← Retour à l'Atelier</button>
-    
-    <h2 style="color: #00aaff; font-family: 'Cinzel', serif; font-size: 2rem; border-bottom: 1px solid #5d1a1a; padding-bottom: 10px; margin-top: 0;">Forger un nouveau Conte</h2>
-    <p style="color: #777; font-style: italic;">Inscrivez les bases de votre nouvelle œuvre dans les registres du Sanctuaire.</p>
-    
-    <div style="background: #111; padding: 30px; border: 1px solid #5d1a1a; margin-top: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.8);">
-        <input type="text" id="story-title" placeholder="Titre de l'histoire" style="display: block; width: 100%; box-sizing: border-box; margin-bottom: 15px; padding: 10px; background: #0a0a0a; color: #e0d7c6; border: 1px solid #333; font-family: 'Segoe UI', sans-serif;">
-        
-        <textarea id="story-synopsis" placeholder="Synopsis (Résumé sombre et captivant...)" rows="6" style="display: block; width: 100%; box-sizing: border-box; margin-bottom: 15px; padding: 10px; background: #0a0a0a; color: #e0d7c6; border: 1px solid #333; font-family: 'Segoe UI', sans-serif; resize: vertical;"></textarea>
-        
-        <select id="story-genre" style="display: block; width: 100%; box-sizing: border-box; margin-bottom: 15px; padding: 10px; background: #0a0a0a; color: #e0d7c6; border: 1px solid #333; font-family: 'Segoe UI', sans-serif;">
-            <option value="">-- Choisissez le Genre --</option>
-            <option value="High & Low Fantasy">High & Low Fantasy</option>
-            <option value="Dark Fantasy & Grimdark">Dark Fantasy & Grimdark</option>
-            <option value="Romantasy Tragique">Romantasy Tragique</option>
-            <option value="Sci-Fi & Cyberpunk">Sci-Fi & Cyberpunk</option>
-            <option value="Horreur Psychologique">Horreur Psychologique</option>
-        </select>
+        </div>
 
-        <h3 style="color: #c4a484; font-size: 1rem; margin-top: 20px; margin-bottom: 10px;">Couverture du Grimoire</h3>
-        <input type="file" id="story-cover-file" accept="image/png, image/jpeg, image/webp" style="display: block; width: 100%; box-sizing: border-box; margin-bottom: 5px; padding: 10px; background: #0a0a0a; color: #e0d7c6; border: 1px solid #333; font-family: 'Segoe UI', sans-serif;">
-        <p style="color: #777; font-size: 0.8rem; margin-top: 0; margin-bottom: 25px;">Format: JPG, PNG ou WEBP (Max 5 Mo)</p>
-        
-        <button id="submit-story" class="genre-btn" style="border-color: #00aaff; color: #00aaff; width: 100%; padding: 15px; font-size: 1.1rem;">Graver l'Œuvre dans la Roche</button>
-    </div>
-</div>
-
-            <div id="onglet-utilisateur" style="display: block;">
+        <div id="onglet-utilisateur" style="display: block;">
                 <div style="background: #111; padding: 20px; border: 1px solid #5d1a1a; display: flex; gap: 20px; align-items: center; margin-top: 20px;">
                     <img id="profile-avatar-preview" src="default-avatar.png" style="width: 100px; height: 100px; border-radius: 50%; border: 2px solid #c4a484; object-fit: cover;">
                     
@@ -189,6 +161,34 @@
             </div>
 
         </div>
+		
+		<div id="creation-page" style="display: none; padding: 40px 20px; color: #e0d7c6; max-width: 800px; margin: 0 auto;">
+			<button id="btn-retour-creation" class="genre-btn" style="margin-bottom: 20px;">← Retour à l'Atelier</button>
+    
+			<h2 style="color: #00aaff; font-family: 'Cinzel', serif; font-size: 2rem; border-bottom: 1px solid #5d1a1a; padding-bottom: 10px; margin-top: 0;">Forger un nouveau Conte</h2>
+			<p style="color: #777; font-style: italic;">Inscrivez les bases de votre nouvelle œuvre dans les registres du Sanctuaire.</p>
+    
+		<div style="background: #111; padding: 30px; border: 1px solid #5d1a1a; margin-top: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.8);">
+        <input type="text" id="story-title" placeholder="Titre de l'histoire" style="display: block; width: 100%; box-sizing: border-box; margin-bottom: 15px; padding: 10px; background: #0a0a0a; color: #e0d7c6; border: 1px solid #333; font-family: 'Segoe UI', sans-serif;">
+        
+        <textarea id="story-synopsis" placeholder="Synopsis (Résumé sombre et captivant...)" rows="6" style="display: block; width: 100%; box-sizing: border-box; margin-bottom: 15px; padding: 10px; background: #0a0a0a; color: #e0d7c6; border: 1px solid #333; font-family: 'Segoe UI', sans-serif; resize: vertical;"></textarea>
+        
+        <select id="story-genre" style="display: block; width: 100%; box-sizing: border-box; margin-bottom: 15px; padding: 10px; background: #0a0a0a; color: #e0d7c6; border: 1px solid #333; font-family: 'Segoe UI', sans-serif;">
+            <option value="">-- Choisissez le Genre --</option>
+            <option value="High & Low Fantasy">High & Low Fantasy</option>
+            <option value="Dark Fantasy & Grimdark">Dark Fantasy & Grimdark</option>
+            <option value="Romantasy Tragique">Romantasy Tragique</option>
+            <option value="Sci-Fi & Cyberpunk">Sci-Fi & Cyberpunk</option>
+            <option value="Horreur Psychologique">Horreur Psychologique</option>
+        </select>
+
+        <h3 style="color: #c4a484; font-size: 1rem; margin-top: 20px; margin-bottom: 10px;">Couverture du Grimoire</h3>
+        <input type="file" id="story-cover-file" accept="image/png, image/jpeg, image/webp" style="display: block; width: 100%; box-sizing: border-box; margin-bottom: 5px; padding: 10px; background: #0a0a0a; color: #e0d7c6; border: 1px solid #333; font-family: 'Segoe UI', sans-serif;">
+        <p style="color: #777; font-size: 0.8rem; margin-top: 0; margin-bottom: 25px;">Format: JPG, PNG ou WEBP (Max 5 Mo)</p>
+        
+        <button id="submit-story" class="genre-btn" style="border-color: #00aaff; color: #00aaff; width: 100%; padding: 15px; font-size: 1.1rem;">Graver l'Œuvre dans la Roche</button>
+    </div>
+</div>
 		
     </main>
 		<div id="auth-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #111; padding: 40px; border: 1px solid #c4a484; z-index: 1000; text-align: center; box-shadow: 0 0 20px #000;">
