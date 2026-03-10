@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-	<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+	<script src="https://cdn.tiny.cloud/1/7wembcbcgu8gfb6pr1n7asb3c874wi5liehyedvaz96p4b5g/tinymce/8/tinymce.min.js" referrerpolicy="origin" crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -238,13 +238,17 @@
 
     <script>
         tinymce.init({
-            selector: '#chapitre-contenu',
-            skin: 'oxide-dark',
-            content_css: 'dark',
-            plugins: 'lists link',
-            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat',
+            selector: '#chapitre-contenu', // On cible ta zone de texte
+            skin: 'oxide-dark', // Thème sombre pour l'interface
+            content_css: 'dark', // Fond sombre pour la zone d'écriture
+            plugins: [
+                'lists', 'link', 'charmap', 'searchreplace', 'wordcount', 'visualblocks'
+            ],
+            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat',
             height: 600,
-            menubar: false
+            menubar: false,
+            branding: false, // Enlève le petit logo "Powered by Tiny"
+            promotion: false // Enlève le bouton bleu "Upgrade" agaçant
         });
     </script>
 
