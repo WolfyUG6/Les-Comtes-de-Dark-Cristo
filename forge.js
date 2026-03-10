@@ -222,8 +222,9 @@ window.chargerChapitresAdmin = async function(idHistoire) {
 window.supprimerOeuvreCourante = async function() {
     if(confirm("Êtes-vous sûr de vouloir jeter cette œuvre dans les abysses ? Cette action est irréversible.")) {
         const { error } = await window._supabase.from('histoires').delete().eq('id', window.currentOeuvreId);
-        if(error) alert("Erreur : " + error.message);
-        else {
+        if(error) {
+            alert("Supabase a bloqué la destruction ! Erreur : " + error.message + "\n\n(Va sur Supabase autoriser le DELETE dans les Policies RLS)");
+        } else {
             alert("L'œuvre a été consumée par les ténèbres.");
             window.changerDePage('studio'); // On retourne à l'atelier
             chargerMesOeuvres(); // On rafraîchit la liste
@@ -235,8 +236,9 @@ window.supprimerOeuvreCourante = async function() {
 window.supprimerChapitre = async function(idChapitre, idHistoire) {
     if(confirm("Détruire ce parchemin à jamais ?")) {
         const { error } = await window._supabase.from('chapitres').delete().eq('id', idChapitre);
-        if(error) alert("Erreur : " + error.message);
-        else {
+        if(error) {
+            alert("Supabase a bloqué la destruction ! Erreur : " + error.message + "\n\n(Va sur Supabase autoriser le DELETE dans les Policies RLS)");
+        } else {
             chargerChapitresAdmin(idHistoire); // On rafraîchit la liste
         }
     }
