@@ -205,14 +205,12 @@ window.lireChapitre = async function(idChapitre) {
 	window.scrollTo(0, 0);
 	
 	// --- NOUVEAU : LES PANNEAUX DE NAVIGATION ---
-    const btnPrecHaut = document.getElementById('btn-chap-prec-haut');
-    const btnSuivHaut = document.getElementById('btn-chap-suiv-haut');
     const btnPrecBas = document.getElementById('btn-chap-prec-bas');
     const btnSuivBas = document.getElementById('btn-chap-suiv-bas');
 
     // On cache tout par défaut à chaque nouveau chapitre
-    btnPrecHaut.style.display = 'none'; btnPrecBas.style.display = 'none';
-    btnSuivHaut.style.display = 'none'; btnSuivBas.style.display = 'none';
+    if (btnPrecBas) btnPrecBas.style.display = 'none';
+    if (btnSuivBas) btnSuivBas.style.display = 'none';
 
     // L'Archiviste cherche le chapitre PRÉCÉDENT (numéro inférieur au numéro actuel)
     const { data: chapPrec } = await window._supabase
@@ -224,9 +222,8 @@ window.lireChapitre = async function(idChapitre) {
         .limit(1)
         .maybeSingle();
 
-    if (chapPrec) {
-        btnPrecHaut.style.display = 'block'; btnPrecBas.style.display = 'block';
-        btnPrecHaut.onclick = () => lireChapitre(chapPrec.id);
+    if (chapPrec && btnPrecBas) {
+        btnPrecBas.style.display = 'block';
         btnPrecBas.onclick = () => lireChapitre(chapPrec.id);
     }
 
@@ -240,9 +237,8 @@ window.lireChapitre = async function(idChapitre) {
         .limit(1)
         .maybeSingle();
 
-    if (chapSuiv) {
-        btnSuivHaut.style.display = 'block'; btnSuivBas.style.display = 'block';
-        btnSuivHaut.onclick = () => lireChapitre(chapSuiv.id);
+    if (chapSuiv && btnSuivBas) {
+        btnSuivBas.style.display = 'block';
         btnSuivBas.onclick = () => lireChapitre(chapSuiv.id);
     }
 	
