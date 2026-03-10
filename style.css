@@ -173,18 +173,19 @@ button:hover {
     color: #e0d7c6;
     font-family: 'Segoe UI', sans-serif;
     font-size: 1.1rem;
-    line-height: 1.8;
+    line-height: 1.6; /* Un peu plus serré pour éviter l'effet "vide" */
 }
 
-/* --- LE DESTRUCTEUR DE MARGES FANTÔMES (Anti-Word) --- */
-.ql-editor p,
-.ql-editor h1,
-.ql-editor h2,
-.ql-editor h3 {
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
+/* --- LE DESTRUCTEUR DE MARGES FANTÔMES (Anti-LibreOffice/Word) --- */
+/* On force tous les paragraphes et titres à n'avoir AUCUNE marge par défaut */
+.ql-editor p, 
+.ql-editor h1, 
+.ql-editor h2, 
+.ql-editor h3, 
+.ql-editor div {
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 1.2em; /* Garde une petite hauteur pour les lignes vraiment vides */
 }
 
 /* Texte fantôme (placeholder) */
