@@ -1,10 +1,16 @@
 // --- L'ATELIER (Publication et Gestion Auteur) ---
 const btnPublish = document.getElementById('btn-publish');
-const publishModal = document.getElementById('publish-modal');
 const submitStory = document.getElementById('submit-story');
 
-btnPublish.addEventListener('click', () => publishModal.style.display = 'block');
-document.getElementById('close-publish-modal').addEventListener('click', () => publishModal.style.display = 'none');
+// 1. Ouvrir la page de création
+btnPublish.addEventListener('click', () => {
+    window.changerDePage('creation');
+});
+
+// 2. Retourner à l'atelier si on annule
+document.getElementById('btn-retour-creation').addEventListener('click', () => {
+    window.changerDePage('studio');
+});
 
 submitStory.addEventListener('click', async () => {
     const title = document.getElementById('story-title').value;
