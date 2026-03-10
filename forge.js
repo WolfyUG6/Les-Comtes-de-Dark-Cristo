@@ -129,11 +129,31 @@ const quill = new Quill('#chapitre-contenu', {
             ['bold', 'italic', 'underline', 'strike'],
             [{ 'list': 'ordered'}, { 'list': 'bullet' }],
             [{ 'align': [] }],
-            ['clean']
+            ['clean'] // Bouton pour enlever le formatage
         ],
         clipboard: {
-            matchVisual: false // Le premier bouclier contre les lignes fantômes
+            matchVisual: false
         }
+    }
+});
+
+// --- LE DOUANIER ANTI-GOUFFRES (Nettoyeur d'espaces vides) ---
+quill.root.addEventListener('paste', function(e) {
+    // 1. On bloque l'intégration par défaut de Quill qui multiplie les sauts de ligne
+    e.preventDefault();
+
+    // 2. On récupère le texte brut
+    let text = (e.originalEvent || e).clipboardData.getData('text/plain');
+
+    // 3. LA VRAIE MAGIE : Si le texte contient 3 sauts de ligne ou plus à la suite, 
+    // on écrase tout ça pour n'en garder que 2 (ce qui crée un seul espace vide propre entre les paragraphes).
+    text = text.replace(/[\r\n]{3,}/g, '\n\n');
+
+    // 4. On insère le texte proprement
+    const range = quill.getSelection();
+    if (range) {
+        quill.insertText(range.index, text);
+        quill.setSelection(range.index + text.length);
     }
 });
 
