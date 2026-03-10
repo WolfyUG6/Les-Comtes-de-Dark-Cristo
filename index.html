@@ -7,7 +7,8 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-	<script src="https://cdn.tiny.cloud/1/7wembcbcgu8gfb6pr1n7asb3c874wi5liehyedvaz96p4b5g/tinymce/8/tinymce.min.js" referrerpolicy="origin" crossorigin="anonymous"></script>
+	<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+	<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 </head>
 <body>
 
@@ -239,27 +240,13 @@
                 <input type="text" id="chapitre-titre" placeholder="Titre du chapitre" style="flex: 1; padding: 10px; background: #0a0a0a; color: #e0d7c6; border: 1px solid #5d1a1a; font-family: 'Segoe UI', sans-serif;">
             </div>
             
-            <textarea id="chapitre-contenu" placeholder="Rédigez votre texte ici..."></textarea>
+            <div style="background: #0a0a0a; color: #e0d7c6; border: 1px solid #5d1a1a;">
+				<div id="chapitre-contenu" style="height: 500px; font-family: 'Segoe UI', sans-serif; font-size: 1.1rem;"></div>
+			</div>
             
             <button id="submit-chapitre" class="genre-btn" style="border-color: #00aaff; color: #00aaff; width: 100%; padding: 15px; font-size: 1.1rem; margin-top: 20px;">Graver le Chapitre</button>
         </div>
     </div>
-
-    <script>
-        tinymce.init({
-            selector: '#chapitre-contenu', // On cible ta zone de texte
-            skin: 'oxide-dark', // Thème sombre pour l'interface
-            content_css: 'dark', // Fond sombre pour la zone d'écriture
-            plugins: [
-                'lists', 'link', 'charmap', 'searchreplace', 'wordcount', 'visualblocks'
-            ],
-            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat',
-            height: 600,
-            menubar: false,
-            branding: false, // Enlève le petit logo "Powered by Tiny"
-            promotion: false // Enlève le bouton bleu "Upgrade" agaçant
-        });
-    </script>
 
     <script src="config.js"></script>
     <script src="auth.js"></script>

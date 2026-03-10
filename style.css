@@ -137,3 +137,36 @@ button:hover {
     background-color: #5d1a1a; /* Rouge sang */
     color: white;
 }
+
+/* --- LE STYLE DE LA PLUME (QUILL EDITOR) --- */
+.ql-toolbar.ql-snow {
+    background-color: #111;
+    border: 1px solid #5d1a1a !important;
+    border-bottom: none !important;
+}
+
+.ql-container.ql-snow {
+    border: 1px solid #5d1a1a !important;
+}
+
+/* Colorer les boutons de la barre d'outils en cuivre */
+.ql-snow .ql-stroke {
+    stroke: #c4a484 !important;
+}
+.ql-snow .ql-fill, .ql-snow .ql-stroke.ql-fill {
+    fill: #c4a484 !important;
+}
+
+/* Texte à l'intérieur de l'éditeur */
+.ql-editor {
+    color: #e0d7c6;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 1.1rem;
+    line-height: 1.8;
+}
+
+/* Texte fantôme (placeholder) */
+.ql-editor.ql-blank::before {
+    color: #777 !important;
+    font-style: italic;
+}

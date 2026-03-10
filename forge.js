@@ -114,6 +114,21 @@ async function chargerMesOeuvres() {
 // --- AJOUT DE CHAPITRE DANS L'ATELIER ---
 const submitChapitre = document.getElementById('submit-chapitre');
 
+// Initialisation de la Plume Quill
+const quill = new Quill('#chapitre-contenu', {
+    theme: 'snow',
+    placeholder: 'Rédigez votre texte ici...',
+    modules: {
+        toolbar: [
+            [{ 'header': [1, 2, 3, false] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            [{ 'align': [] }],
+            ['clean'] // Bouton pour enlever le formatage
+        ]
+    }
+});
+
 document.getElementById('close-chapitre-modal').addEventListener('click', () => {
     window.changerDePage('gestion');
 });
@@ -121,7 +136,7 @@ document.getElementById('close-chapitre-modal').addEventListener('click', () => 
 submitChapitre.addEventListener('click', async () => {
     const numero = document.getElementById('chapitre-numero').value;
     const titre = document.getElementById('chapitre-titre').value;
-    const contenu = tinymce.get('chapitre-contenu').getContent();
+    const contenu = quill.root.innerHTML;
 
     if (!numero || !titre || !contenu) {
         alert("Champs requis manquants.");
@@ -143,7 +158,7 @@ submitChapitre.addEventListener('click', async () => {
     else {
         alert("Chapitre ajouté !");
         window.changerDePage('gestion');
-		tinymce.get('chapitre-contenu').setContent(''); // On nettoie le parchemin pour la prochaine fois
+		quill.root.innerHTML = ''; // On nettoie le parchemin pour la prochaine fois
         chargerChapitres(window.currentOeuvreId); // On recharge la liste
     }
     submitChapitre.innerText = "Publier le Chapitre";
