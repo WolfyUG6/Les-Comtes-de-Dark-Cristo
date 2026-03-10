@@ -88,7 +88,10 @@
                 </div>
 
                 <div style="flex: 2;">
-                    <span id="oeuvre-genre" style="background-color: #5d1a1a; color: white; padding: 3px 8px; font-size: 0.8rem; text-transform: uppercase;"></span>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <span id="oeuvre-genre" style="background-color: #5d1a1a; color: white; padding: 3px 8px; font-size: 0.8rem; text-transform: uppercase;"></span>
+                        <span id="oeuvre-age" style="background-color: #111; color: #ff4444; border: 1px solid #ff4444; padding: 3px 8px; font-size: 0.8rem; text-transform: uppercase; font-weight: bold;"></span>
+                    </div>
                     <h2 id="oeuvre-titre" style="color: #c4a484; font-family: 'Cinzel', serif; font-size: 2rem; margin: 10px 0;"></h2>
 
                     <div style="background: #111; padding: 15px; border-left: 3px solid #00aaff; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
@@ -176,6 +179,13 @@
                     <option value="Sci-Fi & Cyberpunk">Sci-Fi & Cyberpunk</option>
                     <option value="Horreur Psychologique">Horreur Psychologique</option>
                 </select>
+				
+				<select id="story-age" style="display: block; width: 100%; box-sizing: border-box; margin-bottom: 15px; padding: 10px; background: #0a0a0a; color: #e0d7c6; border: 1px solid #333; font-family: 'Segoe UI', sans-serif;">
+                    <option value="Tout public">Tout public</option>
+                    <option value="R15">R15 (Averti)</option>
+                    <option value="R16">R16 (Mature)</option>
+                    <option value="R18">R18 (Explicite)</option>
+                </select>
 
                 <h3 style="color: #c4a484; font-size: 1rem; margin-top: 20px; margin-bottom: 10px;">Couverture du Grimoire</h3>
                 <input type="file" id="story-cover-file" accept="image/png, image/jpeg, image/webp" style="display: block; width: 100%; box-sizing: border-box; margin-bottom: 5px; padding: 10px; background: #0a0a0a; color: #e0d7c6; border: 1px solid #333; font-family: 'Segoe UI', sans-serif;">
@@ -199,6 +209,13 @@
                 
                 <textarea id="edit-story-synopsis" placeholder="Synopsis" rows="5" style="display: block; width: 100%; box-sizing: border-box; margin-bottom: 15px; padding: 10px; background: #0a0a0a; color: #e0d7c6; border: 1px solid #333; resize: vertical;"></textarea>
                 
+				<select id="edit-story-age" style="display: block; width: 100%; box-sizing: border-box; margin-bottom: 15px; padding: 10px; background: #0a0a0a; color: #e0d7c6; border: 1px solid #333; font-family: 'Segoe UI', sans-serif;">
+                    <option value="Tout public">Tout public</option>
+                    <option value="R15">R15 (Averti)</option>
+                    <option value="R16">R16 (Mature)</option>
+                    <option value="R18">R18 (Explicite)</option>
+                </select>
+				
                 <h4 style="color: #777; margin-bottom: 5px;">Nouvelle Couverture (optionnel)</h4>
                 <input type="file" id="edit-story-cover" accept="image/png, image/jpeg, image/webp" style="display: block; width: 100%; box-sizing: border-box; margin-bottom: 15px; padding: 10px; background: #0a0a0a; color: #e0d7c6; border: 1px solid #333;">
                 

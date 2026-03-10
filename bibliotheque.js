@@ -36,7 +36,10 @@ async function loadStories(genreFilter = null) {
 
         card.innerHTML = `
             ${imgHtml}
-            <span style="font-size: 0.7rem; background-color: #5d1a1a; color: white; padding: 3px 6px; align-self: flex-start; text-transform: uppercase;">${histoire.genre}</span>
+            <div style="display: flex; gap: 10px; align-self: flex-start;">
+                <span style="font-size: 0.7rem; background-color: #5d1a1a; color: white; padding: 3px 6px; text-transform: uppercase;">${histoire.genre}</span>
+                <span style="font-size: 0.7rem; background-color: #111; color: #ff4444; border: 1px solid #ff4444; padding: 3px 6px; text-transform: uppercase; font-weight: bold;">${histoire.classification || 'Tout public'}</span>
+            </div>
             <h3 style="color: #c4a484; font-family: 'Cinzel', serif; margin: 5px 0 0 0; font-size: 1.2rem;">${histoire.titre}</h3>
             <span style="font-size: 0.8rem; color: #777;">Par Comte ${pseudo}</span>
             <p style="color: #aaa; font-size: 0.9rem; flex-grow: 1; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; margin-bottom: 0;">${histoire.synopsis}</p>

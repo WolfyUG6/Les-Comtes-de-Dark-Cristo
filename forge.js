@@ -16,10 +16,11 @@ submitStory.addEventListener('click', async () => {
     const title = document.getElementById('story-title').value;
     const synopsis = document.getElementById('story-synopsis').value;
     const genre = document.getElementById('story-genre').value;
+	const classification = document.getElementById('story-age').value;
     const file = document.getElementById('story-cover-file').files[0];
 
     const { data: { session } } = await _supabase.auth.getSession();
-    if (!session || !title || !synopsis || !genre) {
+    if (!session || !title || !synopsis || !genre || !classification) {
         alert("Champs manquants ou non connecté.");
         return;
     }
@@ -41,6 +42,7 @@ submitStory.addEventListener('click', async () => {
         titre: title, 
         synopsis, 
         genre, 
+		classification, 
         auteur: session.user.email, 
         image_couverture: imageUrl,
         pseudo_auteur: monPseudo 
@@ -220,6 +222,7 @@ window.ouvrirGestionOeuvre = async function(idHistoire) {
     if (histoire) {
         document.getElementById('edit-story-title').value = histoire.titre;
         document.getElementById('edit-story-synopsis').value = histoire.synopsis;
+		document.getElementById('edit-story-age').value = histoire.classification || 'Tout public';
     }
 
     // On charge la liste des chapitres en dessous
@@ -307,6 +310,7 @@ document.getElementById('btn-save-story-edit').addEventListener('click', async (
     const btnSave = document.getElementById('btn-save-story-edit');
     const nouveauTitre = document.getElementById('edit-story-title').value;
     const nouveauSynopsis = document.getElementById('edit-story-synopsis').value;
+	const nouvelleClassification = document.getElementById('edit-story-age').value;
     const fichierCouverture = document.getElementById('edit-story-cover').files[0];
 
     // Vérification de sécurité : on ne veut pas d'histoire sans nom
@@ -321,7 +325,8 @@ document.getElementById('btn-save-story-edit').addEventListener('click', async (
     // On prépare le colis pour l'Archiviste
     let miseAJour = {
         titre: nouveauTitre,
-        synopsis: nouveauSynopsis
+        synopsis: nouveauSynopsis,
+        classification: nouvelleClassification
     };
 
     // Si le Seigneur a choisi une NOUVELLE couverture, on l'envoie d'abord
