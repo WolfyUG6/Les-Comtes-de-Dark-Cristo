@@ -352,3 +352,39 @@ btnTextMinus.addEventListener('click', () => {
 selectFont.addEventListener('change', (event) => {
     boiteLecture.style.fontFamily = event.target.value;
 });
+
+// --- LES BOTTES DE SEPT LIEUES (Défilement rapide) ---
+const btnScrollTop = document.getElementById('btn-scroll-top');
+const btnScrollBottom = document.getElementById('btn-scroll-bottom');
+
+if (btnScrollTop && btnScrollBottom) {
+    // 1. Action : S'envoler tout en haut du parchemin
+    btnScrollTop.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // 2. Action : Plonger tout en bas du parchemin
+    btnScrollBottom.addEventListener('click', () => {
+        window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+    });
+
+    // 3. L'Oeil de la Tour : Surveille la position pendant la lecture
+    window.addEventListener('scroll', () => {
+        // Si on est descendu dans les abysses (plus de 300 pixels), on affiche le bouton "Haut"
+        if (window.scrollY > 300) {
+            btnScrollTop.style.display = 'block';
+        } else {
+            btnScrollTop.style.display = 'none';
+        }
+
+        // Si on touche presque le fond du gouffre, on cache le bouton "Bas"
+        const hauteurTotale = document.documentElement.scrollHeight;
+        const positionActuelle = window.innerHeight + window.scrollY;
+        
+        if (positionActuelle >= hauteurTotale - 50) {
+            btnScrollBottom.style.display = 'none';
+        } else {
+            btnScrollBottom.style.display = 'block';
+        }
+    });
+}
