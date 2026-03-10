@@ -233,54 +233,51 @@
             </div>
         </div>
         
-        <div id="lecture-page" style="display: none; padding: 40px 20px; color: #e0d7c6; width: 95%; max-width: 1400px; margin: 0 auto; box-sizing: border-box;">
-            <button id="btn-retour-oeuvre" class="genre-btn" style="margin-bottom: 20px;">← Retour au Grimoire</button>
-            
-            <h2 id="lecture-titre" style="color: #c4a484; font-family: 'Cinzel', serif; font-size: 2.5rem; text-align: center; border-bottom: 1px solid #5d1a1a; padding-bottom: 15px; margin-top: 0;"></h2>
-            
-            <div style="display: flex; gap: 40px; margin-top: 30px; align-items: flex-start; justify-content: center;">
-            
-            <div id="lecture-settings" style="width: 250px; background: #111; border: 1px solid #5d1a1a; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.8); flex-shrink: 0;">
-                <h3 style="color: #c4a484; font-family: 'Cinzel', serif; border-bottom: 1px solid #333; padding-bottom: 5px; margin-top: 0; text-align: center;">Le Pupitre</h3>
-                
-                <label style="color: #777; font-size: 0.9rem; display: block; margin-top: 15px;">Parchemin (Fond)</label>
-                <div style="display: flex; gap: 10px; margin-top: 5px;">
-                    <button id="btn-theme-sombre" class="genre-btn" style="flex: 1; border-color: #00aaff; color: #00aaff;">Abysses</button>
-                    <button id="btn-theme-clair" class="genre-btn" style="flex: 1; border-color: #c4a484; color: #c4a484;">Lumière</button>
-                </div>
+        <div id="lecture-page" style="display: none; color: #e0d7c6; width: 100%; min-height: 100vh; box-sizing: border-box;">
+    
+    <div style="position: sticky; top: 0; background: #0a0a0a; z-index: 100; padding: 20px; border-bottom: 1px solid #5d1a1a; text-align: center; display: flex; align-items: center; justify-content: center;">
+        <button id="btn-retour-oeuvre" class="genre-btn" style="position: absolute; left: 20px;">← Retour</button>
+        <h2 id="lecture-titre" style="color: #c4a484; font-family: 'Cinzel', serif; font-size: 1.8rem; margin: 0;"></h2>
+    </div>
 
-                <label style="color: #777; font-size: 0.9rem; display: block; margin-top: 15px;">Taille de la plume</label>
-                <div style="display: flex; gap: 10px; margin-top: 5px;">
-                    <button id="btn-text-minus" class="genre-btn" style="flex: 1; font-size: 1.1rem;">A-</button>
-                    <button id="btn-text-plus" class="genre-btn" style="flex: 1; font-size: 1.1rem;">A+</button>
-                </div>
-
-                <label style="color: #777; font-size: 0.9rem; display: block; margin-top: 15px;">Calligraphie (Police)</label>
-                <select id="select-font" style="width: 100%; margin-top: 5px; padding: 8px; background: #0a0a0a; color: #e0d7c6; border: 1px solid #333; font-family: 'Segoe UI', sans-serif;">
-                    <option value="'Segoe UI', sans-serif">Classique (Segoe UI)</option>
-                    <option value="'Cinzel', serif">Antique (Cinzel)</option>
-                    <option value="'Georgia', serif">Romanesque (Georgia)</option>
-                    <option value="'Courier New', monospace">Machine (Courier)</option>
-                </select>
+    <div style="display: flex; justify-content: center; gap: 40px; padding: 40px 20px; align-items: flex-start;">
+        
+        <div id="lecture-settings" style="position: sticky; top: 120px; width: 220px; background: #111; border: 1px solid #5d1a1a; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.8); flex-shrink: 0;">
+            <h3 style="color: #c4a484; font-family: 'Cinzel', serif; border-bottom: 1px solid #333; padding-bottom: 5px; margin-top: 0; text-align: center;">Le Pupitre</h3>
+            
+            <label style="color: #777; font-size: 0.8rem; display: block; margin-top: 15px;">Parchemin</label>
+            <div style="display: flex; gap: 5px; margin-top: 5px;">
+                <button id="btn-theme-sombre" class="genre-btn" style="flex: 1; font-size: 0.7rem;">Abysses</button>
+                <button id="btn-theme-clair" class="genre-btn" style="flex: 1; font-size: 0.7rem;">Lumière</button>
             </div>
 
-            <div style="flex: 1; max-width: 900px; display: flex; flex-direction: column; gap: 15px;">
-                <div style="display: flex; justify-content: space-between;">
-                    <button id="btn-chap-prec-haut" class="genre-btn" style="display: none; border-color: #c4a484; color: #c4a484;">← Chapitre Précédent</button>
-                    <div style="flex: 1;"></div> <button id="btn-chap-suiv-haut" class="genre-btn" style="display: none; border-color: #c4a484; color: #c4a484;">Chapitre Suivant →</button>
-                </div>
-
-                <div id="lecture-contenu" style="font-family: 'Segoe UI', sans-serif; font-size: 1.1rem; line-height: 1.8; color: #e0d7c6; height: 75vh; min-height: 40vh; resize: vertical; overflow-y: auto; padding: 30px; border: 1px solid #333; background: #050505; box-shadow: inset 0 0 15px rgba(0,0,0,0.8); transition: background-color 0.3s ease, color 0.3s ease;">
-				</div>
-
-                <div style="display: flex; justify-content: space-between;">
-                    <button id="btn-chap-prec-bas" class="genre-btn" style="display: none; border-color: #c4a484; color: #c4a484;">← Chapitre Précédent</button>
-                    <div style="flex: 1;"></div> <button id="btn-chap-suiv-bas" class="genre-btn" style="display: none; border-color: #c4a484; color: #c4a484;">Chapitre Suivant →</button>
-                </div>
+            <label style="color: #777; font-size: 0.8rem; display: block; margin-top: 15px;">Taille Plume</label>
+            <div style="display: flex; gap: 5px; margin-top: 5px;">
+                <button id="btn-text-minus" class="genre-btn" style="flex: 1;">A-</button>
+                <button id="btn-text-plus" class="genre-btn" style="flex: 1;">A+</button>
             </div>
-            
+
+            <label style="color: #777; font-size: 0.8rem; display: block; margin-top: 15px;">Calligraphie</label>
+            <select id="select-font" style="width: 100%; margin-top: 5px; padding: 8px; background: #0a0a0a; color: #e0d7c6; border: 1px solid #333;">
+                <option value="'Segoe UI', sans-serif">Classique</option>
+                <option value="'Cinzel', serif">Antique</option>
+                <option value="'Georgia', serif">Romanesque</option>
+            </select>
         </div>
+
+        <div style="flex: 1; max-width: 850px;">
+            <div id="lecture-contenu" style="font-family: 'Segoe UI', sans-serif; font-size: 1.1rem; line-height: 2; color: #e0d7c6; min-height: 60vh;">
+                </div>
+
+            <div style="display: flex; justify-content: space-between; margin-top: 60px; padding-top: 20px; border-top: 1px solid #333;">
+                <button id="btn-chap-prec-bas" class="genre-btn" style="display: none; border-color: #c4a484; color: #c4a484;">← Précédent</button>
+                <button id="btn-chap-suiv-bas" class="genre-btn" style="display: none; border-color: #c4a484; color: #c4a484;">Suivant →</button>
+            </div>
         </div>
+
+        <div style="width: 220px; flex-shrink: 0;"></div>
+    </div>
+</div>
     </main>
 
     <div id="auth-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #111; padding: 40px; border: 1px solid #c4a484; z-index: 1000; text-align: center; box-shadow: 0 0 20px #000;">

@@ -202,6 +202,7 @@ window.lireChapitre = async function(idChapitre) {
     
     // 4. LA MAGIE : On utilise innerHTML pour que le gras et l'italique s'affichent correctement !
     document.getElementById('lecture-contenu').innerHTML = chapitre.contenu;
+	window.scrollTo(0, 0);
 	
 	// --- NOUVEAU : LES PANNEAUX DE NAVIGATION ---
     const btnPrecHaut = document.getElementById('btn-chap-prec-haut');
@@ -261,19 +262,15 @@ document.getElementById('btn-retour-oeuvre').addEventListener('click', () => {
 });
 
 // --- LE SORTILÈGE DE LA JAUGE DE SANG (Progression DANS LA BOÎTE) ---
-let timeoutBulle = null; // Le sablier pour faire disparaître l'étiquette
+let timeoutBulle = null;
 
-// Attention : On surveille maintenant 'lecture-contenu' et non plus 'window'
-document.getElementById('lecture-contenu').addEventListener('scroll', function() {
+window.addEventListener('scroll', function() {
     const progressContainer = document.getElementById('lecture-progress-container');
     
-    // L'œil de l'Archiviste ne s'active que si la jauge est visible
-    if (progressContainer.style.display === 'block') {
+    if (progressContainer && progressContainer.style.display === 'block') {
         
-        const boite = this; // La boîte qui contient le texte
-        
-        const hauteurDefilee = boite.scrollTop;
-        const hauteurTotale = boite.scrollHeight - boite.clientHeight;
+        const hauteurDefilee = window.scrollY;
+        const hauteurTotale = document.documentElement.scrollHeight - window.innerHeight;
         
         let pourcentage = 0;
         if (hauteurTotale > 0) {
@@ -283,10 +280,8 @@ document.getElementById('lecture-contenu').addEventListener('scroll', function()
         if (pourcentage > 100) pourcentage = 100;
         if (pourcentage < 0) pourcentage = 0;
         
-        // On remplit la jauge visuellement
         document.getElementById('lecture-progress-bar').style.width = pourcentage + '%';
         
-        // --- LA MAGIE DES PALIERS (25%, 50%, 75%, 100%) ---
         let palierActuel = Math.floor(pourcentage / 25) * 25;
         if (pourcentage >= 99) palierActuel = 100;
 
@@ -294,17 +289,16 @@ document.getElementById('lecture-contenu').addEventListener('scroll', function()
             window.dernierPalierAffiche = palierActuel;
             
             const bulle = document.getElementById('lecture-pourcentage-bulle');
-            bulle.innerText = palierActuel + "%"; 
-            bulle.style.display = 'block'; 
-            
-            if (timeoutBulle) clearTimeout(timeoutBulle);
-            
-            timeoutBulle = setTimeout(() => {
-                bulle.style.display = 'none';
-            }, 3000);
+            if (bulle) {
+                bulle.innerText = palierActuel + "%"; 
+                bulle.style.display = 'block'; 
+                
+                if (timeoutBulle) clearTimeout(timeoutBulle);
+                timeoutBulle = setTimeout(() => {
+                    bulle.style.display = 'none';
+                }, 3000);
+            }
         }
-        
-        // (La mécanique de la "Vue" validée à 50% viendra se loger ici...)
     }
 });
 
