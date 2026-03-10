@@ -1,5 +1,9 @@
 body {
-    background-color: #0a0a0a; /* Noir profond */
+    /* La toile magique : un mélange de noir profond et de rouge sang très sombre */
+    background: linear-gradient(135deg, #0a0a0a 0%, #150202 50%, #0a0a0a 100%);
+    background-size: 300% 300%; /* On fait déborder la toile de l'écran */
+    animation: respirationAbyssale 18s ease infinite; /* On la fait bouger en boucle */
+    
     color: #e0d7c6; /* Beige Os pour le texte */
     font-family: 'Cinzel', serif; /* Style noble/médiéval */
     margin: 0;
@@ -7,6 +11,13 @@ body {
     flex-direction: column;
     align-items: center;
     min-height: 100vh;
+}
+
+/* --- LE SORTILÈGE DE LA BRUME SANGLANTE --- */
+@keyframes respirationAbyssale {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 header {
