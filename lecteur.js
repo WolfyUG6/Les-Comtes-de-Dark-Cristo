@@ -205,10 +205,14 @@ window.lireChapitre = async function(idChapitre) {
 	window.scrollTo(0, 0);
 	
 	// --- NOUVEAU : LES PANNEAUX DE NAVIGATION ---
+    const btnPrecHaut = document.getElementById('btn-chap-prec-haut');
+    const btnSuivHaut = document.getElementById('btn-chap-suiv-haut');
     const btnPrecBas = document.getElementById('btn-chap-prec-bas');
     const btnSuivBas = document.getElementById('btn-chap-suiv-bas');
 
     // On cache tout par défaut à chaque nouveau chapitre
+    if (btnPrecHaut) btnPrecHaut.style.display = 'none';
+    if (btnSuivHaut) btnSuivHaut.style.display = 'none';
     if (btnPrecBas) btnPrecBas.style.display = 'none';
     if (btnSuivBas) btnSuivBas.style.display = 'none';
 
@@ -222,9 +226,9 @@ window.lireChapitre = async function(idChapitre) {
         .limit(1)
         .maybeSingle();
 
-    if (chapPrec && btnPrecBas) {
-        btnPrecBas.style.display = 'block';
-        btnPrecBas.onclick = () => lireChapitre(chapPrec.id);
+    if (chapPrec) {
+        if (btnPrecHaut) { btnPrecHaut.style.display = 'block'; btnPrecHaut.onclick = () => lireChapitre(chapPrec.id); }
+        if (btnPrecBas) { btnPrecBas.style.display = 'block'; btnPrecBas.onclick = () => lireChapitre(chapPrec.id); }
     }
 
     // L'Archiviste cherche le chapitre SUIVANT (numéro supérieur au numéro actuel)
@@ -237,9 +241,9 @@ window.lireChapitre = async function(idChapitre) {
         .limit(1)
         .maybeSingle();
 
-    if (chapSuiv && btnSuivBas) {
-        btnSuivBas.style.display = 'block';
-        btnSuivBas.onclick = () => lireChapitre(chapSuiv.id);
+    if (chapSuiv) {
+        if (btnSuivHaut) { btnSuivHaut.style.display = 'block'; btnSuivHaut.onclick = () => lireChapitre(chapSuiv.id); }
+        if (btnSuivBas) { btnSuivBas.style.display = 'block'; btnSuivBas.onclick = () => lireChapitre(chapSuiv.id); }
     }
 	
 	// 5. Apparition de la Jauge de Sang
