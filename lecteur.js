@@ -120,7 +120,7 @@ async function chargerChapitres(idHistoire) {
             </div>
             <div style="display: flex; gap: 15px; align-items: center;">
                 <span style="color: #555; font-size: 0.8rem;">${datePub}</span>
-                <button class="genre-btn" style="padding: 5px 15px; font-size: 0.8rem;" onclick="alert('Lecture bientôt disponible !')">Lire</button>
+                <button class="genre-btn" style="padding: 5px 15px; font-size: 0.8rem;" onclick="lireChapitre(${chapitre.id})">Lire</button>
             </div>
         `;
         ul.appendChild(li);
@@ -174,4 +174,39 @@ btnSoutenir.addEventListener('click', async () => {
     document.getElementById('oeuvre-likes').innerText = count || 0;
 
     btnSoutenir.disabled = false; 
+});
+
+// --- LE POUVOIR DE LECTURE ---
+window.lireChapitre = async function(idChapitre) {
+    // 1. On demande au Chef d'Orchestre d'ouvrir la Salle de Lecture
+    window.changerDePage('lecture');
+    
+    // On met un texte d'attente
+    document.getElementById('lecture-titre').innerText = "Déchiffrement du parchemin...";
+    document.getElementById('lecture-contenu').innerHTML = "";
+
+    // 2. L'Archiviste fouille l'étagère Supabase pour trouver CE chapitre précis
+    const { data: chapitre, error } = await window._supabase
+        .from('chapitres')
+        .select('*')
+        .eq('id', idChapitre)
+        .single();
+
+    if (error) {
+        document.getElementById('lecture-contenu').innerHTML = '<p style="color: red;">Erreur : ' + error.message + '</p>';
+        return;
+    }
+
+    // 3. On affiche le titre
+    document.getElementById('lecture-titre').innerText = "Chapitre " + chapitre.numero + " : " + chapitre.titre;
+    
+    // 4. LA MAGIE : On utilise innerHTML pour que le gras et l'italique s'affichent correctement !
+    document.getElementById('lecture-contenu').innerHTML = chapitre.contenu;
+};
+
+// --- BOUTON DE RETOUR ---
+// Permet de quitter la Salle de Lecture pour revenir à l'accueil du Grimoire (l'œuvre)
+document.getElementById('btn-retour-oeuvre').addEventListener('click', () => {
+    // On utilise la fonction existante en lui redonnant l'ID de l'œuvre en cours
+    window.ouvrirOeuvre(window.currentOeuvreId); 
 });

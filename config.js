@@ -17,6 +17,7 @@ window.changerDePage = function(pageDemandee) {
     document.getElementById('quartiers-page').style.display = 'none';
     document.getElementById('creation-page').style.display = 'none';
     document.getElementById('gestion-page').style.display = 'none'; // <-- L'oubli était ici
+	document.getElementById('lecture-page').style.display = 'none';
 	document.getElementById('editeur-chapitre-page').style.display = 'none';
 
     // 2. On cache tous les éléments d'en-tête (logos, menus)
@@ -52,6 +53,10 @@ window.changerDePage = function(pageDemandee) {
     }
 	else if (pageDemandee === 'editeur-chapitre') { 
         document.getElementById('editeur-chapitre-page').style.display = 'block';
+        document.getElementById('mini-logo').style.display = 'flex';
+    }
+	else if (pageDemandee === 'lecture') { 
+        document.getElementById('lecture-page').style.display = 'block';
         document.getElementById('mini-logo').style.display = 'flex';
     }
 };
