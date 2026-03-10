@@ -114,6 +114,11 @@ async function chargerMesOeuvres() {
 // --- AJOUT DE CHAPITRE DANS L'ATELIER ---
 const submitChapitre = document.getElementById('submit-chapitre');
 
+// --- LE BOUCLIER ANTI-WORD (Force les blocs neutres) ---
+const Block = Quill.import('blots/block');
+Block.tagName = 'DIV';
+Quill.register(Block, true);
+
 // Initialisation de la Plume Quill
 const quill = new Quill('#chapitre-contenu', {
     theme: 'snow',
