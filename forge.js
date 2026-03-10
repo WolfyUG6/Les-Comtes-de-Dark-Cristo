@@ -104,7 +104,7 @@ async function chargerMesOeuvres() {
                 <span style="font-size: 0.8rem; background-color: #5d1a1a; color: white; padding: 2px 6px; text-transform: uppercase;">${histoire.genre}</span>
             </div>
             <div>
-                <button class="genre-btn" style="border-color: #00aaff; color: #00aaff;" onclick="ouvrirGestionOeuvre(${histoire.id}, '${histoire.titre.replace(/'/g, "\\'")}')">Gérer</button>
+                <button class="genre-btn" style="border-color: #00aaff; color: #00aaff;" onclick="ouvrirGestionOeuvre(${histoire.id})">Gérer</button>
             </div>
         `;
         conteneur.appendChild(carte);
@@ -153,24 +153,34 @@ document.getElementById('btn-retour-studio').addEventListener('click', () => {
     window.changerDePage('accueil');
 });
 
-// --- GESTION DE L'ŒUVRE (Le Panneau d'Administration) ---
+// --- GESTION DE L'ŒUVRE (Le Panneau d'Administration Complet) ---
 
-// 1. Ouvrir le panneau de gestion pour une œuvre spécifique
-window.ouvrirGestionOeuvre = function(idHistoire, titreHistoire) {
-    const container = document.getElementById('gestion-chapitres-container');
-    container.style.display = 'block'; // On affiche la zone cachée
-    
-    // On met le titre et un bouton rouge pour supprimer TOUTE l'histoire
-    document.getElementById('gestion-titre-oeuvre').innerHTML = `
-        ${titreHistoire} 
-        <button class="genre-btn" style="border-color: red; color: red; font-size: 0.7rem; margin-left: 20px;" onclick="supprimerOeuvre(${idHistoire})">🗑️ Supprimer l'œuvre</button>
-    `;
+// 1. Ouvrir la nouvelle page de gestion pour une œuvre
+window.ouvrirGestionOeuvre = async function(idHistoire) {
+    window.currentOeuvreId = idHistoire; // On mémorise l'œuvre
+    window.changerDePage('gestion'); // Le Chef d'Orchestre affiche la page
 
-    // On charge les chapitres
+    // On met des textes d'attente
+    document.getElementById('edit-story-title').value = "Recherche en cours...";
+    document.getElementById('edit-story-synopsis').value = "Recherche en cours...";
+
+    // L'Archiviste récupère les données actuelles de l'histoire
+    const { data: histoire, error } = await window._supabase
+        .from('histoires')
+        .select('*')
+        .eq('id', idHistoire)
+        .single();
+
+    if (histoire) {
+        document.getElementById('edit-story-title').value = histoire.titre;
+        document.getElementById('edit-story-synopsis').value = histoire.synopsis;
+    }
+
+    // On charge la liste des chapitres en dessous
     chargerChapitresAdmin(idHistoire);
 };
 
-// 2. Charger et lister les chapitres dans l'Atelier
+// 2. Charger et lister les chapitres dans la page Gestion
 window.chargerChapitresAdmin = async function(idHistoire) {
     const liste = document.getElementById('liste-chapitres-admin');
     liste.innerHTML = '<p style="color: #c4a484; font-style: italic;">Lecture des parchemins...</p>';
@@ -207,15 +217,15 @@ window.chargerChapitresAdmin = async function(idHistoire) {
     });
 };
 
-// 3. Le pouvoir de Destruction : Supprimer une œuvre
-window.supprimerOeuvre = async function(idHistoire) {
+// 3. Le pouvoir de Destruction : Supprimer TOUTE l'œuvre
+window.supprimerOeuvreCourante = async function() {
     if(confirm("Êtes-vous sûr de vouloir jeter cette œuvre dans les abysses ? Cette action est irréversible.")) {
-        const { error } = await window._supabase.from('histoires').delete().eq('id', idHistoire);
+        const { error } = await window._supabase.from('histoires').delete().eq('id', window.currentOeuvreId);
         if(error) alert("Erreur : " + error.message);
         else {
             alert("L'œuvre a été consumée par les ténèbres.");
-            document.getElementById('gestion-chapitres-container').style.display = 'none';
-            chargerMesOeuvres(); // On rafraîchit la liste des œuvres
+            window.changerDePage('studio'); // On retourne à l'atelier
+            chargerMesOeuvres(); // On rafraîchit la liste
         }
     }
 };
@@ -226,12 +236,25 @@ window.supprimerChapitre = async function(idChapitre, idHistoire) {
         const { error } = await window._supabase.from('chapitres').delete().eq('id', idChapitre);
         if(error) alert("Erreur : " + error.message);
         else {
-            chargerChapitresAdmin(idHistoire); // On rafraîchit la liste des chapitres
+            chargerChapitresAdmin(idHistoire); // On rafraîchit la liste
         }
     }
 };
 
-// 5. Fermer le panneau de gestion
-document.getElementById('btn-fermer-gestion').addEventListener('click', () => {
-    document.getElementById('gestion-chapitres-container').style.display = 'none';
+// --- LES BOUTONS DE LA NOUVELLE PAGE GESTION ---
+
+// Bouton Retour à l'Atelier
+document.getElementById('btn-retour-gestion').addEventListener('click', () => {
+    window.changerDePage('studio');
+    chargerMesOeuvres(); 
+});
+
+// Bouton Ouvrir "Ajouter un Chapitre"
+document.getElementById('btn-open-add-chapitre').addEventListener('click', () => {
+    document.getElementById('chapitre-modal').style.display = 'block';
+});
+
+// Bouton Sauvegarder les modifications de l'histoire (Titre, Synopsis, Image)
+document.getElementById('btn-save-story-edit').addEventListener('click', () => {
+    alert("Les engrenages pour modifier l'œuvre sont en cours de fabrication ! (On codera ça la prochaine fois)");
 });
