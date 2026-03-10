@@ -206,6 +206,7 @@ window.lireChapitre = async function(idChapitre) {
 	// 5. Apparition de la Jauge de Sang
     document.getElementById('lecture-progress-container').style.display = 'block';
     document.getElementById('lecture-progress-bar').style.width = '0%';
+	window.dernierPalierAffiche = 0; // On remet la mémoire des paliers à zéro
 };
 
 // --- BOUTON DE RETOUR ---
@@ -218,27 +219,48 @@ document.getElementById('btn-retour-oeuvre').addEventListener('click', () => {
 });
 
 // --- LE SORTILÈGE DE LA JAUGE DE SANG (Progression de lecture) ---
+let timeoutBulle = null; // Le sablier pour faire disparaître l'étiquette
+
 window.addEventListener('scroll', () => {
     const progressContainer = document.getElementById('lecture-progress-container');
     
-    // L'œil de l'Archiviste ne s'active que si la jauge est visible (donc en pleine lecture)
+    // L'œil de l'Archiviste ne s'active que si la jauge est visible
     if (progressContainer.style.display === 'block') {
         
-        // 1. Quelle distance le lecteur a-t-il parcourue vers le bas ?
         const hauteurDefilee = document.documentElement.scrollTop;
-        
-        // 2. Quelle est la hauteur totale du parchemin (moins la taille de l'écran visible) ?
         const hauteurTotale = document.documentElement.scrollHeight - document.documentElement.clientHeight;
         
-        // 3. On calcule le pourcentage d'avancée
         let pourcentage = (hauteurDefilee / hauteurTotale) * 100;
         
-        // On s'assure que la jauge ne déborde pas
         if (pourcentage > 100) pourcentage = 100;
         if (pourcentage < 0) pourcentage = 0;
         
-        // 4. On remplit la jauge
+        // On remplit la jauge visuellement
         document.getElementById('lecture-progress-bar').style.width = pourcentage + '%';
+        
+        // --- LA MAGIE DES PALIERS (25%, 50%, 75%, 100%) ---
+        // On arrondit le pourcentage au palier de 25 le plus proche en dessous
+        let palierActuel = Math.floor(pourcentage / 25) * 25;
+        
+        // On force le 100% si on est tout en bas (car le calcul précis donne parfois 99.8%)
+        if (pourcentage >= 99) palierActuel = 100;
+
+        // Si on atteint un NOUVEAU palier et qu'il est supérieur à 0
+        if (palierActuel > (window.dernierPalierAffiche || 0) && palierActuel > 0) {
+            window.dernierPalierAffiche = palierActuel; // On mémorise ce palier pour ne pas le répéter
+            
+            const bulle = document.getElementById('lecture-pourcentage-bulle');
+            bulle.innerText = palierActuel + "%"; // On écrit le chiffre
+            bulle.style.display = 'block'; // On affiche l'étiquette
+            
+            // Si un ancien sablier était en cours, on le brise
+            if (timeoutBulle) clearTimeout(timeoutBulle);
+            
+            // On lance un nouveau sablier : dans 3 secondes (3000 ms), l'étiquette replonge dans les ténèbres
+            timeoutBulle = setTimeout(() => {
+                bulle.style.display = 'none';
+            }, 3000);
+        }
         
         // (C'est ici que l'on cachera le déclencheur de la "Vue" au-delà de 50% plus tard...)
     }
