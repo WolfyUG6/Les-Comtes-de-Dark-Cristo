@@ -25,8 +25,16 @@ async function loadStories(genreFilter = null) {
     }
 
     histoires.forEach(histoire => {
+        // 1. Le Sortilège de l'Aura : on choisit la couleur selon l'âge
+        let couleurAura = "rgba(0, 0, 0, 0.8)"; // Noir abyssal par défaut s'il n'y a rien
+        if (histoire.classification === "Tout public") couleurAura = "rgba(46, 139, 87, 0.4)"; // Vert subtil
+        else if (histoire.classification === "R15") couleurAura = "rgba(255, 215, 0, 0.3)"; // Jaune or subtil
+        else if (histoire.classification === "R16") couleurAura = "rgba(255, 140, 0, 0.4)"; // Orange subtil
+        else if (histoire.classification === "R18") couleurAura = "rgba(255, 0, 0, 0.5)"; // Rouge sang subtil
+
+        // 2. On fabrique la carte en lui injectant la couleur d'Aura
         const card = document.createElement('div');
-        card.style.cssText = "background-color: #0a0a0a; border: 1px solid #5d1a1a; width: 280px; padding: 15px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.8);";
+        card.style.cssText = `background-color: #0a0a0a; border: 1px solid #5d1a1a; width: 280px; padding: 15px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 0 15px ${couleurAura}; transition: box-shadow 0.3s ease;`;
 
         const imgHtml = histoire.image_couverture 
             ? `<img src="${histoire.image_couverture}" alt="${histoire.titre}" style="width: 100%; height: 380px; object-fit: cover; border: 1px solid #333;">` 
