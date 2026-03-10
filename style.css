@@ -170,3 +170,8 @@ button:hover {
     color: #777 !important;
     font-style: italic;
 }
+
+/* Forcer le conteneur principal à prendre toute la largeur */
+main {
+    width: 100%;
+}
