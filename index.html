@@ -264,7 +264,19 @@
                 </select>
             </div>
 
-            <div id="lecture-contenu" style="flex: 1; max-width: 900px; font-family: 'Segoe UI', sans-serif; font-size: 1.1rem; line-height: 1.8; color: #e0d7c6; height: 65vh; overflow-y: auto; padding: 30px; border: 1px solid #333; background: #050505; box-shadow: inset 0 0 15px rgba(0,0,0,0.8); transition: all 0.3s ease;">
+            <div style="flex: 1; max-width: 900px; display: flex; flex-direction: column; gap: 15px;">
+                <div style="display: flex; justify-content: space-between;">
+                    <button id="btn-chap-prec-haut" class="genre-btn" style="display: none; border-color: #c4a484; color: #c4a484;">← Chapitre Précédent</button>
+                    <div style="flex: 1;"></div> <button id="btn-chap-suiv-haut" class="genre-btn" style="display: none; border-color: #c4a484; color: #c4a484;">Chapitre Suivant →</button>
+                </div>
+
+                <div id="lecture-contenu" style="font-family: 'Segoe UI', sans-serif; font-size: 1.1rem; line-height: 1.8; color: #e0d7c6; height: 60vh; overflow-y: auto; padding: 30px; border: 1px solid #333; background: #050505; box-shadow: inset 0 0 15px rgba(0,0,0,0.8); transition: all 0.3s ease;">
+                </div>
+
+                <div style="display: flex; justify-content: space-between;">
+                    <button id="btn-chap-prec-bas" class="genre-btn" style="display: none; border-color: #c4a484; color: #c4a484;">← Chapitre Précédent</button>
+                    <div style="flex: 1;"></div> <button id="btn-chap-suiv-bas" class="genre-btn" style="display: none; border-color: #c4a484; color: #c4a484;">Chapitre Suivant →</button>
+                </div>
             </div>
             
         </div>

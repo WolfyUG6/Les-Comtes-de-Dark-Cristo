@@ -203,6 +203,48 @@ window.lireChapitre = async function(idChapitre) {
     // 4. LA MAGIE : On utilise innerHTML pour que le gras et l'italique s'affichent correctement !
     document.getElementById('lecture-contenu').innerHTML = chapitre.contenu;
 	
+	// --- NOUVEAU : LES PANNEAUX DE NAVIGATION ---
+    const btnPrecHaut = document.getElementById('btn-chap-prec-haut');
+    const btnSuivHaut = document.getElementById('btn-chap-suiv-haut');
+    const btnPrecBas = document.getElementById('btn-chap-prec-bas');
+    const btnSuivBas = document.getElementById('btn-chap-suiv-bas');
+
+    // On cache tout par défaut à chaque nouveau chapitre
+    btnPrecHaut.style.display = 'none'; btnPrecBas.style.display = 'none';
+    btnSuivHaut.style.display = 'none'; btnSuivBas.style.display = 'none';
+
+    // L'Archiviste cherche le chapitre PRÉCÉDENT (numéro inférieur au numéro actuel)
+    const { data: chapPrec } = await window._supabase
+        .from('chapitres')
+        .select('id')
+        .eq('histoire_id', chapitre.histoire_id)
+        .lt('numero', chapitre.numero)
+        .order('numero', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+    if (chapPrec) {
+        btnPrecHaut.style.display = 'block'; btnPrecBas.style.display = 'block';
+        btnPrecHaut.onclick = () => lireChapitre(chapPrec.id);
+        btnPrecBas.onclick = () => lireChapitre(chapPrec.id);
+    }
+
+    // L'Archiviste cherche le chapitre SUIVANT (numéro supérieur au numéro actuel)
+    const { data: chapSuiv } = await window._supabase
+        .from('chapitres')
+        .select('id')
+        .eq('histoire_id', chapitre.histoire_id)
+        .gt('numero', chapitre.numero)
+        .order('numero', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+    if (chapSuiv) {
+        btnSuivHaut.style.display = 'block'; btnSuivBas.style.display = 'block';
+        btnSuivHaut.onclick = () => lireChapitre(chapSuiv.id);
+        btnSuivBas.onclick = () => lireChapitre(chapSuiv.id);
+    }
+	
 	// 5. Apparition de la Jauge de Sang
     document.getElementById('lecture-progress-container').style.display = 'block';
     document.getElementById('lecture-progress-bar').style.width = '0%';
