@@ -370,21 +370,38 @@ if (btnScrollTop && btnScrollBottom) {
 
     // 3. L'Oeil de la Tour : Surveille la position pendant la lecture
     window.addEventListener('scroll', () => {
-        // Si on est descendu dans les abysses (plus de 300 pixels), on affiche le bouton "Haut"
-        if (window.scrollY > 300) {
-            btnScrollTop.style.display = 'block';
+        
+        // --- SENSIBILITÉ ACCRUE : On réagit dès 50 pixels au lieu de 300 ---
+        if (window.scrollY > 50) {
+            // On réveille le bouton "Haut" (sang rouge et clic autorisé)
+            btnScrollTop.style.opacity = '1';
+            btnScrollTop.style.pointerEvents = 'auto';
+            btnScrollTop.style.borderColor = '#5d1a1a';
+            btnScrollTop.style.color = '#e0d7c6';
         } else {
-            btnScrollTop.style.display = 'none';
+            // On pétrifie le bouton "Haut" (gris et incliquable)
+            btnScrollTop.style.opacity = '0.3';
+            btnScrollTop.style.pointerEvents = 'none';
+            btnScrollTop.style.borderColor = '#333';
+            btnScrollTop.style.color = '#777';
         }
 
-        // Si on touche presque le fond du gouffre, on cache le bouton "Bas"
+        // --- GESTION DU FOND DU GOUFFRE ---
         const hauteurTotale = document.documentElement.scrollHeight;
         const positionActuelle = window.innerHeight + window.scrollY;
         
         if (positionActuelle >= hauteurTotale - 50) {
-            btnScrollBottom.style.display = 'none';
+            // On pétrifie le bouton "Bas"
+            btnScrollBottom.style.opacity = '0.3';
+            btnScrollBottom.style.pointerEvents = 'none';
+            btnScrollBottom.style.borderColor = '#333';
+            btnScrollBottom.style.color = '#777';
         } else {
-            btnScrollBottom.style.display = 'block';
+            // On réveille le bouton "Bas"
+            btnScrollBottom.style.opacity = '1';
+            btnScrollBottom.style.pointerEvents = 'auto';
+            btnScrollBottom.style.borderColor = '#5d1a1a';
+            btnScrollBottom.style.color = '#e0d7c6';
         }
     });
 }
