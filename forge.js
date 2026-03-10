@@ -255,6 +255,56 @@ document.getElementById('btn-open-add-chapitre').addEventListener('click', () =>
 });
 
 // Bouton Sauvegarder les modifications de l'histoire (Titre, Synopsis, Image)
-document.getElementById('btn-save-story-edit').addEventListener('click', () => {
-    alert("Les engrenages pour modifier l'œuvre sont en cours de fabrication ! (On codera ça la prochaine fois)");
+document.getElementById('btn-save-story-edit').addEventListener('click', async () => {
+    const btnSave = document.getElementById('btn-save-story-edit');
+    const nouveauTitre = document.getElementById('edit-story-title').value;
+    const nouveauSynopsis = document.getElementById('edit-story-synopsis').value;
+    const fichierCouverture = document.getElementById('edit-story-cover').files[0];
+
+    // Vérification de sécurité : on ne veut pas d'histoire sans nom
+    if (!nouveauTitre || !nouveauSynopsis) {
+        alert("Les fondations de votre œuvre ne peuvent pas être vides ! (Titre et Synopsis requis)");
+        return;
+    }
+
+    btnSave.innerText = "Gravure en cours...";
+    btnSave.disabled = true; // On bloque le bouton pour éviter les doubles clics
+
+    // On prépare le colis pour l'Archiviste
+    let miseAJour = {
+        titre: nouveauTitre,
+        synopsis: nouveauSynopsis
+    };
+
+    // Si le Seigneur a choisi une NOUVELLE couverture, on l'envoie d'abord
+    if (fichierCouverture) {
+        const fileName = `${Date.now()}-${fichierCouverture.name}`;
+        const { error: upErr } = await window._supabase.storage.from('couvertures').upload(fileName, fichierCouverture);
+        
+        if (!upErr) {
+            const { data } = window._supabase.storage.from('couvertures').getPublicUrl(fileName);
+            miseAJour.image_couverture = data.publicUrl; // On ajoute la nouvelle image au colis
+        } else {
+            alert("Erreur lors de l'ajout de la couverture : " + upErr.message);
+            btnSave.innerText = "Graver les modifications";
+            btnSave.disabled = false;
+            return; // On arrête tout si l'image plante
+        }
+    }
+
+    // On envoie la mise à jour finale au registre (Supabase)
+    const { error } = await window._supabase
+        .from('histoires')
+        .update(miseAJour)
+        .eq('id', window.currentOeuvreId);
+
+    if (error) {
+        alert("Le registre a refusé la modification : " + error.message);
+    } else {
+        alert("Les modifications ont été gravées dans la roche !");
+        document.getElementById('edit-story-cover').value = ""; // On nettoie le champ de l'image
+    }
+
+    btnSave.innerText = "Graver les modifications";
+    btnSave.disabled = false;
 });
