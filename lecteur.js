@@ -29,6 +29,20 @@ window.ouvrirOeuvre = async function(idHistoire) {
     document.getElementById('oeuvre-cover').src = histoire.image_couverture || '';
     document.getElementById('oeuvre-genre').innerText = histoire.genre;
 	document.getElementById('oeuvre-age').innerText = histoire.classification || 'Tout public';
+	const bulleSensible = document.getElementById('oeuvre-sensible');
+    if (histoire.contenu_sensible) {
+        bulleSensible.innerText = "⚠️ Contenu Sensible";
+        bulleSensible.style.backgroundColor = "#5d1a1a";
+        bulleSensible.style.color = "white";
+        bulleSensible.style.border = "1px solid #ff0055";
+        bulleSensible.style.textDecoration = "none";
+    } else {
+        bulleSensible.innerText = "Contenu Sensible";
+        bulleSensible.style.backgroundColor = "transparent";
+        bulleSensible.style.color = "#555";
+        bulleSensible.style.border = "1px dotted #333";
+        bulleSensible.style.textDecoration = "line-through";
+    }
     document.getElementById('oeuvre-titre').innerText = histoire.titre;
     document.getElementById('oeuvre-auteur').innerText = "Comte " + (histoire.pseudo_auteur || histoire.auteur.split('@')[0]);
     document.getElementById('oeuvre-synopsis').innerText = histoire.synopsis;

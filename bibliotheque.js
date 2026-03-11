@@ -47,6 +47,10 @@ async function loadStories(genreFilter = null) {
             <div style="display: flex; gap: 10px; align-self: flex-start;">
                 <span style="font-size: 0.7rem; background-color: #5d1a1a; color: white; padding: 3px 6px; text-transform: uppercase;">${histoire.genre}</span>
                 <span style="font-size: 0.7rem; background-color: #111; color: #ff4444; border: 1px solid #ff4444; padding: 3px 6px; text-transform: uppercase; font-weight: bold;">${histoire.classification || 'Tout public'}</span>
+                ${histoire.contenu_sensible 
+                    ? `<span style="font-size: 0.7rem; background-color: #5d1a1a; color: white; border: 1px solid #ff0055; padding: 3px 6px; text-transform: uppercase; font-weight: bold;">⚠️ Sensible</span>`
+                    : `<span style="font-size: 0.7rem; background-color: transparent; color: #555; border: 1px dotted #333; padding: 3px 6px; text-transform: uppercase; text-decoration: line-through;">Sensible</span>`
+                }
             </div>
             <h3 style="color: #c4a484; font-family: 'Cinzel', serif; margin: 5px 0 0 0; font-size: 1.2rem;">${histoire.titre}</h3>
             <span style="font-size: 0.8rem; color: #777;">Par Comte ${pseudo}</span>

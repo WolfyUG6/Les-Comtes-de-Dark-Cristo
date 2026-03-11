@@ -18,6 +18,7 @@ submitStory.addEventListener('click', async () => {
     const genre = document.getElementById('story-genre').value;
 	const classification = document.getElementById('story-age').value;
     const file = document.getElementById('story-cover-file').files[0];
+	const isSensible = document.getElementById('story-sensible').checked;
 
     const { data: { session } } = await _supabase.auth.getSession();
     if (!session || !title || !synopsis || !genre || !classification) {
@@ -46,6 +47,7 @@ submitStory.addEventListener('click', async () => {
         auteur: session.user.email, 
         image_couverture: imageUrl,
         pseudo_auteur: monPseudo 
+		contenu_sensible: isSensible 
     }]);
     if (error) alert(error.message);
     else {
@@ -223,6 +225,7 @@ window.ouvrirGestionOeuvre = async function(idHistoire) {
         document.getElementById('edit-story-title').value = histoire.titre;
         document.getElementById('edit-story-synopsis').value = histoire.synopsis;
 		document.getElementById('edit-story-age').value = histoire.classification || 'Tout public';
+		document.getElementById('edit-story-sensible').checked = histoire.contenu_sensible || false;
     }
 
     // On charge la liste des chapitres en dessous
@@ -323,10 +326,13 @@ document.getElementById('btn-save-story-edit').addEventListener('click', async (
     btnSave.disabled = true; // On bloque le bouton pour éviter les doubles clics
 
     // On prépare le colis pour l'Archiviste
+    const nouvelleSensibilite = document.getElementById('edit-story-sensible').checked;
+    
     let miseAJour = {
         titre: nouveauTitre,
         synopsis: nouveauSynopsis,
-        classification: nouvelleClassification
+        classification: nouvelleClassification, // <-- LA VIRGULE EST ICI !
+        contenu_sensible: nouvelleSensibilite
     };
 
     // Si le Seigneur a choisi une NOUVELLE couverture, on l'envoie d'abord
