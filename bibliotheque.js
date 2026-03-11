@@ -25,16 +25,15 @@ async function loadStories(genreFilter = null) {
     }
 
     histoires.forEach(histoire => {
-        // 1. Le Sortilège de l'Aura : on choisit la couleur selon l'âge
-        let couleurAura = "rgba(0, 0, 0, 0.8)"; // Noir abyssal par défaut s'il n'y a rien
-        if (histoire.classification === "Tout public") couleurAura = "rgba(46, 139, 87, 0.4)"; // Vert subtil
-        else if (histoire.classification === "R15") couleurAura = "rgba(255, 215, 0, 0.3)"; // Jaune or subtil
-        else if (histoire.classification === "R16") couleurAura = "rgba(255, 140, 0, 0.4)"; // Orange subtil
-        else if (histoire.classification === "R18") couleurAura = "rgba(255, 0, 0, 0.5)"; // Rouge sang subtil
+        // 1. Les Teintures de l'Inquisition : on choisit la couleur de l'étiquette selon l'âge
+        let couleurAge = "#2e8b57"; // Vert par défaut (Tout public)
+        if (histoire.classification === "R15") couleurAge = "#ffd700"; // Jaune or
+        else if (histoire.classification === "R16") couleurAge = "#ff8c00"; // Orange
+        else if (histoire.classification === "R18") couleurAge = "#ff0000"; // Rouge sang
 
-        // 2. On fabrique la carte en lui injectant la couleur d'Aura
+        // 2. On fabrique la carte (sans le halo, avec une ombre noire classique)
         const card = document.createElement('div');
-        card.style.cssText = `background-color: #0a0a0a; border: 1px solid #5d1a1a; width: 280px; padding: 15px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 0 15px ${couleurAura}; transition: box-shadow 0.3s ease;`;
+        card.style.cssText = `background-color: #0a0a0a; border: 1px solid #5d1a1a; width: 280px; padding: 15px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.8);`;
 
         const imgHtml = histoire.image_couverture 
             ? `<img src="${histoire.image_couverture}" alt="${histoire.titre}" style="width: 100%; height: 380px; object-fit: cover; border: 1px solid #333;">` 
@@ -42,11 +41,12 @@ async function loadStories(genreFilter = null) {
 
         const pseudo = histoire.pseudo_auteur || histoire.auteur.split('@')[0];
 
+        // 3. On injecte la couleur dans l'étiquette de l'âge (et on garde la bulle sensible !)
         card.innerHTML = `
             ${imgHtml}
-            <div style="display: flex; gap: 10px; align-self: flex-start;">
+            <div style="display: flex; gap: 10px; align-self: flex-start; flex-wrap: wrap;">
                 <span style="font-size: 0.7rem; background-color: #5d1a1a; color: white; padding: 3px 6px; text-transform: uppercase;">${histoire.genre}</span>
-                <span style="font-size: 0.7rem; background-color: #111; color: #ff4444; border: 1px solid #ff4444; padding: 3px 6px; text-transform: uppercase; font-weight: bold;">${histoire.classification || 'Tout public'}</span>
+                <span style="font-size: 0.7rem; background-color: #111; color: ${couleurAge}; border: 1px solid ${couleurAge}; padding: 3px 6px; text-transform: uppercase; font-weight: bold;">${histoire.classification || 'Tout public'}</span>
                 ${histoire.contenu_sensible 
                     ? `<span style="font-size: 0.7rem; background-color: #5d1a1a; color: white; border: 1px solid #ff0055; padding: 3px 6px; text-transform: uppercase; font-weight: bold;">⚠️ Sensible</span>`
                     : `<span style="font-size: 0.7rem; background-color: transparent; color: #555; border: 1px dotted #333; padding: 3px 6px; text-transform: uppercase; text-decoration: line-through;">Sensible</span>`

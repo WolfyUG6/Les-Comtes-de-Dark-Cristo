@@ -28,7 +28,17 @@ window.ouvrirOeuvre = async function(idHistoire) {
     // 3. Remplissage des informations sur la page
     document.getElementById('oeuvre-cover').src = histoire.image_couverture || '';
     document.getElementById('oeuvre-genre').innerText = histoire.genre;
-	document.getElementById('oeuvre-age').innerText = histoire.classification || 'Tout public';
+	// Teinture de l'âge
+    const ageSpan = document.getElementById('oeuvre-age');
+    ageSpan.innerText = histoire.classification || 'Tout public';
+    
+    let couleurAge = "#2e8b57"; // Vert
+    if (histoire.classification === "R15") couleurAge = "#ffd700"; // Or
+    else if (histoire.classification === "R16") couleurAge = "#ff8c00"; // Orange
+    else if (histoire.classification === "R18") couleurAge = "#ff0000"; // Rouge
+    
+    ageSpan.style.color = couleurAge;
+    ageSpan.style.borderColor = couleurAge;
 	const bulleSensible = document.getElementById('oeuvre-sensible');
     if (histoire.contenu_sensible) {
         bulleSensible.innerText = "⚠️ Contenu Sensible";
