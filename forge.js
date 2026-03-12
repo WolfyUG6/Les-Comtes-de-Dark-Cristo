@@ -125,7 +125,7 @@ const Block = Quill.import('blots/block');
 Block.tagName = 'DIV';
 Quill.register(Block, true);
 
-// Initialisation de la Plume Quill
+// Initialisation de la Plume Quill (La Grande)
 const quill = new Quill('#chapitre-contenu', {
     theme: 'snow',
     placeholder: 'Rédigez votre texte ici...',
@@ -141,7 +141,16 @@ const quill = new Quill('#chapitre-contenu', {
             matchVisual: false
         }
     }
-});
+}); // <-- REGARDE ICI, la grande plume se termine bien par ça !
+
+// Initialisation des petites Plumes pour les Notes (Les Petites)
+const optionPlumeNote = {
+    theme: 'snow',
+    placeholder: 'Un mot pour vos lecteurs ? (Laissez vide si inutile)',
+    modules: { toolbar: [ ['bold', 'italic'], ['clean'] ] }
+};
+const quillNoteDebut = new Quill('#note-debut-contenu', optionPlumeNote);
+const quillNoteFin = new Quill('#note-fin-contenu', optionPlumeNote);
 
 // --- LE GARDIEN DU PARCHEMIN (Nettoyage sécurisé du collage) ---
 quill.root.addEventListener('paste', function(e) {
@@ -173,6 +182,11 @@ submitChapitre.addEventListener('click', async () => {
     const numero = document.getElementById('chapitre-numero').value;
     const titre = document.getElementById('chapitre-titre').value;
     const contenu = quill.root.innerHTML;
+	let contenuDebut = quillNoteDebut.root.innerHTML;
+    if (contenuDebut === '<p><br></p>') contenuDebut = null;
+
+    let contenuFin = quillNoteFin.root.innerHTML;
+    if (contenuFin === '<p><br></p>') contenuFin = null;
 
     if (!numero || !titre || !contenu) {
         alert("Champs requis manquants.");
@@ -187,14 +201,21 @@ submitChapitre.addEventListener('click', async () => {
             histoire_id: window.currentOeuvreId, 
             numero: parseInt(numero), 
             titre, 
-            contenu 
+            contenu,
+            note_debut: contenuDebut, // <-- AJOUT
+            note_fin: contenuFin      // <-- AJOUT
         }]);
 
     if (error) alert(error.message);
     else {
         alert("Chapitre ajouté !");
         window.changerDePage('gestion');
-		quill.root.innerHTML = ''; // On nettoie le parchemin pour la prochaine fois
+        
+        // --- LE NETTOYAGE DES PLUMES EST ICI ---
+        quill.root.innerHTML = ''; // On nettoie la grande plume
+        quillNoteDebut.root.innerHTML = ''; // On nettoie la petite plume du haut
+        quillNoteFin.root.innerHTML = ''; // On nettoie la petite plume du bas
+        
         chargerChapitres(window.currentOeuvreId); // On recharge la liste
     }
     submitChapitre.innerText = "Publier le Chapitre";

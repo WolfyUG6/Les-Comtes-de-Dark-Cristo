@@ -108,7 +108,6 @@
 
                     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; margin-top: 30px; padding-bottom: 5px;">
                         <h3 style="color: #c4a484; margin: 0;">Chapitres</h3>
-                        <button id="btn-add-chapitre" class="genre-btn" style="display: none; font-size: 0.8rem; border-color: #00aaff; color: #00aaff;">+ Forger un Chapitre</button>
                     </div>
                     <div id="chapitres-liste" style="background: #111; border: 1px solid #333; padding: 20px; text-align: center; color: #777; font-style: italic;">
                         Le mécanisme des chapitres est en cours de forge...
@@ -277,8 +276,22 @@
                     <input type="text" id="chapitre-titre" placeholder="Titre du chapitre" style="flex: 1; padding: 10px; background: #0a0a0a; color: #e0d7c6; border: 1px solid #5d1a1a; font-family: 'Segoe UI', sans-serif;">
                 </div>
                 
-                <div style="background: #0a0a0a; color: #e0d7c6; border: 1px solid #5d1a1a;">
+                <div style="margin-bottom: 15px;">
+                    <h3 style="color: #777; font-size: 0.9rem; margin-bottom: 5px;">Mots de l'Auteur (Avant le chapitre) - Optionnel</h3>
+                    <div style="background: #0a0a0a; color: #e0d7c6; border: 1px solid #333;">
+                        <div id="note-debut-contenu" style="height: 100px; font-family: 'Segoe UI', sans-serif; font-size: 1rem;"></div>
+                    </div>
+                </div>
+
+                <div style="background: #0a0a0a; color: #e0d7c6; border: 1px solid #5d1a1a; margin-bottom: 15px;">
                     <div id="chapitre-contenu" style="height: 800px; font-family: 'Segoe UI', sans-serif; font-size: 1.1rem;"></div>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <h3 style="color: #777; font-size: 0.9rem; margin-bottom: 5px;">Mots de l'Auteur (Après le chapitre) - Optionnel</h3>
+                    <div style="background: #0a0a0a; color: #e0d7c6; border: 1px solid #333;">
+                        <div id="note-fin-contenu" style="height: 100px; font-family: 'Segoe UI', sans-serif; font-size: 1rem;"></div>
+                    </div>
                 </div>
                 
                 <button id="submit-chapitre" class="genre-btn" style="border-color: #00aaff; color: #00aaff; width: 100%; padding: 15px; font-size: 1.1rem; margin-top: 20px;">Graver le Chapitre</button>

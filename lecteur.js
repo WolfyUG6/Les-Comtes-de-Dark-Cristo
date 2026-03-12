@@ -68,14 +68,6 @@ window.ouvrirOeuvre = async function(idHistoire) {
     document.getElementById('oeuvre-likes').innerText = totalLikes || 0;
 
     window.currentOeuvreId = idHistoire;
-    
-    // 4. Vérification si l'utilisateur est l'auteur (pour le bouton "Ajouter Chapitre")
-    const { data: { session } } = await window._supabase.auth.getSession();
-    if (session && session.user.email === histoire.auteur) {
-        document.getElementById('btn-add-chapitre').style.display = 'block';
-    } else {
-        document.getElementById('btn-add-chapitre').style.display = 'none';
-    }
 
     // --- 5. GESTION VISUELLE DU BOUTON SOUTENIR ---
     const btnSoutenir = document.getElementById('btn-soutenir');
@@ -227,8 +219,31 @@ window.lireChapitre = async function(idChapitre) {
     // 3. On affiche le titre
     document.getElementById('lecture-titre').innerText = "Chapitre " + chapitre.numero + " : " + chapitre.titre;
     
-    // 4. LA MAGIE : On utilise innerHTML pour que le gras et l'italique s'affichent correctement !
-    document.getElementById('lecture-contenu').innerHTML = chapitre.contenu;
+    // 4. LA MAGIE : On assemble le chapitre (Notes + Contenu)
+    let htmlLecture = "";
+
+    // S'il y a une note de début, on l'encadre joliment
+    if (chapitre.note_debut) {
+        htmlLecture += `
+            <div style="background: #111; border-left: 3px solid #ff0055; padding: 15px; margin-bottom: 40px; font-family: 'Segoe UI', sans-serif;">
+                <span style="color: #ff0055; font-size: 0.8rem; text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 5px;">Mot de l'Auteur</span>
+                <div style="color: #c4a484; font-size: 0.95rem; font-style: italic; line-height: 1.5;">${chapitre.note_debut}</div>
+            </div>`;
+    }
+
+    // Le corps du chapitre
+    htmlLecture += chapitre.contenu;
+
+    // S'il y a une note de fin, on l'encadre aussi
+    if (chapitre.note_fin) {
+        htmlLecture += `
+            <div style="background: #111; border-left: 3px solid #00aaff; padding: 15px; margin-top: 40px; font-family: 'Segoe UI', sans-serif;">
+                <span style="color: #00aaff; font-size: 0.8rem; text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 5px;">Mot de fin de l'Auteur</span>
+                <div style="color: #c4a484; font-size: 0.95rem; font-style: italic; line-height: 1.5;">${chapitre.note_fin}</div>
+            </div>`;
+    }
+
+    document.getElementById('lecture-contenu').innerHTML = htmlLecture;
 	window.scrollTo(0, 0);
 	
 	// --- NOUVEAU : LES PANNEAUX DE NAVIGATION ---
