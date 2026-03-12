@@ -30,12 +30,13 @@ async function loadStories(genreFilter = null) {
         // Rien ne peut s'afficher à côté de lui !
         messageBienvenue.style.cssText = "flex-basis: 100%; display: flex; justify-content: center; margin-bottom: 40px;";
         messageBienvenue.innerHTML = `
-            <div style="max-width: 800px; text-align: center;">
-                <h2 style="color: #c4a484; font-family: 'Cinzel', serif; font-size: 2rem; margin-top: 0;">Bienvenue dans le Sanctuaire</h2>
-                <p style="color: #aaa; font-size: 1.1rem; line-height: 1.6; font-family: 'Segoe UI', sans-serif;">
-                    Les Comtes de Dark & Cristo est une confrérie littéraire dédiée aux œuvres sombres, matures et exigeantes.<br>
-                    Ici, pas de fast-food narratif. Seulement des récits forgés avec passion, allant de la High Fantasy épique à l'Horreur Psychologique.<br>
-                    Sélectionnez un rayon ci-dessus pour explorer nos archives, ou découvrez nos dernières entrées ci-dessous.
+            <div style="max-width: 850px; text-align: center; padding: 20px; border-bottom: 1px solid #5d1a1a;">
+                <h2 style="color: #c4a484; font-family: 'Cinzel', serif; font-size: 2.2rem; margin-top: 0;">Bienvenue dans l'Antre des Déchus</h2>
+                <p style="color: #aaa; font-size: 1.1rem; line-height: 1.7; font-family: 'Segoe UI', sans-serif; font-style: italic;">
+                    Ici, on se retrouve entre personnes à la recherche d'histoires sérieuses, celles que les sites habituels délaissent pour faire du clic facile.<br><br>
+                    Je ne peux pas vous promettre un havre de paix — vu les thèmes, on n'est pas là pour lire des "bisounours" — mais tant que le respect est là, la porte sera toujours ouverte. Vous trouverez ici de la romance et de l'intimité, mais nous ne gardons que les plumes qui traitent leurs récits avec un sérieux total.<br><br>
+                    Mon but est de réunir les auteurs qui font passer <strong>l'intrigue avant l'excitation</strong>. L'amour et la joie font partie de la vie, ça ne me pose aucun souci, mais ça doit être écrit avec profondeur.<br><br>
+                    Ce site est le projet d'un passionné d'histoires sombres. Elles ne trouvaient pas leur place ailleurs, alors elles ont fait naître ce Sanctuaire. Bienvenue dans le monde du WebNovel sérieux.
                 </p>
             </div>
         `;
