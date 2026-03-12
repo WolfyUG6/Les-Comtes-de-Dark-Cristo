@@ -275,9 +275,16 @@ window.lireChapitre = async function(idChapitre) {
 	// 5. Apparition de la Jauge de Sang
     document.getElementById('lecture-progress-container').style.display = 'block';
     document.getElementById('lecture-progress-bar').style.width = '0%';
-	window.derniereZone = 0; // On remet la mémoire des zones à zéro
-	vueComptee = false; // On déverrouille le compteur pour ce nouveau chapitre
-    tempsDebutLecture = Date.now(); // Le chronomètre fantôme commence à tourner !
+	window.derniereZone = 0; 
+    vueComptee = false;
+    tempsLectureAtteint = false;
+    aAtteintMoitie = false;
+
+    // L'horloge absolue : Dans exactement 30 secondes (30000ms), la Serrure 1 s'ouvre !
+    setTimeout(() => {
+        tempsLectureAtteint = true;
+        verifierPacteDeVue();
+    }, 30000);
 };
 
 // --- BOUTON DE RETOUR ---
@@ -291,8 +298,21 @@ document.getElementById('btn-retour-oeuvre').addEventListener('click', () => {
 
 // --- LE SORTILÈGE DE LA JAUGE DE SANG (Progression DANS LA BOÎTE) ---
 let timeoutBulle = null;
-let vueComptee = false; // Permet de savoir si on a déjà compté la vue pour ce chapitre
-let tempsDebutLecture = 0; // Va enregistrer l'heure à laquelle le chapitre est ouvert
+let vueComptee = false;
+let tempsLectureAtteint = false; // Serrure 1 : Le temps
+let aAtteintMoitie = false;      // Serrure 2 : Le défilement
+
+// La fonction magique qui vérifie si les DEUX serrures sont ouvertes
+function verifierPacteDeVue() {
+    if (tempsLectureAtteint && aAtteintMoitie && !vueComptee) {
+        vueComptee = true; // On verrouille pour ne faire +1 qu'une seule fois
+        // On murmure l'ordre à Supabase
+        window._supabase.rpc('increment_vues', { histoire_id: window.currentOeuvreId })
+            .then(({error}) => {
+                if (error) console.error("L'archiviste a trébuché :", error.message);
+            });
+    }
+}
 
 window.addEventListener('scroll', function() {
     const progressContainer = document.getElementById('lecture-progress-container');
@@ -311,6 +331,12 @@ window.addEventListener('scroll', function() {
         if (pourcentage < 0) pourcentage = 0;
         
         document.getElementById('lecture-progress-bar').style.width = pourcentage + '%';
+		
+		// --- L'OEIL DE L'INQUISITEUR (Serrure de distance) ---
+        if (pourcentage >= 50 && !aAtteintMoitie) {
+            aAtteintMoitie = true; // La Serrure 2 s'ouvre !
+            verifierPacteDeVue();
+        }
         
         // On découpe l'œuvre en 4 zones
         let zoneActuelle = Math.floor(pourcentage / 25);
