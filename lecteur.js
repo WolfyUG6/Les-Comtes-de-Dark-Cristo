@@ -79,6 +79,7 @@ window.ouvrirOeuvre = async function(idHistoire) {
         btnSoutenir.disabled = false;
 
         // Si le lecteur est connecté, on vérifie s'il a déjà versé son sang (liké)
+        const { data: { session } } = await window._supabase.auth.getSession();
         if (session) {
             const { data: aDejaSoutenu } = await window._supabase
                 .from('favoris')
