@@ -105,7 +105,7 @@ async function chargerChapitres(idHistoire) {
     const chapitresListe = document.getElementById('chapitres-liste');
     chapitresListe.innerHTML = '<p style="color: #c4a484; font-style: italic;">Recherche des écrits...</p>';
 
-    const { data: chapitres, error } = await _supabase
+    const { data: chapitres, error } = await window._supabase
         .from('chapitres')
         .select('*')
         .eq('histoire_id', idHistoire)
