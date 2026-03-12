@@ -94,6 +94,7 @@
                         <span id="oeuvre-genre" style="background-color: #5d1a1a; color: white; padding: 3px 8px; font-size: 0.8rem; text-transform: uppercase;"></span>
                         <span id="oeuvre-age" style="background-color: #111; color: #ff4444; border: 1px solid #ff4444; padding: 3px 8px; font-size: 0.8rem; text-transform: uppercase; font-weight: bold;"></span>
 						<span id="oeuvre-sensible" style="padding: 3px 8px; font-size: 0.8rem; text-transform: uppercase; font-weight: bold; transition: 0.3s;"></span>
+						<span id="oeuvre-statut" style="background-color: #0a0a0a; color: #00aaff; border: 1px solid #00aaff; padding: 3px 8px; font-size: 0.8rem; text-transform: uppercase; font-weight: bold;"></span>
                     </div>
                     <h2 id="oeuvre-titre" style="color: #c4a484; font-family: 'Cinzel', serif; font-size: 2rem; margin: 10px 0;"></h2>
 
@@ -190,6 +191,14 @@
                     <option value="R18">R18 (Explicite)</option>
                 </select>
 				
+				<select id="story-status" style="display: block; width: 100%; box-sizing: border-box; margin-bottom: 15px; padding: 10px; background: #0a0a0a; color: #e0d7c6; border: 1px solid #333; font-family: 'Segoe UI', sans-serif;">
+                    <option value="✍️ En cours">✍️ En cours</option>
+                    <option value="⏳ En pause">⏳ En pause</option>
+                    <option value="🔄 En réécriture">🔄 En réécriture</option>
+                    <option value="📖 Terminée">📖 Terminée</option>
+                    <option value="🪦 Abandonnée">🪦 Abandonnée</option>
+                </select>
+				
 				<div style="background: #150202; border: 1px solid #5d1a1a; padding: 15px; margin-bottom: 20px; display: flex; align-items: flex-start; gap: 10px;">
                     <input type="checkbox" id="story-sensible" style="margin-top: 5px; transform: scale(1.2); accent-color: #ff0055;">
                     <label for="story-sensible" style="color: #e0d7c6; font-size: 0.9rem; line-height: 1.4; font-family: 'Segoe UI', sans-serif;">
@@ -224,6 +233,14 @@
                     <option value="R15">R15 (Averti)</option>
                     <option value="R16">R16 (Mature)</option>
                     <option value="R18">R18 (Explicite)</option>
+                </select>
+				
+				<select id="edit-story-status" style="display: block; width: 100%; box-sizing: border-box; margin-bottom: 15px; padding: 10px; background: #0a0a0a; color: #e0d7c6; border: 1px solid #333; font-family: 'Segoe UI', sans-serif;">
+                    <option value="✍️ En cours">✍️ En cours</option>
+                    <option value="⏳ En pause">⏳ En pause</option>
+                    <option value="🔄 En réécriture">🔄 En réécriture</option>
+                    <option value="📖 Terminée">📖 Terminée</option>
+                    <option value="🪦 Abandonnée">🪦 Abandonnée</option>
                 </select>
 				
 				<div style="background: #150202; border: 1px solid #5d1a1a; padding: 15px; margin-bottom: 20px; display: flex; align-items: flex-start; gap: 10px;">

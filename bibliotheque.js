@@ -46,6 +46,7 @@ async function loadStories(genreFilter = null) {
             ${imgHtml}
             <div style="display: flex; gap: 10px; align-self: flex-start; flex-wrap: wrap;">
                 <span style="font-size: 0.7rem; background-color: #5d1a1a; color: white; padding: 3px 6px; text-transform: uppercase;">${histoire.genre}</span>
+				<span style="font-size: 0.7rem; background-color: #0a0a0a; color: #00aaff; border: 1px solid #00aaff; padding: 3px 6px; text-transform: uppercase; font-weight: bold;">${histoire.statut || '✍️ En cours'}</span>
                 <span style="font-size: 0.7rem; background-color: #111; color: ${couleurAge}; border: 1px solid ${couleurAge}; padding: 3px 6px; text-transform: uppercase; font-weight: bold;">${histoire.classification || 'Tout public'}</span>
                 ${histoire.contenu_sensible 
                     ? `<span style="font-size: 0.7rem; background-color: #5d1a1a; color: white; border: 1px solid #ff0055; padding: 3px 6px; text-transform: uppercase; font-weight: bold;">⚠️ Sensible</span>`

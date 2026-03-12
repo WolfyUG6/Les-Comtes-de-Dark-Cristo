@@ -17,6 +17,7 @@ submitStory.addEventListener('click', async () => {
     const synopsis = document.getElementById('story-synopsis').value;
     const genre = document.getElementById('story-genre').value;
 	const classification = document.getElementById('story-age').value;
+	const statut = document.getElementById('story-status').value;
     const file = document.getElementById('story-cover-file').files[0];
 	const isSensible = document.getElementById('story-sensible').checked;
 
@@ -44,6 +45,7 @@ submitStory.addEventListener('click', async () => {
         synopsis, 
         genre, 
 		classification, 
+		statut: statut, // <-- Ajoute cette ligne ici 
         auteur: session.user.email, 
         image_couverture: imageUrl,
         pseudo_auteur: monPseudo,
@@ -225,6 +227,7 @@ window.ouvrirGestionOeuvre = async function(idHistoire) {
         document.getElementById('edit-story-title').value = histoire.titre;
         document.getElementById('edit-story-synopsis').value = histoire.synopsis;
 		document.getElementById('edit-story-age').value = histoire.classification || 'Tout public';
+		document.getElementById('edit-story-status').value = histoire.statut || '✍️ En cours';
 		document.getElementById('edit-story-sensible').checked = histoire.contenu_sensible || false;
     }
 
@@ -314,6 +317,7 @@ document.getElementById('btn-save-story-edit').addEventListener('click', async (
     const nouveauTitre = document.getElementById('edit-story-title').value;
     const nouveauSynopsis = document.getElementById('edit-story-synopsis').value;
 	const nouvelleClassification = document.getElementById('edit-story-age').value;
+	const nouveauStatut = document.getElementById('edit-story-status').value;
     const fichierCouverture = document.getElementById('edit-story-cover').files[0];
 
     // Vérification de sécurité : on ne veut pas d'histoire sans nom
@@ -332,7 +336,8 @@ document.getElementById('btn-save-story-edit').addEventListener('click', async (
         titre: nouveauTitre,
         synopsis: nouveauSynopsis,
         classification: nouvelleClassification, // <-- LA VIRGULE EST ICI !
-        contenu_sensible: nouvelleSensibilite
+        contenu_sensible: nouvelleSensibilite,
+        statut: nouveauStatut // <-- LA NOUVELLE VIRGULE ET CETTE LIGNE
     };
 
     // Si le Seigneur a choisi une NOUVELLE couverture, on l'envoie d'abord

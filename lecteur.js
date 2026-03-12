@@ -28,6 +28,7 @@ window.ouvrirOeuvre = async function(idHistoire) {
     // 3. Remplissage des informations sur la page
     document.getElementById('oeuvre-cover').src = histoire.image_couverture || '';
     document.getElementById('oeuvre-genre').innerText = histoire.genre;
+	document.getElementById('oeuvre-statut').innerText = histoire.statut || '✍️ En cours';
 	document.getElementById('oeuvre-vues').innerText = histoire.vues || 0;
 	// Teinture de l'âge
     const ageSpan = document.getElementById('oeuvre-age');
