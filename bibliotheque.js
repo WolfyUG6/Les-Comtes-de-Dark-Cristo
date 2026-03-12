@@ -36,7 +36,8 @@ async function loadStories(genreFilter = null) {
                     Ici, on se retrouve entre personnes à la recherche d'histoires sérieuses, celles que les sites habituels délaissent pour faire du clic facile.<br><br>
                     Je ne peux pas vous promettre un havre de paix — vu les thèmes, on n'est pas là pour lire des "bisounours" — mais tant que le respect est là, la porte sera toujours ouverte. Vous trouverez ici de la romance et de l'intimité, mais nous ne gardons que les plumes qui traitent leurs récits avec un sérieux total.<br><br>
                     Mon but est de réunir les auteurs qui font passer <strong>l'intrigue avant l'excitation</strong>. L'amour et la joie font partie de la vie, ça ne me pose aucun souci, mais ça doit être écrit avec profondeur.<br><br>
-                    Ce site est le projet d'un passionné d'histoires sombres. Elles ne trouvaient pas leur place ailleurs, alors elles ont fait naître ce Sanctuaire. Bienvenue dans le monde du WebNovel sérieux.
+                    Ce site est le projet d'un passionné d'histoires sombres. Elles ne trouvaient pas leur place ailleurs, alors elles ont fait naître ce Sanctuaire. Bienvenue dans le monde du WebNovel sérieux.<br><br>
+                    Pour commencer votre aventure, choisissez un genre, ou découvrez l'une des histoires de chaque genre aléatoirement chaque semaine.
                 </p>
             </div>
         `;
