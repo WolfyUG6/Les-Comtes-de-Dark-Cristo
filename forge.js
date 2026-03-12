@@ -182,43 +182,69 @@ submitChapitre.addEventListener('click', async () => {
     const numero = document.getElementById('chapitre-numero').value;
     const titre = document.getElementById('chapitre-titre').value;
     const contenu = quill.root.innerHTML;
-	let contenuDebut = quillNoteDebut.root.innerHTML;
+
+    // 1. On récupère les notes (et on les vide si elles ne contiennent qu'un espace invisible)
+    let contenuDebut = quillNoteDebut.root.innerHTML;
     if (contenuDebut === '<p><br></p>') contenuDebut = null;
 
     let contenuFin = quillNoteFin.root.innerHTML;
     if (contenuFin === '<p><br></p>') contenuFin = null;
 
-    if (!numero || !titre || !contenu) {
-        alert("Champs requis manquants.");
+    // 2. Vérification de sécurité (on force à remplir le chapitre)
+    if (!numero || !titre || contenu === '<p><br></p>' || !contenu) {
+        alert("Les Ténèbres exigent un Numéro, un Titre et un Contenu pour ce chapitre !");
         return;
     }
 
     submitChapitre.innerText = "Gravure...";
-    
-    const { error } = await _supabase
-        .from('chapitres')
-        .insert([{ 
-            histoire_id: window.currentOeuvreId, 
-            numero: parseInt(numero), 
-            titre, 
-            contenu,
-            note_debut: contenuDebut, // <-- AJOUT
-            note_fin: contenuFin      // <-- AJOUT
-        }]);
+    let erreurGravure = null;
 
-    if (error) alert(error.message);
-    else {
-        alert("Chapitre ajouté !");
+    // 3. L'AIGUILLAGE : Création ou Modification ?
+    if (window.currentChapitreId) {
+        // --- MODE MODIFICATION (Le chapitre existe déjà) ---
+        const { error } = await window._supabase
+            .from('chapitres')
+            .update({ 
+                numero: parseInt(numero), 
+                titre, 
+                contenu,
+                note_debut: contenuDebut,
+                note_fin: contenuFin 
+            })
+            .eq('id', window.currentChapitreId); // On cible le chapitre exact
+        erreurGravure = error;
+    } else {
+        // --- MODE CRÉATION (C'est un tout nouveau chapitre) ---
+        const { error } = await window._supabase
+            .from('chapitres')
+            .insert([{ 
+                histoire_id: window.currentOeuvreId, 
+                numero: parseInt(numero), 
+                titre, 
+                contenu,
+                note_debut: contenuDebut,
+                note_fin: contenuFin
+            }]);
+        erreurGravure = error;
+    }
+
+    // 4. Bilan de l'opération
+    if (erreurGravure) {
+        alert("Le parchemin a pris feu : " + erreurGravure.message);
+    } else {
+        alert(window.currentChapitreId ? "Modifications gravées !" : "Chapitre ajouté !");
         window.changerDePage('gestion');
         
-        // --- LE NETTOYAGE DES PLUMES EST ICI ---
-        quill.root.innerHTML = ''; // On nettoie la grande plume
-        quillNoteDebut.root.innerHTML = ''; // On nettoie la petite plume du haut
-        quillNoteFin.root.innerHTML = ''; // On nettoie la petite plume du bas
+        // --- NETTOYAGE DES 3 PLUMES ---
+        quill.root.innerHTML = ''; 
+        quillNoteDebut.root.innerHTML = ''; 
+        quillNoteFin.root.innerHTML = ''; 
         
-        chargerChapitres(window.currentOeuvreId); // On recharge la liste
+        chargerChapitresAdmin(window.currentOeuvreId); // On recharge la liste avec Admin !
     }
-    submitChapitre.innerText = "Publier le Chapitre";
+    
+    // On remet le texte par défaut sur le bouton
+    submitChapitre.innerText = "Graver le Chapitre";
 });
 
 // Quitter le Studio pour retourner aux archives
@@ -285,7 +311,7 @@ window.chargerChapitresAdmin = async function(idHistoire) {
         div.innerHTML = `
             <span style="color: #e0d7c6; font-family: 'Cinzel', serif;">Chapitre ${chap.numero} : ${chap.titre}</span>
             <div>
-                <button class="genre-btn" style="font-size: 0.7rem; margin-right: 10px; border-color: #c4a484; color: #c4a484;" onclick="alert('La modification arrive bientôt !')">Modifier</button>
+                <button class="genre-btn" style="font-size: 0.7rem; margin-right: 10px; border-color: #c4a484; color: #c4a484;" onclick="ouvrirEditeurChapitre(${chap.id})">Modifier</button>
                 <button class="genre-btn" style="font-size: 0.7rem; border-color: red; color: red;" onclick="supprimerChapitre(${chap.id}, ${idHistoire})">Supprimer</button>
             </div>
         `;
@@ -329,6 +355,16 @@ document.getElementById('btn-retour-gestion').addEventListener('click', () => {
 
 // Bouton Ouvrir "Ajouter un Chapitre" (nouvelle page)
 document.getElementById('btn-open-add-chapitre').addEventListener('click', () => {
+    window.currentChapitreId = null; // On oublie l'ancien chapitre ! C'est une NOUVELLE création.
+    
+    // On vide toutes les cases
+    document.getElementById('chapitre-numero').value = '';
+    document.getElementById('chapitre-titre').value = '';
+    quill.root.innerHTML = '';
+    quillNoteDebut.root.innerHTML = '';
+    quillNoteFin.root.innerHTML = '';
+    
+    document.getElementById('submit-chapitre').innerText = "Graver le Chapitre";
     window.changerDePage('editeur-chapitre');
 });
 
@@ -397,3 +433,35 @@ document.getElementById('btn-save-story-edit').addEventListener('click', async (
     btnSave.innerText = "Graver les modifications";
     btnSave.disabled = false;
 });
+
+// 5. Rouvrir un parchemin existant (Modifier un Chapitre)
+window.ouvrirEditeurChapitre = async function(idChapitre) {
+    // On mémorise l'ID du chapitre pour savoir qu'on est en train de modifier !
+    window.currentChapitreId = idChapitre; 
+    
+    // On ouvre la page de l'éditeur
+    window.changerDePage('editeur-chapitre');
+
+    document.getElementById('chapitre-titre').value = "Recherche dans les archives...";
+
+    // L'Archiviste va chercher les textes
+    const { data: chapitre, error } = await window._supabase
+        .from('chapitres')
+        .select('*')
+        .eq('id', idChapitre)
+        .single();
+
+    if (chapitre) {
+        // On remplit les cases
+        document.getElementById('chapitre-numero').value = chapitre.numero;
+        document.getElementById('chapitre-titre').value = chapitre.titre;
+        
+        // On remplit les 3 plumes (avec une sécurité si c'est vide)
+        quill.root.innerHTML = chapitre.contenu || '';
+        quillNoteDebut.root.innerHTML = chapitre.note_debut || '';
+        quillNoteFin.root.innerHTML = chapitre.note_fin || '';
+        
+        // On change le texte du bouton pour être clair
+        document.getElementById('submit-chapitre').innerText = "Graver les modifications";
+    }
+};
