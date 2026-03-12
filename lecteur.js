@@ -28,6 +28,7 @@ window.ouvrirOeuvre = async function(idHistoire) {
     // 3. Remplissage des informations sur la page
     document.getElementById('oeuvre-cover').src = histoire.image_couverture || '';
     document.getElementById('oeuvre-genre').innerText = histoire.genre;
+	document.getElementById('oeuvre-vues').innerText = histoire.vues || 0;
 	// Teinture de l'âge
     const ageSpan = document.getElementById('oeuvre-age');
     ageSpan.innerText = histoire.classification || 'Tout public';
@@ -275,6 +276,8 @@ window.lireChapitre = async function(idChapitre) {
     document.getElementById('lecture-progress-container').style.display = 'block';
     document.getElementById('lecture-progress-bar').style.width = '0%';
 	window.derniereZone = 0; // On remet la mémoire des zones à zéro
+	vueComptee = false; // On déverrouille le compteur pour ce nouveau chapitre
+    tempsDebutLecture = Date.now(); // Le chronomètre fantôme commence à tourner !
 };
 
 // --- BOUTON DE RETOUR ---
@@ -288,6 +291,8 @@ document.getElementById('btn-retour-oeuvre').addEventListener('click', () => {
 
 // --- LE SORTILÈGE DE LA JAUGE DE SANG (Progression DANS LA BOÎTE) ---
 let timeoutBulle = null;
+let vueComptee = false; // Permet de savoir si on a déjà compté la vue pour ce chapitre
+let tempsDebutLecture = 0; // Va enregistrer l'heure à laquelle le chapitre est ouvert
 
 window.addEventListener('scroll', function() {
     const progressContainer = document.getElementById('lecture-progress-container');
