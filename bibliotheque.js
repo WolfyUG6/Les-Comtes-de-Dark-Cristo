@@ -11,7 +11,7 @@ async function loadStories(genreFilter = null) {
     if (genreFilter && genreFilter !== 'accueil') {
         query = query.eq('genre', genreFilter); // On fouille un rayon spécifique
     } else {
-        query = query.limit(4); // C'est l'accueil, on ne prend que les 4 grimoires les plus récents
+        query = query.limit(5); // C'est l'accueil, on prépare le terrain pour le Top 5 !
     }
 
     const { data: histoires, error } = await query;
@@ -26,17 +26,21 @@ async function loadStories(genreFilter = null) {
     // 3. On affiche le message de bienvenue UNIQUEMENT dans le Hall (l'accueil)
     if (!genreFilter || genreFilter === 'accueil') {
         const messageBienvenue = document.createElement('div');
-        messageBienvenue.style.cssText = "width: 100%; text-align: center; max-width: 800px; margin: 0 auto 30px auto;";
+        // Le bouclier magique : flex-basis: 100% force le panneau à prendre toute la ligne. 
+        // Rien ne peut s'afficher à côté de lui !
+        messageBienvenue.style.cssText = "flex-basis: 100%; display: flex; justify-content: center; margin-bottom: 40px;";
         messageBienvenue.innerHTML = `
-            <h2 style="color: #c4a484; font-family: 'Cinzel', serif; font-size: 2rem; margin-top: 0;">Bienvenue dans le Sanctuaire</h2>
-            <p style="color: #aaa; font-size: 1.1rem; line-height: 1.6; font-family: 'Segoe UI', sans-serif;">
-                Les Comtes de Dark & Cristo est une confrérie littéraire dédiée aux œuvres sombres, matures et exigeantes.<br>
-                Ici, pas de fast-food narratif. Seulement des récits forgés avec passion, allant de la High Fantasy épique à l'Horreur Psychologique.<br>
-                Sélectionnez un rayon ci-dessus pour explorer nos archives, ou découvrez nos dernières entrées ci-dessous.
-            </p>
+            <div style="max-width: 800px; text-align: center;">
+                <h2 style="color: #c4a484; font-family: 'Cinzel', serif; font-size: 2rem; margin-top: 0;">Bienvenue dans le Sanctuaire</h2>
+                <p style="color: #aaa; font-size: 1.1rem; line-height: 1.6; font-family: 'Segoe UI', sans-serif;">
+                    Les Comtes de Dark & Cristo est une confrérie littéraire dédiée aux œuvres sombres, matures et exigeantes.<br>
+                    Ici, pas de fast-food narratif. Seulement des récits forgés avec passion, allant de la High Fantasy épique à l'Horreur Psychologique.<br>
+                    Sélectionnez un rayon ci-dessus pour explorer nos archives, ou découvrez nos dernières entrées ci-dessous.
+                </p>
+            </div>
         `;
         storiesContainer.appendChild(messageBienvenue);
-    } 
+    }
 
     if (histoires.length === 0) {
         storiesContainer.innerHTML = '<p style="color: #777; font-style: italic;">Aucune œuvre trouvée dans ces ténèbres pour le moment...</p>';
