@@ -87,3 +87,34 @@ window.changerTheme = function(state) {
         document.body.className = 'theme-lumiere'; 
     }
 };
+
+// --- LE GARDIEN DES PARCHEMINS (Anti-Copie) ---
+window.estAdmin = false; // Par défaut, tout le monde est un simple mortel
+
+window.activerBouclier = function() {
+    if (window.estAdmin) {
+        document.body.classList.remove('protection-active'); // On lève le bouclier pour le Maître
+    } else {
+        document.body.classList.add('protection-active'); // On abaisse le bouclier pour les autres
+    }
+};
+
+// 1. Bloquer le clic droit
+document.addEventListener('contextmenu', function(e) {
+    if (!window.estAdmin) {
+        e.preventDefault(); // Annule l'ouverture du menu
+    }
+});
+
+// 2. Bloquer le CTRL+C (Copier) et autres raccourcis curieux
+document.addEventListener('keydown', function(e) {
+    if (!window.estAdmin) {
+        // Si la personne appuie sur CTRL + (C ou U ou S ou P)
+        if (e.ctrlKey && (e.key === 'c' || e.key === 'C' || e.key === 'u' || e.key === 'U' || e.key === 's' || e.key === 'S' || e.key === 'p' || e.key === 'P')) {
+            e.preventDefault(); // On bloque l'action
+        }
+    }
+});
+
+// On active le bouclier par défaut dès l'ouverture de la porte du Sanctuaire
+window.activerBouclier();

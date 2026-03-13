@@ -92,6 +92,14 @@ window._supabase.auth.onAuthStateChange((event, session) => {
         
         if (headerAvatar) headerAvatar.src = avatarUrl;
         if (previewAvatar) previewAvatar.src = avatarUrl;
+		// --- IDENTIFICATION DU MAÎTRE DU SANCTUAIRE ---
+        // Remplace l'email ci-dessous par ton VRAI email de compte Supabase
+        if (session.user.email === "nitroapex@gmail.com") {
+            window.estAdmin = true;
+        } else {
+            window.estAdmin = false;
+        }
+        window.activerBouclier(); // On met à jour le bouclier selon l'identité
 
     } else {
         if(authContainer) authContainer.style.display = 'flex';

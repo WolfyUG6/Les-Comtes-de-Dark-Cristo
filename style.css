@@ -356,3 +356,17 @@ body.theme-lumiere #liste-mes-lectures h3 {
     color: inherit !important;
     background-color: transparent !important;
 }
+
+/* --- LE BOUCLIER ANTI-COPIE (Sortilège de Pétrification) --- */
+.protection-active {
+    user-select: none; /* Empêche de surligner le texte */
+    -webkit-user-select: none; /* Pour les navigateurs Safari/Apple */
+}
+
+/* Mais on laisse les zones de texte utilisables pour pouvoir écrire ! */
+.protection-active input, 
+.protection-active textarea, 
+.protection-active .ql-editor {
+    user-select: text; 
+    -webkit-user-select: text;
+}
