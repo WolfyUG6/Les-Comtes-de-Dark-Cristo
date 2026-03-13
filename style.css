@@ -250,51 +250,67 @@ main {
 .tri-state-toggle[data-active="2"]::before { transform: translateX(100%); }
 .tri-state-toggle[data-active="3"]::before { transform: translateX(200%); }
 
-/* --- LES SORTILÈGES D'ILLUSION (Thèmes Globaux) --- */
+/* --- LES SORTILÈGES D'ILLUSION (Thèmes Globaux) - CORRIGÉS --- */
 
-/* 1. LE MODE ABYSSE (Noir profond, texte blanc) */
+/* === MODE ABYSSE === */
 body.theme-abysse {
-    background-color: #0d0d0d !important; 
-    background-image: none !important; /* On assassine le dégradé d'origine */
+    background-color: #0d0d0d !important;
+    background-image: none !important;
+    color: #e0d7c6;
 }
-/* On force TOUS les textes à devenir blancs */
-body.theme-abysse, body.theme-abysse * {
-    color: #ffffff !important;
+/* On cible précisément les textes de base sans casser les couleurs spéciales (comme les boutons ou les étiquettes) */
+body.theme-abysse h1, body.theme-abysse h2, body.theme-abysse h3, body.theme-abysse p, body.theme-abysse label {
+    color: #e0d7c6; 
 }
-/* On assombrit toutes les boîtes grises ou noires d'origine */
-body.theme-abysse [style*="background-color: #0a0a0a"],
-body.theme-abysse [style*="background-color: #111"],
-body.theme-abysse [style*="background: #0a0a0a"],
-body.theme-abysse [style*="background: #111"],
-body.theme-abysse [style*="background-color: #050505"],
-body.theme-abysse header, 
-body.theme-abysse footer, 
-body.theme-abysse .genre-menu {
+/* On assombrit les boîtes du site (Cartes, Menu, Pupitre, En-tête...) */
+body.theme-abysse header, body.theme-abysse footer, body.theme-abysse .genre-menu, 
+body.theme-abysse .dropdown-content, body.theme-abysse #stories-container > div, 
+body.theme-abysse #lecture-settings {
     background-color: #141414 !important;
     background-image: none !important;
     border-color: #333333 !important;
 }
 
-/* 2. LE MODE LUMIÈRE (Fond clair, texte noir) */
+/* === MODE LUMIÈRE === */
 body.theme-lumiere {
     background-color: #f5f5f5 !important;
-    background-image: none !important; /* On assassine le dégradé d'origine */
+    background-image: none !important;
+    color: #1a1a1a;
 }
-/* On force TOUS les textes à devenir noirs */
-body.theme-lumiere, body.theme-lumiere * {
-    color: #111111 !important;
+body.theme-lumiere h1, body.theme-lumiere h2, body.theme-lumiere h3, body.theme-lumiere p, body.theme-lumiere label {
+    color: #1a1a1a; 
 }
-/* On blanchit toutes les boîtes du site */
-body.theme-lumiere [style*="background-color: #0a0a0a"],
-body.theme-lumiere [style*="background-color: #111"],
-body.theme-lumiere [style*="background: #0a0a0a"],
-body.theme-lumiere [style*="background: #111"],
-body.theme-lumiere [style*="background-color: rgba(10, 10, 10, 0.85)"],
-body.theme-lumiere [style*="background-color: #050505"],
-body.theme-lumiere header, 
-body.theme-lumiere footer, 
-body.theme-lumiere .genre-menu {
+/* On éclaircit les boîtes du site */
+body.theme-lumiere header, body.theme-lumiere footer, body.theme-lumiere .genre-menu, 
+body.theme-lumiere .dropdown-content, body.theme-lumiere #stories-container > div, 
+body.theme-lumiere #lecture-settings {
     background-color: #ffffff !important;
     background-image: none !important;
     border-color: #cccccc !important;
+}
+/* On s'assure que les boutons restent visibles et jolis sur fond blanc */
+body.theme-lumiere .genre-btn {
+    color: #1a1a1a;
+    border-color: #1a1a1a;
+}
+body.theme-lumiere .genre-btn:hover {
+    background-color: #1a1a1a;
+    color: #ffffff;
+}
+/* Adaptation de l'interrupteur du bas pour le mode Lumière */
+body.theme-lumiere .tri-state-toggle {
+    background-color: #dddddd;
+    border-color: #bbbbbb;
+}
+body.theme-lumiere .toggle-btn {
+    color: #555555;
+}
+body.theme-lumiere .toggle-btn.active {
+    color: #ffffff; /* Le texte sur la lueur rouge reste blanc */
+}
+
+/* === LE BOUCLIER DU LECTEUR (Protection Absolue) === */
+/* On empêche le changement de thème global d'écraser les réglages du Pupitre de lecture ! */
+body.theme-abysse #lecture-contenu *, body.theme-lumiere #lecture-contenu * {
+    color: inherit;
 }
