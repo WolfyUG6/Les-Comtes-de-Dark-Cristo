@@ -249,3 +249,50 @@ main {
 .tri-state-toggle[data-active="1"]::before { transform: translateX(0%); }
 .tri-state-toggle[data-active="2"]::before { transform: translateX(100%); }
 .tri-state-toggle[data-active="3"]::before { transform: translateX(200%); }
+
+/* --- LES SORTILÈGES D'ILLUSION (Thèmes Globaux) --- */
+
+/* 1. LE MODE ABYSSE (Noir profond, texte blanc) */
+body.theme-abysse {
+    background: #0d0d0d !important; /* On tue le fond rouge d'origine */
+}
+/* On force TOUS les textes à devenir blancs */
+body.theme-abysse, body.theme-abysse * {
+    color: #ffffff !important;
+}
+/* On assombrit toutes les boîtes grises ou noires d'origine */
+body.theme-abysse [style*="background-color: #0a0a0a"],
+body.theme-abysse [style*="background-color: #111"],
+body.theme-abysse [style*="background: #0a0a0a"],
+body.theme-abysse [style*="background: #111"],
+body.theme-abysse [style*="background-color: #050505"],
+body.theme-abysse header, 
+body.theme-abysse footer, 
+body.theme-abysse .genre-menu {
+    background-color: #141414 !important;
+    background-image: none !important;
+    border-color: #333333 !important;
+}
+
+/* 2. LE MODE LUMIÈRE (Fond clair, texte noir) */
+body.theme-lumiere {
+    background: #f5f5f5 !important;
+}
+/* On force TOUS les textes à devenir noirs */
+body.theme-lumiere, body.theme-lumiere * {
+    color: #111111 !important;
+}
+/* On blanchit toutes les boîtes du site */
+body.theme-lumiere [style*="background-color: #0a0a0a"],
+body.theme-lumiere [style*="background-color: #111"],
+body.theme-lumiere [style*="background: #0a0a0a"],
+body.theme-lumiere [style*="background: #111"],
+body.theme-lumiere [style*="background-color: rgba(10, 10, 10, 0.85)"],
+body.theme-lumiere [style*="background-color: #050505"],
+body.theme-lumiere header, 
+body.theme-lumiere footer, 
+body.theme-lumiere .genre-menu {
+    background-color: #ffffff !important;
+    background-image: none !important;
+    border-color: #cccccc !important;
+}

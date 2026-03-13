@@ -83,8 +83,17 @@ document.addEventListener('DOMContentLoaded', () => {
             // 4. On donne l'ordre à la boîte globale de déplacer la lueur
             toggleContainer.setAttribute('data-active', state);
             
-            // --- C'EST ICI QU'ON AJOUTERA LE VRAI POUVOIR PLUS TARD ---
-            console.log("Le mécanisme a basculé sur la position : " + state);
+            // --- LE VRAI POUVOIR : L'APPLICATION DES THÈMES ---
+            if (state === '1') {
+                // Mode Original : On arrache les étiquettes, le site redevient normal
+                document.body.className = ''; 
+            } else if (state === '2') {
+                // Mode Abysse : On colle l'étiquette sombre
+                document.body.className = 'theme-abysse'; 
+            } else if (state === '3') {
+                // Mode Lumière : On colle l'étiquette lumineuse
+                document.body.className = 'theme-lumiere'; 
+            }
         });
     });
 });
