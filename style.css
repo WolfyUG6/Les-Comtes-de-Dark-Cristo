@@ -254,7 +254,8 @@ main {
 
 /* 1. LE MODE ABYSSE (Noir profond, texte blanc) */
 body.theme-abysse {
-    background: #0d0d0d !important; /* On tue le fond rouge d'origine */
+    background-color: #0d0d0d !important; 
+    background-image: none !important; /* On assassine le dégradé d'origine */
 }
 /* On force TOUS les textes à devenir blancs */
 body.theme-abysse, body.theme-abysse * {
@@ -276,7 +277,8 @@ body.theme-abysse .genre-menu {
 
 /* 2. LE MODE LUMIÈRE (Fond clair, texte noir) */
 body.theme-lumiere {
-    background: #f5f5f5 !important;
+    background-color: #f5f5f5 !important;
+    background-image: none !important; /* On assassine le dégradé d'origine */
 }
 /* On force TOUS les textes à devenir noirs */
 body.theme-lumiere, body.theme-lumiere * {

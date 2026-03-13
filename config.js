@@ -62,38 +62,28 @@ window.changerDePage = function(pageDemandee) {
 };
 
 // --- LE MÉCANISME DU PIÉDESTAL (Interrupteur 3 positions) ---
-document.addEventListener('DOMContentLoaded', () => {
+window.changerTheme = function(state) {
     const toggleContainer = document.getElementById('footer-toggle');
     if (!toggleContainer) return;
-
-    // On récupère les 3 sous-boutons
+    
     const buttons = toggleContainer.querySelectorAll('.toggle-btn');
-
-    buttons.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            // 1. On éteint tous les boutons
-            buttons.forEach(b => b.classList.remove('active'));
-            
-            // 2. On allume le bouton cliqué
-            e.target.classList.add('active');
-            
-            // 3. On récupère le numéro de la position (1, 2 ou 3)
-            const state = e.target.getAttribute('data-state');
-            
-            // 4. On donne l'ordre à la boîte globale de déplacer la lueur
-            toggleContainer.setAttribute('data-active', state);
-            
-            // --- LE VRAI POUVOIR : L'APPLICATION DES THÈMES ---
-            if (state === '1') {
-                // Mode Original : On arrache les étiquettes, le site redevient normal
-                document.body.className = ''; 
-            } else if (state === '2') {
-                // Mode Abysse : On colle l'étiquette sombre
-                document.body.className = 'theme-abysse'; 
-            } else if (state === '3') {
-                // Mode Lumière : On colle l'étiquette lumineuse
-                document.body.className = 'theme-lumiere'; 
-            }
-        });
-    });
-});
+    
+    // 1. On éteint tous les boutons
+    buttons.forEach(b => b.classList.remove('active'));
+    
+    // 2. On allume le bon bouton
+    const btnActif = toggleContainer.querySelector(`[data-state="${state}"]`);
+    if (btnActif) btnActif.classList.add('active');
+    
+    // 3. On déplace la lueur rouge
+    toggleContainer.setAttribute('data-active', state);
+    
+    // 4. On applique la magie sur tout le site
+    if (state == 1) {
+        document.body.className = ''; 
+    } else if (state == 2) {
+        document.body.className = 'theme-abysse'; 
+    } else if (state == 3) {
+        document.body.className = 'theme-lumiere'; 
+    }
+};
