@@ -192,7 +192,7 @@ submitChapitre.addEventListener('click', async () => {
 
     // --- LE SORTILÈGE DE COMPTAGE (NOUVEAU) ---
     // On extrait le texte pur (sans la mise en forme HTML) et on compte les espaces
-    const textePur = quill.getText().trim();
+    const textePur = quill.root.innerText.trim();
     let compteMots = 0;
     if (textePur.length > 0) {
         compteMots = textePur.split(/\s+/).length; 
