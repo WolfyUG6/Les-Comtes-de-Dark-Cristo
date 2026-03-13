@@ -316,7 +316,8 @@ body.theme-lumiere .toggle-btn.active {
 }
 
 /* === LE BOUCLIER DU LECTEUR (Protection Absolue) === */
-/* On empêche le changement de thème global d'écraser les réglages du Pupitre de lecture ! */
-body.theme-abysse #lecture-contenu *, body.theme-lumiere #lecture-contenu * {
-    color: inherit;
+/* Purge les anciennes couleurs collées par erreur dans les chapitres pour forcer l'héritage du Pupitre */
+#vrai-contenu-chapitre, #vrai-contenu-chapitre * {
+    color: inherit !important;
+    background-color: transparent !important;
 }
