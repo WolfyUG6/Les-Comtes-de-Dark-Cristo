@@ -337,6 +337,19 @@ body.theme-lumiere #chapitres-liste span {
     color: #1a1a1a !important;
 }
 
+/* LA PURGE DE L'ATELIER ET DES QUARTIERS : Illumine les bannières des œuvres */
+body.theme-lumiere #mes-oeuvres-liste > div,
+body.theme-lumiere #liste-mes-lectures > div {
+    background-color: #ffffff !important;
+    border-color: #cccccc !important;
+}
+
+/* On force les titres des œuvres à devenir sombres pour être lisibles sur le blanc */
+body.theme-lumiere #mes-oeuvres-liste h3,
+body.theme-lumiere #liste-mes-lectures h3 {
+    color: #1a1a1a !important;
+}
+
 /* === LE BOUCLIER DU LECTEUR (Protection Absolue) === */
 /* Purge les anciennes couleurs collées par erreur dans les chapitres pour forcer l'héritage du Pupitre */
 #vrai-contenu-chapitre, #vrai-contenu-chapitre * {
