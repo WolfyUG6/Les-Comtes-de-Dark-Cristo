@@ -325,6 +325,18 @@ body.theme-lumiere .tri-state-toggle {
 body.theme-lumiere .toggle-btn { color: #555555; }
 body.theme-lumiere .toggle-btn.active { color: #ffffff; }
 
+/* LA PURGE DES PARCHEMINS : Force les listes de chapitres (côté gestion et côté lecture) à s'illuminer */
+body.theme-lumiere #liste-chapitres-admin > div,
+body.theme-lumiere #chapitres-liste li {
+    background-color: #ffffff !important;
+    border-color: #cccccc !important;
+}
+
+body.theme-lumiere #liste-chapitres-admin span,
+body.theme-lumiere #chapitres-liste span {
+    color: #1a1a1a !important;
+}
+
 /* === LE BOUCLIER DU LECTEUR (Protection Absolue) === */
 /* Purge les anciennes couleurs collées par erreur dans les chapitres pour forcer l'héritage du Pupitre */
 #vrai-contenu-chapitre, #vrai-contenu-chapitre * {
