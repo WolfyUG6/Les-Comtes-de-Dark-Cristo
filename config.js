@@ -60,3 +60,31 @@ window.changerDePage = function(pageDemandee) {
         document.getElementById('mini-logo').style.display = 'flex';
     }
 };
+
+// --- LE MÉCANISME DU PIÉDESTAL (Interrupteur 3 positions) ---
+document.addEventListener('DOMContentLoaded', () => {
+    const toggleContainer = document.getElementById('footer-toggle');
+    if (!toggleContainer) return;
+
+    // On récupère les 3 sous-boutons
+    const buttons = toggleContainer.querySelectorAll('.toggle-btn');
+
+    buttons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            // 1. On éteint tous les boutons
+            buttons.forEach(b => b.classList.remove('active'));
+            
+            // 2. On allume le bouton cliqué
+            e.target.classList.add('active');
+            
+            // 3. On récupère le numéro de la position (1, 2 ou 3)
+            const state = e.target.getAttribute('data-state');
+            
+            // 4. On donne l'ordre à la boîte globale de déplacer la lueur
+            toggleContainer.setAttribute('data-active', state);
+            
+            // --- C'EST ICI QU'ON AJOUTERA LE VRAI POUVOIR PLUS TARD ---
+            console.log("Le mécanisme a basculé sur la position : " + state);
+        });
+    });
+});

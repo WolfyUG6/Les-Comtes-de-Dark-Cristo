@@ -198,3 +198,54 @@ button:hover {
 main {
     width: 100%;
 }
+
+/* --- LE MÉCANISME OCCULTE (Interrupteur à 3 positions) --- */
+.tri-state-toggle {
+    display: flex;
+    background-color: #0a0a0a;
+    border: 1px solid #5d1a1a;
+    border-radius: 20px; /* Bords arrondis */
+    position: relative;
+    width: 250px;
+    height: 35px;
+}
+
+.toggle-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #777; /* Texte éteint */
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: color 0.3s;
+    z-index: 2; /* Le texte reste au-dessus de la lueur */
+    position: relative;
+    box-shadow: none; /* Anti-surcharge de tes anciens boutons */
+}
+
+/* Quand un bouton est cliqué, il s'allume en beige os */
+.toggle-btn.active {
+    color: #e0d7c6;
+    font-weight: bold;
+}
+
+/* La lueur magique rouge qui se déplace */
+.tri-state-toggle::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 33.33%; /* 1/3 de la boîte totale */
+    height: 100%;
+    background-color: #5d1a1a; /* Rouge sang */
+    border-radius: 20px;
+    transition: transform 0.3s ease; /* C'est ça qui fait l'effet de glissement fluide ! */
+    z-index: 1;
+    box-shadow: 0 0 8px #ff0055;
+}
+
+/* Le sortilège de déplacement : selon l'état de la boîte, on décale la lueur */
+.tri-state-toggle[data-active="1"]::before { transform: translateX(0%); }
+.tri-state-toggle[data-active="2"]::before { transform: translateX(100%); }
+.tri-state-toggle[data-active="3"]::before { transform: translateX(200%); }
