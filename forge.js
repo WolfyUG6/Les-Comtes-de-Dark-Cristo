@@ -190,14 +190,11 @@ submitChapitre.addEventListener('click', async () => {
     let contenuFin = quillNoteFin.root.innerHTML;
     if (contenuFin === '<p><br></p>') contenuFin = null;
 
-    // --- LE COMPTAGE (BRUTAL ET INFAILLIBLE) ---
-    let textePropre = contenu.replace(/<[^>]+>/g, ' '); // Remplace les balises par un espace
-    textePropre = textePropre.replace(/&nbsp;/g, ' ');  // Dégage les faux espaces de Quill
-    textePropre = textePropre.replace(/\s+/g, ' ').trim(); // Ne garde qu'un seul espace propre entre les mots
-    
+    // --- LE SORTILÈGE DE COMPTAGE ---
+    const textePur = quill.getText().trim();
     let compteMots = 0;
-    if (textePropre.length > 0) {
-        compteMots = textePropre.split(' ').length;
+    if (textePur.length > 0) {
+        compteMots = textePur.split(/\s+/).length; 
     }
 
     // 2. Vérification de sécurité (on force à remplir le chapitre)
@@ -468,10 +465,10 @@ window.ouvrirEditeurChapitre = async function(idChapitre) {
         document.getElementById('chapitre-numero').value = chapitre.numero;
         document.getElementById('chapitre-titre').value = chapitre.titre;
         
-        // On remplit les 3 plumes (avec une sécurité si c'est vide)
-        quill.root.innerHTML = chapitre.contenu || '';
-        quillNoteDebut.root.innerHTML = chapitre.note_debut || '';
-        quillNoteFin.root.innerHTML = chapitre.note_fin || '';
+        // On remplit les 3 plumes PROPREMENT pour que leur cerveau soit au courant
+        quill.clipboard.dangerouslyPasteHTML(chapitre.contenu || '');
+        quillNoteDebut.clipboard.dangerouslyPasteHTML(chapitre.note_debut || '');
+        quillNoteFin.clipboard.dangerouslyPasteHTML(chapitre.note_fin || '');
         
         // On change le texte du bouton pour être clair
         document.getElementById('submit-chapitre').innerText = "Graver les modifications";
