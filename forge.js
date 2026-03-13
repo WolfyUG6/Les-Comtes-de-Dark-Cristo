@@ -190,6 +190,14 @@ submitChapitre.addEventListener('click', async () => {
     let contenuFin = quillNoteFin.root.innerHTML;
     if (contenuFin === '<p><br></p>') contenuFin = null;
 
+    // --- LE SORTILÈGE DE COMPTAGE (NOUVEAU) ---
+    // On extrait le texte pur (sans la mise en forme HTML) et on compte les espaces
+    const textePur = quill.getText().trim();
+    let compteMots = 0;
+    if (textePur.length > 0) {
+        compteMots = textePur.split(/\s+/).length; 
+    }
+
     // 2. Vérification de sécurité (on force à remplir le chapitre)
     if (!numero || !titre || contenu === '<p><br></p>' || !contenu) {
         alert("Les Ténèbres exigent un Numéro, un Titre et un Contenu pour ce chapitre !");
@@ -209,9 +217,10 @@ submitChapitre.addEventListener('click', async () => {
                 titre, 
                 contenu,
                 note_debut: contenuDebut,
-                note_fin: contenuFin 
+                note_fin: contenuFin,
+                nombre_mots: compteMots // <-- NOUVELLE LIGNE ICI
             })
-            .eq('id', window.currentChapitreId); // On cible le chapitre exact
+            .eq('id', window.currentChapitreId);
         erreurGravure = error;
     } else {
         // --- MODE CRÉATION (C'est un tout nouveau chapitre) ---
@@ -223,7 +232,8 @@ submitChapitre.addEventListener('click', async () => {
                 titre, 
                 contenu,
                 note_debut: contenuDebut,
-                note_fin: contenuFin
+                note_fin: contenuFin,
+                nombre_mots: compteMots // <-- NOUVELLE LIGNE ICI
             }]);
         erreurGravure = error;
     }

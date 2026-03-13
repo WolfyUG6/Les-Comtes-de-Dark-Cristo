@@ -127,7 +127,13 @@ async function chargerChapitres(idHistoire) {
     ul.style.listStyleType = 'none';
     ul.style.padding = '0';
 
+    // --- LE BOULIER DE L'ARCHIVISTE (NOUVEAU) ---
+    let totalMotsOeuvre = 0;
+
     chapitres.forEach(chapitre => {
+        // On ajoute les mots du chapitre au grand total !
+        totalMotsOeuvre += chapitre.nombre_mots || 0; 
+
         const li = document.createElement('li');
         li.style.cssText = "background: #0a0a0a; border: 1px solid #333; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;";
         
@@ -146,6 +152,13 @@ async function chargerChapitres(idHistoire) {
         ul.appendChild(li);
     });
     chapitresListe.appendChild(ul);
+
+    // --- AFFICHAGE DU TOTAL (NOUVEAU) ---
+    // Le toLocaleString permet d'afficher 10 000 au lieu de 10000 (c'est plus joli)
+    const affichageMots = document.getElementById('oeuvre-mots');
+    if (affichageMots) {
+        affichageMots.innerText = totalMotsOeuvre.toLocaleString('fr-FR');
+    }
 }
 
 // --- LE POUVOIR DE SOUTIEN (Ajouter ou Retirer) ---
