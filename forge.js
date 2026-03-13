@@ -190,12 +190,13 @@ submitChapitre.addEventListener('click', async () => {
     let contenuFin = quillNoteFin.root.innerHTML;
     if (contenuFin === '<p><br></p>') contenuFin = null;
 
-    // --- LE SORTILÈGE DE COMPTAGE (NOUVEAU) ---
-    // On extrait le texte pur (sans la mise en forme HTML) et on compte les espaces
-    const textePur = quill.root.innerText.trim();
+    // --- LE SORTILÈGE DE COMPTAGE (LA MACHINE DE GUERRE) ---
+    // On ignore la Plume. On prend le 'contenu' brut (le HTML prêt à être sauvegardé), 
+    // on écrase toutes les balises de code en espaces, et on compte les vrais mots restants.
+    const texteBrut = contenu.replace(/<[^>]+>/g, ' ').trim();
     let compteMots = 0;
-    if (textePur.length > 0) {
-        compteMots = textePur.split(/\s+/).length; 
+    if (texteBrut.length > 0) {
+        compteMots = texteBrut.split(/\s+/).length; 
     }
 
     // 2. Vérification de sécurité (on force à remplir le chapitre)
