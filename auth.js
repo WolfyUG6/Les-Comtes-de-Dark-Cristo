@@ -104,5 +104,7 @@ window._supabase.auth.onAuthStateChange((event, session) => {
     } else {
         if(authContainer) authContainer.style.display = 'flex';
         if(userContainer) userContainer.style.display = 'none';
+		window.estAdmin = false;
+        window.activerBouclier();
     }
 });

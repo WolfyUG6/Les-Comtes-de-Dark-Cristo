@@ -78,13 +78,15 @@ window.changerTheme = function(state) {
     // 3. On déplace la lueur rouge
     toggleContainer.setAttribute('data-active', state);
     
-    // 4. On applique la magie sur tout le site
-    if (state == 1) {
-        document.body.className = ''; 
-    } else if (state == 2) {
-        document.body.className = 'theme-abysse'; 
+    // 4. On applique la magie sur tout le site (sans détruire le bouclier !)
+    // On retire d'abord les anciennes couleurs
+    document.body.classList.remove('theme-abysse', 'theme-lumiere');
+    
+    // On enfile le nouveau manteau si nécessaire
+    if (state == 2) {
+        document.body.classList.add('theme-abysse'); 
     } else if (state == 3) {
-        document.body.className = 'theme-lumiere'; 
+        document.body.classList.add('theme-lumiere'); 
     }
 };
 
