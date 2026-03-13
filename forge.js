@@ -190,19 +190,15 @@ submitChapitre.addEventListener('click', async () => {
     let contenuFin = quillNoteFin.root.innerHTML;
     if (contenuFin === '<p><br></p>') contenuFin = null;
 
-    // --- LE SORTILÈGE DE COMPTAGE (L'OEIL DU FANTÔME) ---
-    // On ignore le cerveau buggé de la Plume. On crée une boîte invisible, 
-    // on y jette ton HTML pur, et on force le navigateur à compter les vrais mots.
-    const divFantome = document.createElement('div');
-    divFantome.innerHTML = contenu; 
-    const textePur = (divFantome.innerText || divFantome.textContent).trim();
+    // --- LE COMPTAGE (BRUTAL ET INFAILLIBLE) ---
+    let textePropre = contenu.replace(/<[^>]+>/g, ' '); // Remplace les balises par un espace
+    textePropre = textePropre.replace(/&nbsp;/g, ' ');  // Dégage les faux espaces de Quill
+    textePropre = textePropre.replace(/\s+/g, ' ').trim(); // Ne garde qu'un seul espace propre entre les mots
     
     let compteMots = 0;
-    if (textePur.length > 0) {
-        compteMots = textePur.split(/\s+/).length; 
+    if (textePropre.length > 0) {
+        compteMots = textePropre.split(' ').length;
     }
-    // On grave ça dans la console (F12) pour prouver que ça marche !
-    console.log("Mots comptés par le Fantôme lors de la modification : " + compteMots);
 
     // 2. Vérification de sécurité (on force à remplir le chapitre)
     if (!numero || !titre || contenu === '<p><br></p>' || !contenu) {
