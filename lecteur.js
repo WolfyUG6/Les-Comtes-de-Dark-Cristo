@@ -232,8 +232,8 @@ window.lireChapitre = async function(idChapitre) {
             </div>`;
     }
 
-    // Le corps du chapitre
-    htmlLecture += chapitre.contenu;
+    // Le corps du chapitre protégé par le bouclier
+    htmlLecture += '<div id="vrai-contenu-chapitre">' + chapitre.contenu + '</div>';
 
     // S'il y a une note de fin, on l'encadre aussi
     if (chapitre.note_fin) {
