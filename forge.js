@@ -143,6 +143,33 @@ const quill = new Quill('#chapitre-contenu', {
     }
 }); // <-- REGARDE ICI, la grande plume se termine bien par ça !
 
+// ==========================================
+// 🔴 LE COMPTEUR EN DIRECT (VISIBLE) 🔴
+// ==========================================
+const boiteEditeur = document.getElementById('chapitre-contenu').parentNode;
+const affichageCompteur = document.createElement('div');
+affichageCompteur.style.cssText = "color: #00aaff; font-size: 1.1rem; font-family: 'Cinzel', serif; margin-bottom: 10px; text-align: right; font-weight: bold;";
+affichageCompteur.innerText = "Mots gravés : 0";
+boiteEditeur.insertBefore(affichageCompteur, document.getElementById('chapitre-contenu'));
+
+// Variable qui gardera toujours la vraie valeur
+window.compteMotsLive = 0;
+
+// La fonction qui calcule la vérité
+window.actualiserCompteur = function() {
+    const textePropre = quill.getText().trim();
+    if (textePropre.length === 0) {
+        window.compteMotsLive = 0;
+    } else {
+        window.compteMotsLive = textePropre.split(/\s+/).length;
+    }
+    affichageCompteur.innerText = "Mots gravés : " + window.compteMotsLive;
+};
+
+// On connecte cette fonction au cerveau de la Plume (à chaque changement de texte)
+quill.on('text-change', window.actualiserCompteur);
+// ==========================================
+
 // Initialisation des petites Plumes pour les Notes (Les Petites)
 const optionPlumeNote = {
     theme: 'snow',
@@ -190,12 +217,9 @@ submitChapitre.addEventListener('click', async () => {
     let contenuFin = quillNoteFin.root.innerHTML;
     if (contenuFin === '<p><br></p>') contenuFin = null;
 
-    // --- LE SORTILÈGE DE COMPTAGE ---
-    const textePur = quill.getText().trim();
-    let compteMots = 0;
-    if (textePur.length > 0) {
-        compteMots = textePur.split(/\s+/).length; 
-    }
+    // --- LE NOUVEAU SORTILÈGE DE COMPTAGE ---
+    // On ne calcule plus rien de caché, on lit le compteur en direct
+    const compteMots = window.compteMotsLive;
 
     // 2. Vérification de sécurité (on force à remplir le chapitre)
     if (!numero || !titre || contenu === '<p><br></p>' || !contenu) {
@@ -469,6 +493,9 @@ window.ouvrirEditeurChapitre = async function(idChapitre) {
         quill.clipboard.dangerouslyPasteHTML(chapitre.contenu || '');
         quillNoteDebut.clipboard.dangerouslyPasteHTML(chapitre.note_debut || '');
         quillNoteFin.clipboard.dangerouslyPasteHTML(chapitre.note_fin || '');
+        
+        // 🔴 ON FORCE LE COMPTEUR À LIRE LE CHAPITRE QU'ON VIENT D'OUVRIR
+        setTimeout(() => { window.actualiserCompteur(); }, 100);
         
         // On change le texte du bouton pour être clair
         document.getElementById('submit-chapitre').innerText = "Graver les modifications";
