@@ -253,7 +253,11 @@ main {
 /* --- LES SORTILÈGES D'ILLUSION (Thèmes Globaux) - CORRIGÉS --- */
 
 /* === MODE ABYSSE === */
-/* On cible précisément les textes de base SAUF ceux dans la zone de lecture */
+body.theme-abysse {
+    background: #0d0d0d !important; /* Le marteau : écrase le dégradé rouge */
+    animation: none !important; /* Coupe la respiration du fond pour éviter les bugs */
+    color: #e0d7c6;
+}
 body.theme-abysse h1:not(#lecture-contenu *), 
 body.theme-abysse h2:not(#lecture-contenu *), 
 body.theme-abysse h3:not(#lecture-contenu *), 
@@ -261,20 +265,20 @@ body.theme-abysse p:not(#lecture-contenu *),
 body.theme-abysse label:not(#lecture-contenu *) {
     color: #e0d7c6; 
 }
-/* On cible précisément les textes de base sans casser les couleurs spéciales (comme les boutons ou les étiquettes) */
-body.theme-abysse h1, body.theme-abysse h2, body.theme-abysse h3, body.theme-abysse p, body.theme-abysse label {
-    color: #e0d7c6; 
-}
-/* On assombrit les boîtes du site (Cartes, Menu, Pupitre, En-tête...) */
+/* On assombrit les boîtes du site */
 body.theme-abysse header, body.theme-abysse footer, body.theme-abysse .genre-menu, 
 body.theme-abysse .dropdown-content, body.theme-abysse #stories-container > div, 
 body.theme-abysse #lecture-settings {
     background-color: #141414 !important;
-    background-image: none !important;
     border-color: #333333 !important;
 }
 
 /* === MODE LUMIÈRE === */
+body.theme-lumiere {
+    background: #f5f5f5 !important; /* Écrase le dégradé rouge par du blanc cassé */
+    animation: none !important; /* Coupe l'animation ! */
+    color: #1a1a1a;
+}
 body.theme-lumiere h1:not(#lecture-contenu *), 
 body.theme-lumiere h2:not(#lecture-contenu *), 
 body.theme-lumiere h3:not(#lecture-contenu *), 
@@ -282,38 +286,44 @@ body.theme-lumiere p:not(#lecture-contenu *),
 body.theme-lumiere label:not(#lecture-contenu *) {
     color: #1a1a1a; 
 }
-}
-body.theme-lumiere h1, body.theme-lumiere h2, body.theme-lumiere h3, body.theme-lumiere p, body.theme-lumiere label {
-    color: #1a1a1a; 
-}
-/* On éclaircit les boîtes du site */
+
+/* LE MARTEAU DE LUMIÈRE : Détruit toutes les boîtes sombres codées en dur dans le HTML/JS */
 body.theme-lumiere header, body.theme-lumiere footer, body.theme-lumiere .genre-menu, 
 body.theme-lumiere .dropdown-content, body.theme-lumiere #stories-container > div, 
-body.theme-lumiere #lecture-settings {
+body.theme-lumiere #lecture-settings,
+body.theme-lumiere [style*="background-color: #0a0a0a"],
+body.theme-lumiere [style*="background: #0a0a0a"],
+body.theme-lumiere [style*="background: #111"],
+body.theme-lumiere [style*="background: #150202"] {
     background-color: #ffffff !important;
-    background-image: none !important;
     border-color: #cccccc !important;
 }
-/* On s'assure que les boutons restent visibles et jolis sur fond blanc */
+
+/* LE MARTEAU D'ENCRE : Force les textes gris/beiges codés en dur à devenir sombres */
+body.theme-lumiere [style*="color: #aaa"],
+body.theme-lumiere [style*="color: #777"],
+body.theme-lumiere [style*="color: #e0d7c6"],
+body.theme-lumiere [style*="color: #c4a484"] {
+    color: #1a1a1a !important;
+}
+
+/* On s'assure que les boutons classiques restent visibles */
 body.theme-lumiere .genre-btn {
-    color: #1a1a1a;
-    border-color: #1a1a1a;
+    color: #1a1a1a !important;
+    border-color: #1a1a1a !important;
 }
 body.theme-lumiere .genre-btn:hover {
-    background-color: #1a1a1a;
-    color: #ffffff;
+    background-color: #1a1a1a !important;
+    color: #ffffff !important;
 }
-/* Adaptation de l'interrupteur du bas pour le mode Lumière */
+
+/* Adaptation de l'interrupteur du bas */
 body.theme-lumiere .tri-state-toggle {
-    background-color: #dddddd;
-    border-color: #bbbbbb;
+    background-color: #dddddd !important;
+    border-color: #bbbbbb !important;
 }
-body.theme-lumiere .toggle-btn {
-    color: #555555;
-}
-body.theme-lumiere .toggle-btn.active {
-    color: #ffffff; /* Le texte sur la lueur rouge reste blanc */
-}
+body.theme-lumiere .toggle-btn { color: #555555; }
+body.theme-lumiere .toggle-btn.active { color: #ffffff; }
 
 /* === LE BOUCLIER DU LECTEUR (Protection Absolue) === */
 /* Purge les anciennes couleurs collées par erreur dans les chapitres pour forcer l'héritage du Pupitre */
