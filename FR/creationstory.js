@@ -23,6 +23,41 @@ window.chargerCreationStory = function() {
         btnSubmit.innerText = "Forger l'Histoire";
         btnSubmit.disabled = false;
     }
+
+    // --- MODE ÉDITION : PRÉ-REMPLISSAGE ---
+    const modeEdition = localStorage.getItem('modeEditionHistoire') === 'true';
+    const idHistoire = localStorage.getItem('currentOeuvreId');
+
+    if (modeEdition && idHistoire) {
+        if (btnSubmit) btnSubmit.innerText = "Recherche dans les archives...";
+        
+        window._supabase.from('histoires').select('*').eq('id', idHistoire).single()
+            .then(({ data: histoire, error }) => {
+                if (histoire && !error) {
+                    document.getElementById('story-title').value = histoire.titre || '';
+                    document.getElementById('story-synopsis').value = histoire.synopsis || '';
+                    document.getElementById('story-genre').value = histoire.genre || '';
+                    
+                    const selectAge = document.getElementById('story-age');
+                    selectAge.value = histoire.classification || 'Tout public';
+                    window.appliquerCouleurAge(selectAge); // Colore selon la classification récupérée
+                    
+                    document.getElementById('story-status').value = histoire.statut || '✍️ En cours';
+                    document.getElementById('story-sensible').checked = histoire.contenu_sensible || false;
+                    
+                    // On ne peut pas pré-remplir un <input type="file"> pour des raisons de sécurité navigateur.
+                    
+                    if (btnSubmit) {
+                        btnSubmit.innerText = "Sauvegarder les changements";
+                        document.querySelector('.title-m0').innerText = "Réviser le Grimoire";
+                    }
+                }
+            });
+    } else {
+        // Rétablit le titre par défaut si c'est une création
+        const titrePage = document.querySelector('.title-m0');
+        if (titrePage) titrePage.innerText = "Graver une Nouvelle Œuvre";
+    }
 };
 
 // Application dynamique de la couleur de classification
@@ -99,35 +134,61 @@ if (!window.creationStoryEventHooked) {
 
             btnSubmit.innerText = "Écriture dans le registre...";
 
-            // 2. Gravure du Grimoire (Table "histoires")
+            // 2. Gravure ou Révision du Grimoire (Table "histoires")
             const monPseudo = session.user.user_metadata?.pseudo || session.user.email.split('@')[0];
             
-            const { data: nouvelleHistoire, error } = await window._supabase.from('histoires').insert([{ 
+            let requeteResult;
+            
+            const payload = {
                 titre: title, 
                 synopsis: synopsis, 
                 genre: genre, 
                 classification: classification, 
                 statut: statut,
-                auteur: session.user.email, // RLS requirement !
-                image_couverture: imageUrl,
-                pseudo_auteur: monPseudo,
                 contenu_sensible: isSensible 
-            }]).select(); // Le select() nous renvoie la ligne avec son nouvel ID (très utile pour ouvrir Gestion)
+            };
+            
+            if (imageUrl) payload.image_couverture = imageUrl; // On n'écrase pas l'image si on n'en fournit pas de nouvelle
+
+            const modeEdition = localStorage.getItem('modeEditionHistoire') === 'true';
+            const idHistoire = localStorage.getItem('currentOeuvreId');
+
+            if (modeEdition && idHistoire) {
+                // --- UPDATE ---
+                requeteResult = await window._supabase.from('histoires')
+                    .update(payload)
+                    .eq('id', idHistoire)
+                    .select();
+            } else {
+                // --- INSERT ---
+                payload.auteur = session.user.email; // Security init RLS
+                payload.pseudo_auteur = monPseudo;
+                
+                requeteResult = await window._supabase.from('histoires')
+                    .insert([payload])
+                    .select();
+            }
+
+            const { data: histoireSauvee, error } = requeteResult;
 
             if (error) {
                 alert("Le registre Supabase a refusé l'inscription : " + error.message);
-                btnSubmit.innerText = "Forger l'Histoire";
+                btnSubmit.innerText = modeEdition ? "Sauvegarder les changements" : "Forger l'Histoire";
                 btnSubmit.disabled = false;
             } else {
-                alert("Un nouveau grimoire est apparu dans l'Atelier !");
-                // On met éventuellement en cache et on redirige pour ouvrir les modifications de ce grimoire !
-                if (nouvelleHistoire && nouvelleHistoire.length > 0) {
-                    const idNouvelleOuevre = nouvelleHistoire[0].id;
+                alert(modeEdition ? "Les modifications ont été gravées dans la roche !" : "Un nouveau grimoire est apparu dans l'Atelier !");
+                
+                // Mémorisation pour le panneau Gestion
+                if (histoireSauvee && histoireSauvee.length > 0) {
+                    const idNouvelleOuevre = histoireSauvee[0].id;
                     window.currentOeuvreId = idNouvelleOuevre;
                     localStorage.setItem('currentOeuvreId', idNouvelleOuevre);
                 }
                 
-                // Recharge obligatoire si on utilise la fonction pour l'atelier
+                // On nettoie le cache d'édition
+                localStorage.removeItem('modeEditionHistoire');
+                
+                // Recharge obligatoire pour l'atelier
                 if (typeof window.chargerMesOeuvres === 'function') window.chargerMesOeuvres(); 
 
                 window.changerDePage('studio'); // Retour l'atelier

@@ -81,6 +81,8 @@ window.afficherOeuvresTriees = function() {
             </div>
             <div>
                 <button class="genre-btn btn-outline-blue" onclick="ouvrirGestionOeuvre(${histoire.id})">Gérer le Grimoire</button>
+                <button class="genre-btn" style="border-color: #ff8c00; color: #ff8c00; font-family: 'Cinzel', serif;" onclick="ouvrirModificationHistoire(${histoire.id})">Réviser le Grimoire</button>
+                <button class="genre-btn btn-outline-red" title="Détruire cette œuvre" onclick="supprimerHistoire(${histoire.id})">Annihiler</button>
             </div>
         `;
         conteneur.appendChild(carte);
@@ -97,9 +99,42 @@ window.ouvrirGestionOeuvre = function(idHistoire) {
     window.changerDePage('gestion');     
 };
 
+// --- LE POUVOIR D'ÉDITION ---
+window.ouvrirModificationHistoire = function(idHistoire) {
+    window.currentOeuvreId = idHistoire;
+    localStorage.setItem('currentOeuvreId', idHistoire);
+    localStorage.setItem('modeEditionHistoire', 'true'); // On prévient la page qu'on vient pour modifier
+    window.changerDePage('creation-story');
+};
+
+// --- LE POUVOIR DE DESTRUCTION MASSIVE ---
+window.supprimerHistoire = async function(idHistoire) {
+    if(confirm("Êtes-vous sûr de vouloir effacer ce Grimoire et tous ses chapitres de la mémoire du monde ? Cette action est irréversible.")) {
+        
+        // 1. On détruit d'abord tous les chapitres liés (Sécurité Anti-Clé Étrangère)
+        const { error: errChapitres } = await window._supabase.from('chapitres').delete().eq('histoire_id', idHistoire);
+        
+        if (errChapitres) {
+            alert("Erreur lors de la purge des chapitres : " + errChapitres.message);
+            return;
+        }
+
+        // 2. On détruit l'histoire principale
+        const { error: errHistoire } = await window._supabase.from('histoires').delete().eq('id', idHistoire);
+        
+        if(errHistoire) {
+            alert("Supabase a bloqué la destruction du grimoire ! Erreur : " + errHistoire.message);
+        } else {
+            // 3. Rafraîchissement total
+            window.chargerMesOeuvres(); 
+        }
+    }
+};
+
 // Écoute des clics globaux
 document.addEventListener('click', (e) => {
     if (e.target && e.target.id === 'btn-publish') {
+        localStorage.removeItem('modeEditionHistoire'); // C'est une création pur souche
         window.changerDePage('creation-story'); 
     }
     if (e.target && e.target.id === 'btn-retour-studio') {
