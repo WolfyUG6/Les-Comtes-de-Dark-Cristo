@@ -411,13 +411,15 @@ span.flatpickr-weekday {
 }
 
 /* --- LE BOUCLIER ZEN (Plein Écran) --- */
+body.mode-zen #main-header,
+body.mode-zen .language-picker,
 body.mode-zen #bandeau-top,
 body.mode-zen #mini-logo,
 body.mode-zen #auth-container,
 body.mode-zen #user-container,
 body.mode-zen #main-footer,
 body.mode-zen #lecture-progress-container {
-    display: none !important; /* On efface les nuisances */
+    display: none !important; /* On efface les nuisances et le vide au-dessus */
 }
 body.mode-zen #barre-titre-lecture {
     top: 0 !important; /* Le titre remonte tout en haut */
