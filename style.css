@@ -370,3 +370,42 @@ body.theme-lumiere #liste-mes-lectures h3 {
     user-select: text; 
     -webkit-user-select: text;
 }
+
+/* --- L'HORLOGE DU SANCTUAIRE (Pop-up de date) --- */
+.flatpickr-calendar {
+    background: #111 !important;
+    border: 1px solid #5d1a1a !important;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.9) !important;
+    font-family: 'Segoe UI', sans-serif !important;
+}
+.flatpickr-month, .flatpickr-current-month {
+    color: #c4a484 !important;
+    fill: #c4a484 !important;
+}
+span.flatpickr-weekday {
+    color: #777 !important;
+    font-family: 'Cinzel', serif !important;
+}
+.flatpickr-day {
+    color: #e0d7c6 !important;
+}
+.flatpickr-day:hover, .flatpickr-day.prevMonthDay:hover, .flatpickr-day.nextMonthDay:hover {
+    background: #5d1a1a !important;
+    border-color: #5d1a1a !important;
+    color: white !important;
+}
+.flatpickr-day.selected {
+    background: #00aaff !important; /* Lueur bleue pour la date choisie */
+    border-color: #00aaff !important;
+    color: #0a0a0a !important;
+    font-weight: bold;
+}
+.flatpickr-time {
+    border-top: 1px solid #333 !important;
+}
+.flatpickr-time input {
+    color: #e0d7c6 !important;
+}
+.flatpickr-time .flatpickr-time-separator, .flatpickr-time .flatpickr-am-pm {
+    color: #c4a484 !important;
+}

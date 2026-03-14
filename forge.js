@@ -179,6 +179,17 @@ const optionPlumeNote = {
 const quillNoteDebut = new Quill('#note-debut-contenu', optionPlumeNote);
 const quillNoteFin = new Quill('#note-fin-contenu', optionPlumeNote);
 
+// --- INITIALISATION DE L'HORLOGE POP-UP ---
+window.horlogeChapitre = flatpickr("#chapitre-date-pub", {
+    enableTime: true,
+    time_24hr: true,
+    dateFormat: "Z", // Format parfait pour Supabase
+    altInput: true,
+    altFormat: "j F Y à H:i", // Ce que le Seigneur voit (ex: 14 Mars 2026 à 20:00)
+    locale: "fr", // En français
+    minDate: "today" // Empêche de programmer dans le passé
+});
+
 // --- LE GARDIEN DU PARCHEMIN (Nettoyage sécurisé du collage) ---
 quill.root.addEventListener('paste', function(e) {
     // 1. On bloque le collage par défaut qui fait n'importe quoi avec les espaces
@@ -425,7 +436,7 @@ document.getElementById('btn-open-add-chapitre').addEventListener('click', () =>
     quillNoteFin.root.innerHTML = '';
     
 	document.getElementById('chapitre-publie').checked = true; // Par défaut, on prépare à publier
-	document.getElementById('chapitre-date-pub').value = '';
+	window.horlogeChapitre.clear();
     document.getElementById('submit-chapitre').innerText = "Graver le Chapitre";
     window.changerDePage('editeur-chapitre');
 });
@@ -526,17 +537,11 @@ window.ouvrirEditeurChapitre = async function(idChapitre) {
         // 🔴 ON FORCE LE COMPTEUR À LIRE LE CHAPITRE QU'ON VIENT D'OUVRIR
         setTimeout(() => { window.actualiserCompteur(); }, 100);
 		
-		// On remet la case dans le bon état
-        document.getElementById('chapitre-publie').checked = chapitre.est_publie !== false;
-		// Le sortilège pour formater la date de la BDD vers le calendrier HTML
+		// L'Horloge Pop-up prend le relais pour afficher la date
         if (chapitre.date_publication) {
-            const dateObj = new Date(chapitre.date_publication);
-            // On s'assure de compenser le fuseau horaire pour l'affichage HTML
-            const offset = dateObj.getTimezoneOffset() * 60000;
-            const dateLocale = new Date(dateObj.getTime() - offset).toISOString().slice(0, 16);
-            document.getElementById('chapitre-date-pub').value = dateLocale;
+            window.horlogeChapitre.setDate(chapitre.date_publication);
         } else {
-            document.getElementById('chapitre-date-pub').value = '';
+            window.horlogeChapitre.clear();
         }
         
         // On change le texte du bouton pour être clair
