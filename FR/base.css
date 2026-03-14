@@ -261,3 +261,132 @@ button:hover, .genre-btn:hover {
 .tag-age { background-color: var(--bg-box); border: 1px solid currentColor; }
 .tag-sensible { background-color: var(--accent-red); color: white; border: 1px solid #ff0055; }
 .tag-sensible-off { background-color: transparent; color: var(--text-muted); border: 1px dotted var(--border-color); text-decoration: line-through; }
+
+/* =========================================
+   L'EN-TÊTE (Header & Bandeau)
+   ========================================= */
+#main-header {
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 80px; /* Laisse de la place sous le bandeau fixe */
+}
+
+/* Le bandeau vitré figé en haut */
+#bandeau-top {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 70px;
+    background-color: rgba(10, 10, 10, 0.85); /* Teinte noire transparente */
+    border-bottom: 1px solid var(--border-color);
+    z-index: 990;
+    backdrop-filter: blur(5px);
+}
+
+/* Boutons de connexion & Profil (En haut à droite) */
+#auth-container, #user-container {
+    position: fixed;
+    top: 15px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* Logo de navigation miniature (En haut à gauche) */
+#mini-logo {
+    position: fixed;
+    top: 15px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 1000;
+}
+
+#mini-logo img {
+    height: 40px;
+}
+
+/* =========================================
+   LE PIED DE PAGE (Footer)
+   ========================================= */
+#main-footer {
+    width: 100%;
+    box-sizing: border-box;
+    background-color: var(--bg-box);
+    border-top: 2px solid var(--border-color);
+    padding: 30px 20px;
+    text-align: center;
+    margin-top: auto; /* Pousse le footer tout en bas de la page */
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 20px;
+}
+
+.footer-brand, .footer-theme-toggle, .footer-links {
+    flex: 1;
+    min-width: 250px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Le destructeur de logo géant : on limite sa hauteur ! */
+.footer-brand img {
+    height: 50px;
+    filter: var(--logo-glow);
+    margin-bottom: 5px;
+}
+
+.footer-brand .brand-title {
+    font-family: 'Cinzel', serif;
+    color: var(--text-title);
+    font-size: 1.1rem;
+    margin: 0;
+    font-weight: bold;
+}
+
+.footer-brand .brand-subtitle {
+    font-size: 0.8rem;
+    font-style: italic;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.footer-links a {
+    color: var(--accent-blue);
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: color 0.3s;
+}
+
+.footer-links a:hover {
+    color: var(--text-title);
+}
+
+.discord-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #7289DA !important; /* Violet Discord */
+    font-weight: bold;
+    margin-top: 10px;
+    transition: filter 0.3s;
+}
+
+.discord-link:hover {
+    filter: brightness(1.2);
+}
