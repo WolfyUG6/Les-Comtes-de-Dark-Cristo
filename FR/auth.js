@@ -34,14 +34,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 3. Fermer la boîte
+    // 3. Fermer la boîte manuellement
     if(closeModal) {
         closeModal.addEventListener('click', () => {
             authModal.classList.add('hidden');
         });
     }
 
-    // 4. Action de validation (Supabase)
+    // 4. Action de validation blindée
     if(submitAuth) {
         submitAuth.addEventListener('click', async () => {
             const email = emailInput.value.trim();
@@ -52,37 +52,53 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // On bloque le bouton le temps que Supabase réponde
+            // On bloque le bouton
             submitAuth.innerText = "Incantation...";
             submitAuth.disabled = true;
 
-            if (isSignUp) {
-                const { error } = await window._supabase.auth.signUp({ email, password });
-                if (error) alert("Erreur : " + error.message);
-                else alert("Compte créé ! Bienvenue dans le Sanctuaire.");
-            } else {
-                const { error } = await window._supabase.auth.signInWithPassword({ email, password });
-                if (error) alert("Erreur : " + error.message);
+            try {
+                if (isSignUp) {
+                    const { data, error } = await window._supabase.auth.signUp({ email, password });
+                    if (error) throw error; // S'il y a une erreur, on saute directement au "catch"
+                    
+                    alert("Compte créé ! Bienvenue dans le Sanctuaire.");
+                    authModal.classList.add('hidden'); // Succès, on ferme la boîte
+                    emailInput.value = '';
+                } else {
+                    const { data, error } = await window._supabase.auth.signInWithPassword({ email, password });
+                    if (error) throw error;
+                    
+                    // Succès, on ferme la boîte
+                    authModal.classList.add('hidden');
+                    emailInput.value = '';
+                }
+            } catch (erreur) {
+                // Si ça plante (mauvais mot de passe, etc.), on affiche l'erreur MAIS on ne ferme pas la boîte
+                alert("Refus du Sanctuaire : " + erreur.message);
+            } finally {
+                // FINALLY : Ce bloc s'exécute TOUJOURS, qu'il y ait eu une erreur ou non !
+                // C'est la garantie absolue que ton bouton ne restera jamais bloqué.
+                submitAuth.innerText = isSignUp ? "Créer mon compte" : "Se connecter";
+                submitAuth.disabled = false;
+                passwordInput.value = ''; // On vide toujours le mot de passe par sécurité
             }
-            
-            // On nettoie et on ferme
-            authModal.classList.add('hidden');
-            submitAuth.disabled = false;
-            emailInput.value = '';
-            passwordInput.value = '';
         });
     }
 
     // 5. Déconnexion
     if(btnLogout) {
         btnLogout.addEventListener('click', async () => {
-            await window._supabase.auth.signOut();
-            alert("Vous avez quitté le sanctuaire.");
-            window.changerDePage('accueil'); // Retour au Hall de force
+            try {
+                await window._supabase.auth.signOut();
+                alert("Vous avez quitté le sanctuaire.");
+                window.changerDePage('accueil'); // Retour au Hall de force
+            } catch (err) {
+                console.error("Erreur de déconnexion", err);
+            }
         });
     }
 
-    // 6. Navigation du Menu Profil (Connexion au Routeur)
+    // 6. Navigation du Menu Profil
     document.getElementById('btn-quartiers-nav')?.addEventListener('click', () => window.changerDePage('quartiers'));
     document.getElementById('btn-lectures-nav')?.addEventListener('click', () => window.changerDePage('lectures'));
     document.getElementById('btn-atelier-nav')?.addEventListener('click', () => window.changerDePage('studio'));
@@ -92,44 +108,46 @@ document.addEventListener('DOMContentLoaded', () => {
 // SURVEILLANCE DE L'ÉTAT (Le Radar)
 // ==========================================
 window._supabase.auth.onAuthStateChange((event, session) => {
-    const authContainer = document.getElementById('auth-container');
-    const userContainer = document.getElementById('user-container');
-    const userNameDisplay = document.getElementById('user-name');
-    const headerAvatar = document.getElementById('header-avatar');
-    
-    if (session) {
-        // Le Seigneur est connecté
-        if(authContainer) authContainer.classList.add('hidden');
-        if(userContainer) userContainer.classList.remove('hidden');
+    try {
+        const authContainer = document.getElementById('auth-container');
+        const userContainer = document.getElementById('user-container');
+        const userNameDisplay = document.getElementById('user-name');
+        const headerAvatar = document.getElementById('header-avatar');
         
-        // Pseudo
-        const nomAAfficher = session.user.user_metadata?.pseudo || session.user.email.split('@')[0];
-        if(userNameDisplay) userNameDisplay.innerText = "Comte " + nomAAfficher;
-        
-        // Avatar
-        const avatarUrl = session.user.user_metadata?.avatar_url || 'default-avatar.png';
-        if (headerAvatar) headerAvatar.src = avatarUrl;
-        
-        // (Optionnel) Si la page des Quartiers est affichée au même moment, on met à jour la preview
-        const previewAvatar = document.getElementById('profile-avatar-preview');
-        if (previewAvatar) previewAvatar.src = avatarUrl;
+        if (session) {
+            // Le Seigneur est connecté
+            if(authContainer) authContainer.classList.add('hidden');
+            if(userContainer) userContainer.classList.remove('hidden');
+            
+            // Gestion du Pseudo
+            const nomAAfficher = session.user.user_metadata?.pseudo || session.user.email.split('@')[0];
+            if(userNameDisplay) userNameDisplay.innerText = "Comte " + nomAAfficher;
+            
+            // Gestion de l'Avatar
+            const avatarUrl = session.user.user_metadata?.avatar_url || 'default-avatar.png';
+            if (headerAvatar) headerAvatar.src = avatarUrl;
+            
+            const previewAvatar = document.getElementById('profile-avatar-preview');
+            if (previewAvatar) previewAvatar.src = avatarUrl;
 
-        // Identification du Maître (L'Admin)
-        if (session.user.email === "nitroapex@gmail.com") {
-            window.estAdmin = true;
+            // Identification de l'Admin
+            if (session.user.email === "nitroapex@gmail.com") {
+                window.estAdmin = true;
+            } else {
+                window.estAdmin = false;
+            }
+            
+            if(typeof window.activerBouclier === 'function') window.activerBouclier();
+
         } else {
+            // Le Seigneur est un simple visiteur
+            if(authContainer) authContainer.classList.remove('hidden');
+            if(userContainer) userContainer.classList.add('hidden');
+            
             window.estAdmin = false;
+            if(typeof window.activerBouclier === 'function') window.activerBouclier();
         }
-        
-        // On active le bouclier (Anti-copie) qui est dans config.js
-        if(typeof window.activerBouclier === 'function') window.activerBouclier();
-
-    } else {
-        // Le Seigneur est un simple visiteur
-        if(authContainer) authContainer.classList.remove('hidden');
-        if(userContainer) userContainer.classList.add('hidden');
-        
-        window.estAdmin = false;
-        if(typeof window.activerBouclier === 'function') window.activerBouclier();
+    } catch (e) {
+        console.error("Le radar a trébuché :", e);
     }
 });
