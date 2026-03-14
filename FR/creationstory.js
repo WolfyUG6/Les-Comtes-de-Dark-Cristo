@@ -18,6 +18,11 @@ window.chargerCreationStory = function() {
     document.getElementById('story-sensible').checked = false;
     document.getElementById('story-cover-file').value = '';
 
+    const deleteBox = document.getElementById('delete-cover-container');
+    if (deleteBox) deleteBox.classList.add('hidden');
+    const deleteCheck = document.getElementById('story-delete-cover');
+    if (deleteCheck) deleteCheck.checked = false;
+
     const btnSubmit = document.getElementById('submit-story');
     if (btnSubmit) {
         btnSubmit.innerText = "Forger l'Histoire";
@@ -46,6 +51,10 @@ window.chargerCreationStory = function() {
                     document.getElementById('story-sensible').checked = histoire.contenu_sensible || false;
                     
                     // On ne peut pas pré-remplir un <input type="file"> pour des raisons de sécurité navigateur.
+                    const deleteBox = document.getElementById('delete-cover-container');
+                    if (histoire.image_couverture && deleteBox) {
+                        deleteBox.classList.remove('hidden');
+                    }
                     
                     if (btnSubmit) {
                         btnSubmit.innerText = "Sauvegarder les changements";
@@ -113,11 +122,43 @@ if (!window.creationStoryEventHooked) {
             btnSubmit.innerText = "Forgeage en cours...";
             btnSubmit.disabled = true;
 
+            const modeEdition = localStorage.getItem('modeEditionHistoire') === 'true';
+            const idHistoire = localStorage.getItem('currentOeuvreId');
+            const chkDelCover = document.getElementById('story-delete-cover');
+            const isDeleteCover = chkDelCover ? chkDelCover.checked : false;
+
             let imageUrl = null;
+            let oldImageUrl = null;
+
+            if (modeEdition && idHistoire) {
+                const { data: currentStory } = await window._supabase.from('histoires').select('image_couverture').eq('id', idHistoire).single();
+                if (currentStory && currentStory.image_couverture) {
+                    oldImageUrl = currentStory.image_couverture;
+                }
+            }
+
+            async function purgerAncienneImage(url) {
+                if (!url) return;
+                try {
+                    const parts = url.split('/');
+                    const fName = parts[parts.length - 1];
+                    if (fName) {
+                        await window._supabase.storage.from('couvertures').remove([fName]);
+                    }
+                } catch(err) {
+                    console.error("Erreur destruction image:", err);
+                }
+            }
 
             // 1. Dépôt de la couverture si fichier présent
             if (file) {
                 btnSubmit.innerText = "Téléversement de l'image...";
+                
+                // --- ON EFFACE D'ABORD L'ANCIENNE ---
+                if (oldImageUrl) {
+                    await purgerAncienneImage(oldImageUrl);
+                }
+
                 const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`; // Sécurité nom de fichier
                 
                 // Compression silencieuse
@@ -152,10 +193,14 @@ if (!window.creationStoryEventHooked) {
                     imageUrl = data.publicUrl;
                 } else {
                     alert("L'image a été rejetée par le portail : " + upErr.message);
-                    btnSubmit.innerText = "Forger l'Histoire";
+                    btnSubmit.innerText = modeEdition ? "Sauvegarder les changements" : "Forger l'Histoire";
                     btnSubmit.disabled = false;
                     return; // On arrête là si l'image plante
                 }
+            } else if (isDeleteCover && oldImageUrl) {
+                // L'utilisateur n'a pas mis de nouveau fichier mais veut effacer l'ancien
+                await purgerAncienneImage(oldImageUrl);
+                imageUrl = "DELETE";
             }
 
             btnSubmit.innerText = "Écriture dans le registre...";
@@ -174,10 +219,11 @@ if (!window.creationStoryEventHooked) {
                 contenu_sensible: isSensible 
             };
             
-            if (imageUrl) payload.image_couverture = imageUrl; // On n'écrase pas l'image si on n'en fournit pas de nouvelle
-
-            const modeEdition = localStorage.getItem('modeEditionHistoire') === 'true';
-            const idHistoire = localStorage.getItem('currentOeuvreId');
+            if (imageUrl === "DELETE") {
+                payload.image_couverture = null;
+            } else if (imageUrl) {
+                payload.image_couverture = imageUrl; // On n'écrase pas l'image si on n'en fournit pas de nouvelle
+            }
 
             if (modeEdition && idHistoire) {
                 // --- UPDATE ---
