@@ -1,0 +1,26 @@
+/* =========================================
+   THEME ORIGINAL - Noir, Sang et Cuivre
+   ========================================= */
+:root {
+    --bg-body: linear-gradient(135deg, #0a0a0a 0%, #150202 50%, #0a0a0a 100%);
+    --animation-fond: respirationAbyssale 18s ease infinite;
+    
+    --bg-box: #111111;
+    --bg-hover: #5d1a1a;
+    
+    --text-main: #e0d7c6; /* Beige Os */
+    --text-title: #c4a484; /* Cuivre rouillé */
+    --text-muted: #777777;
+    --text-hover: #ffffff;
+    
+    --border-color: #5d1a1a;
+    --border-hover: #00aaff;
+    
+    --accent-red: #5d1a1a;
+    --accent-blue: #00aaff;
+    
+    --logo-glow: drop-shadow(0 0 15px #00aaff44);
+    --shadow-box: 0 4px 15px rgba(0,0,0,0.8);
+    --shadow-hover: 0 0 10px #00aaff;
+    --shadow-toggle: 0 0 8px #ff0055;
+}

@@ -1,0 +1,263 @@
+/* =========================================
+   BASE.CSS - L'Ossature du Sanctuaire
+   ========================================= */
+
+body {
+    font-family: 'Cinzel', serif;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    background: var(--bg-body);
+    color: var(--text-main);
+    background-size: 300% 300%;
+    animation: var(--animation-fond, none);
+}
+
+/* Animations globales */
+@keyframes respirationAbyssale {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* --- STRUCTURE PRINCIPALE --- */
+main {
+    width: 100%;
+    flex: 1; /* Pousse le footer en bas */
+}
+
+header {
+    text-align: center;
+    padding: 100px 20px 50px 20px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+#logo-container img {
+    max-width: 300px;
+    filter: var(--logo-glow);
+}
+
+h1, h2, h3, h4 {
+    color: var(--text-title);
+    letter-spacing: 2px;
+}
+
+h1 {
+    font-size: 2.5rem;
+    text-transform: uppercase;
+    letter-spacing: 5px;
+}
+
+/* --- BOUTONS --- */
+button, .genre-btn {
+    background: transparent;
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+button:hover, .genre-btn:hover {
+    background: var(--bg-hover);
+    color: var(--text-hover);
+    box-shadow: var(--shadow-hover);
+    border-color: var(--border-hover);
+}
+
+/* Utilitaires de boutons */
+.btn-primary { background-color: var(--accent-red); color: white; border-color: var(--accent-red); }
+.btn-danger { border-color: var(--accent-red); color: var(--accent-red); }
+.btn-ghost { border-color: transparent; color: var(--text-muted); }
+
+/* --- MENUS & NAVIGATION --- */
+.genre-menu {
+    width: 100%;
+    background-color: var(--bg-box);
+    border-bottom: 1px solid var(--border-color);
+    padding: 15px 0;
+}
+
+.genre-menu ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+/* --- LE MÉCANISME OCCULTE (Toggle 3 positions) --- */
+.tri-state-toggle {
+    display: flex;
+    background-color: var(--bg-box);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    position: relative;
+    width: 250px;
+    height: 35px;
+}
+
+.toggle-btn {
+    flex: 1;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    z-index: 2;
+    position: relative;
+}
+
+.toggle-btn.active {
+    color: var(--text-main);
+    font-weight: bold;
+}
+
+.tri-state-toggle::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 33.33%;
+    height: 100%;
+    background-color: var(--accent-red);
+    border-radius: 20px;
+    transition: transform 0.3s ease;
+    z-index: 1;
+    box-shadow: var(--shadow-toggle);
+}
+
+.tri-state-toggle[data-active="1"]::before { transform: translateX(0%); }
+.tri-state-toggle[data-active="2"]::before { transform: translateX(100%); }
+.tri-state-toggle[data-active="3"]::before { transform: translateX(200%); }
+
+/* --- CLASSES UTILITAIRES --- */
+.hidden { display: none !important; }
+.card {
+    background-color: var(--bg-box);
+    border: 1px solid var(--border-color);
+    padding: 15px;
+    box-shadow: var(--shadow-box);
+}
+
+/* =========================================
+   MODULE : ACCUEIL & CARTES D'HISTOIRES
+   ========================================= */
+
+.page-accueil {
+    padding: 40px 20px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+/* --- Le Parchemin de Bienvenue --- */
+.welcome-banner {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 40px;
+}
+
+.welcome-content {
+    max-width: 850px;
+    text-align: center;
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.welcome-content h2 {
+    font-size: 2.2rem;
+    margin-top: 0;
+}
+
+.welcome-content p {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    line-height: 1.7;
+    font-family: 'Segoe UI', sans-serif;
+    font-style: italic;
+}
+
+.welcome-content strong {
+    color: var(--text-main);
+}
+
+/* --- La Grille des Œuvres --- */
+.stories-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 25px;
+    justify-content: center;
+}
+
+.loading-text {
+    color: var(--text-title);
+    font-style: italic;
+}
+
+/* --- Les Cartes de Grimoire (Préparation pour le JS) --- */
+.story-card {
+    background-color: var(--bg-box);
+    border: 1px solid var(--border-color);
+    width: 280px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: var(--shadow-box);
+}
+
+.story-card img, .story-card .no-cover {
+    width: 100%;
+    height: 380px;
+    object-fit: cover;
+    border: 1px solid var(--border-color);
+}
+
+.story-card .no-cover {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    background-color: rgba(0,0,0,0.5);
+}
+
+.story-card h3 {
+    margin: 5px 0 0 0;
+    font-size: 1.2rem;
+}
+
+.story-card p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    flex-grow: 1;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    margin-bottom: 0;
+}
+
+.story-tags {
+    display: flex;
+    gap: 10px;
+    align-self: flex-start;
+    flex-wrap: wrap;
+}
+
+.tag {
+    font-size: 0.7rem;
+    padding: 3px 6px;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.tag-genre { background-color: var(--accent-red); color: white; }
+.tag-statut { background-color: transparent; color: var(--accent-blue); border: 1px solid var(--accent-blue); }
+.tag-age { background-color: var(--bg-box); border: 1px solid currentColor; }
+.tag-sensible { background-color: var(--accent-red); color: white; border: 1px solid #ff0055; }
+.tag-sensible-off { background-color: transparent; color: var(--text-muted); border: 1px dotted var(--border-color); text-decoration: line-through; }

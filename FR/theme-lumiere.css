@@ -1,0 +1,26 @@
+/* =========================================
+   THEME LUMIÈRE - Parchemin et Encre
+   ========================================= */
+:root {
+    --bg-body: #f5ebd9; /* Beige parchemin clair */
+    --animation-fond: none;
+    
+    --bg-box: #ffffff;
+    --bg-hover: #e0d7c6;
+    
+    --text-main: #1a1a1a; /* Encre très sombre */
+    --text-title: #5d1a1a; /* Sang séché pour les titres */
+    --text-muted: #555555;
+    --text-hover: #000000;
+    
+    --border-color: #cccccc;
+    --border-hover: #1a1a1a;
+    
+    --accent-red: #8b0000;
+    --accent-blue: #005580;
+    
+    --logo-glow: none;
+    --shadow-box: 0 2px 10px rgba(0,0,0,0.1);
+    --shadow-hover: 0 0 5px rgba(0,0,0,0.2);
+    --shadow-toggle: none;
+}
