@@ -81,7 +81,6 @@ window.afficherOeuvresTriees = function() {
             </div>
             <div>
                 <button class="genre-btn btn-outline-blue" onclick="ouvrirGestionOeuvre(${histoire.id})">Gérer le Grimoire</button>
-                <button class="genre-btn" style="border-color: #ff8c00; color: #ff8c00; font-family: 'Cinzel', serif;" onclick="ouvrirModificationHistoire(${histoire.id})">Réviser le Grimoire</button>
                 <button class="genre-btn btn-outline-red" title="Détruire cette œuvre" onclick="supprimerHistoire(${histoire.id})">Annihiler</button>
             </div>
         `;

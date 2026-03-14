@@ -146,6 +146,10 @@ document.addEventListener('click', (e) => {
     if (e.target && e.target.id === 'btn-retour-gestion') {
         window.changerDePage('studio');
     }
+    if (e.target && e.target.id === 'btn-edit-histoire') {
+        localStorage.setItem('modeEditionHistoire', 'true'); 
+        window.changerDePage('creation-story');
+    }
     if (e.target && e.target.id === 'btn-add-chapitre') {
         window.currentChapitreId = null; // C'est une création
         localStorage.removeItem('currentChapitreId');
