@@ -210,12 +210,12 @@ submitChapitre.addEventListener('click', async () => {
     const titre = document.getElementById('chapitre-titre').value;
     const contenu = quill.root.innerHTML;
 
-    // 1. On récupère les notes (et on les vide si elles ne contiennent qu'un espace invisible)
+    // 1. On récupère les notes (et l'Inquisiteur détruit tout ce qui n'a pas de vrai texte)
     let contenuDebut = quillNoteDebut.root.innerHTML;
-    if (contenuDebut === '<p><br></p>') contenuDebut = null;
+    if (quillNoteDebut.getText().trim() === '') contenuDebut = null;
 
     let contenuFin = quillNoteFin.root.innerHTML;
-    if (contenuFin === '<p><br></p>') contenuFin = null;
+    if (quillNoteFin.getText().trim() === '') contenuFin = null;
 
     // --- LE NOUVEAU SORTILÈGE DE COMPTAGE ---
     // On ne calcule plus rien de caché, on lit le compteur en direct

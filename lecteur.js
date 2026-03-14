@@ -238,8 +238,8 @@ window.lireChapitre = async function(idChapitre) {
     // 4. LA MAGIE : On assemble le chapitre (Notes + Contenu)
     let htmlLecture = "";
 
-    // S'il y a une note de début, on l'encadre joliment
-    if (chapitre.note_debut) {
+    // S'il y a une note de début (et que ce n'est pas juste un fantôme d'espace)
+    if (chapitre.note_debut && chapitre.note_debut !== '<p><br></p>' && chapitre.note_debut !== '<p></p>' && chapitre.note_debut.trim() !== '') {
         htmlLecture += `
             <div style="background: #111; border-left: 3px solid #ff0055; padding: 15px; margin-bottom: 40px; font-family: 'Segoe UI', sans-serif;">
                 <span style="color: #ff0055; font-size: 0.8rem; text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 5px;">Mot de l'Auteur</span>
@@ -250,8 +250,8 @@ window.lireChapitre = async function(idChapitre) {
     // Le corps du chapitre protégé par le bouclier
     htmlLecture += '<div id="vrai-contenu-chapitre">' + chapitre.contenu + '</div>';
 
-    // S'il y a une note de fin, on l'encadre aussi
-    if (chapitre.note_fin) {
+    // S'il y a une note de fin (et que ce n'est pas juste un fantôme d'espace)
+    if (chapitre.note_fin && chapitre.note_fin !== '<p><br></p>' && chapitre.note_fin !== '<p></p>' && chapitre.note_fin.trim() !== '') {
         htmlLecture += `
             <div style="background: #111; border-left: 3px solid #00aaff; padding: 15px; margin-top: 40px; font-family: 'Segoe UI', sans-serif;">
                 <span style="color: #00aaff; font-size: 0.8rem; text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 5px;">Mot de fin de l'Auteur</span>
