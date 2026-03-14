@@ -1,6 +1,4 @@
-<div class="page-forge">
-    
-    <section class="welcome-banner">
+<div class="page-forge" style="padding-bottom: 80px;"> <section class="welcome-banner">
         <div class="welcome-content">
             <h2>L'Atelier des Comtes</h2>
             <p>
@@ -14,20 +12,20 @@
         </div>
     </section>
 
-    <section class="my-stories-section" style="max-width: 800px; margin: 0 auto;">
-        <h3 style="text-align: center; margin-bottom: 20px; text-transform: uppercase;">Vos Œuvres en cours</h3>
+    <section class="my-stories-section" style="width: 75%; max-width: 1200px; margin: 0 auto;">
+        <h3 style="text-align: center; margin-bottom: 30px; text-transform: uppercase;">Vos Œuvres en cours</h3>
         
-        <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
-            <select id="tri-oeuvres" class="genre-btn" style="padding: 5px 10px; background: var(--bg-box); color: var(--text-main); font-size: 0.9rem;">
-                <option value="recent">Tri : Plus récentes d'abord</option>
-                <option value="ancien">Tri : Plus anciennes d'abord</option>
-                <option value="az">Tri : Alphabétique (A - Z)</option>
-                <option value="za">Tri : Alphabétique (Z - A)</option>
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+            <select id="tri-oeuvres" style="padding: 10px; background: var(--bg-box); color: var(--text-main); border: 1px solid var(--accent-red); font-family: 'Segoe UI', sans-serif; font-size: 0.9rem; cursor: pointer; outline: none; box-shadow: var(--shadow-box);">
+                <option value="recent">Trier par : Plus récentes d'abord</option>
+                <option value="ancien">Trier par : Plus anciennes d'abord</option>
+                <option value="az">Trier par : Alphabétique (A - Z)</option>
+                <option value="za">Trier par : Alphabétique (Z - A)</option>
             </select>
         </div>
 
-        <div id="mes-oeuvres-liste" style="display: flex; flex-direction: column; gap: 15px;">
-            <p class="loading-text">Recherche de vos parchemins...</p>
+        <div id="mes-oeuvres-liste" style="display: flex; flex-direction: column; gap: 20px;">
+            <p class="loading-text" style="text-align: center;">Recherche de vos parchemins...</p>
         </div>
     </section>
 
