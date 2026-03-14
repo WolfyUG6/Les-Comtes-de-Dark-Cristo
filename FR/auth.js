@@ -97,11 +97,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
-    // 6. Navigation du Menu Profil
-    document.getElementById('btn-quartiers-nav')?.addEventListener('click', () => window.changerDePage('quartiers'));
-    document.getElementById('btn-lectures-nav')?.addEventListener('click', () => window.changerDePage('lectures'));
-    document.getElementById('btn-atelier-nav')?.addEventListener('click', () => window.changerDePage('studio'));
 });
 
 // ==========================================
