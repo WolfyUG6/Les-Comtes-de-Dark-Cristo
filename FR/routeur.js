@@ -169,7 +169,16 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (genre) {
                 // On mémorise le genre choisi pour le script CategorieGenre
                 localStorage.setItem('currentGenre', genre);
-                window.changerDePage('categorie-genre');
+                
+                // Si on est déjà sur la page des genres, le hash de l'URL ne va pas changer
+                // Il faut donc appeler manuellement le rechargement de la page interne
+                if (window.location.hash === '#categorie-genre') {
+                    if (typeof window.chargerGenre === 'function') {
+                        window.chargerGenre();
+                    }
+                } else {
+                    window.changerDePage('categorie-genre');
+                }
             }
         });
     });
