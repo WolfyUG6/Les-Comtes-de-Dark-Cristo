@@ -183,6 +183,7 @@ const quillNoteFin = new Quill('#note-fin-contenu', optionPlumeNote);
 window.horlogeChapitre = flatpickr("#chapitre-date-pub", {
     enableTime: true,
     time_24hr: true,
+	minuteIncrement: 1,
     dateFormat: "Z", // Format parfait pour Supabase
     altInput: true,
     altFormat: "j F Y à H:i", // Ce que le Seigneur voit (ex: 14 Mars 2026 à 20:00)

@@ -515,3 +515,36 @@ if (btnScrollTop && btnScrollBottom) {
         }
     });
 }
+
+// --- LES NOUVEAUX POUVOIRS DU LECTEUR ---
+
+// 1. Le Plein Écran (Mode Zen)
+const btnModeZen = document.getElementById('btn-mode-zen');
+if (btnModeZen) {
+    btnModeZen.addEventListener('click', () => {
+        document.body.classList.toggle('mode-zen');
+        if (document.body.classList.contains('mode-zen')) {
+            btnModeZen.innerText = "✖ Quitter Plein Écran";
+            btnModeZen.style.borderColor = "#ff0055";
+            btnModeZen.style.color = "#ff0055";
+        } else {
+            btnModeZen.innerText = "👁️ Plein Écran";
+            btnModeZen.style.borderColor = "#00aaff";
+            btnModeZen.style.color = "#00aaff";
+        }
+    });
+}
+
+// 2. Le Pupitre Coulissant (Illusion)
+const btnTogglePupitre = document.getElementById('btn-toggle-pupitre');
+const pupitreSettings = document.getElementById('lecture-settings');
+if (btnTogglePupitre && pupitreSettings) {
+    btnTogglePupitre.addEventListener('click', () => {
+        pupitreSettings.classList.toggle('pupitre-cache');
+        if (pupitreSettings.classList.contains('pupitre-cache')) {
+            btnTogglePupitre.innerText = "»"; // Flèche vers la droite pour le rouvrir
+        } else {
+            btnTogglePupitre.innerText = "«"; // Flèche vers la gauche pour le cacher
+        }
+    });
+}

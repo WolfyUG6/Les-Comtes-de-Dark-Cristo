@@ -409,3 +409,43 @@ span.flatpickr-weekday {
 .flatpickr-time .flatpickr-time-separator, .flatpickr-time .flatpickr-am-pm {
     color: #c4a484 !important;
 }
+
+/* --- LE BOUCLIER ZEN (Plein Écran) --- */
+body.mode-zen #bandeau-top,
+body.mode-zen #mini-logo,
+body.mode-zen #auth-container,
+body.mode-zen #user-container,
+body.mode-zen #main-footer,
+body.mode-zen #lecture-progress-container {
+    display: none !important; /* On efface les nuisances */
+}
+body.mode-zen #barre-titre-lecture {
+    top: 0 !important; /* Le titre remonte tout en haut */
+}
+body.mode-zen #lecture-settings {
+    top: 20px !important; /* Le pupitre remonte aussi */
+}
+
+/* --- L'ILLUSION DU PUPITRE (Coulissant) --- */
+/* Quand le pupitre est caché, il s'écrase sur lui-même */
+#lecture-settings.pupitre-cache {
+    width: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    border-color: transparent !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+/* On rend tout le texte invisible rapidement */
+#lecture-settings.pupitre-cache > *:not(#btn-toggle-pupitre) {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+/* Mais le petit onglet reste et se décale ! */
+#lecture-settings.pupitre-cache #btn-toggle-pupitre {
+    left: 0;
+    border-right: 1px solid #5d1a1a !important;
+    border-radius: 5px;
+    background: #0a0a0a;
+}
