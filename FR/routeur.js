@@ -72,6 +72,10 @@ function initialiserScriptsDePage(page) {
     else if (page === 'studio') {
         if (typeof window.chargerMesOeuvres === 'function') window.chargerMesOeuvres();
     }
+    // ---> AJOUTE CECI <---
+    else if (page === 'gestion') {
+        if (typeof window.chargerGestionOeuvre === 'function') window.chargerGestionOeuvre();
+    }
 }
 
 // --- LE NOUVEAU MÉCANISME DU PIÉDESTAL (Interrupteur de Thèmes) ---
