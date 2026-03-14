@@ -2,25 +2,25 @@
    THEME ABYSSE - Ténèbres Profondes
    ========================================= */
 :root {
-    --bg-body: #0d0d0d;
-    --animation-fond: none; /* On coupe la respiration */
+    --bg-body: #16181d; /* Anthracite très doux (façon Discord) */
+    --animation-fond: none; 
     
-    --bg-box: #141414;
-    --bg-hover: #1f1f1f;
+    --bg-box: #1f2229; /* Boîtes légèrement plus claires */
+    --bg-hover: #2b2f38;
     
-    --text-main: #e0d7c6;
-    --text-title: #e0d7c6; /* Les titres perdent le côté cuivre */
-    --text-muted: #666666;
+    --text-main: #d4dbe2; /* Gris perle subtilement bleuté */
+    --text-title: #e0e5ea; 
+    --text-muted: #88929e;
     --text-hover: #ffffff;
     
-    --border-color: #333333;
-    --border-hover: #00aaff;
+    --border-color: #383c47;
+    --border-hover: #5865F2; /* Bleu Discord assumé pour le hover */
     
-    --accent-red: #4a1515;
-    --accent-blue: #0088cc;
+    --accent-red: #8f2c34; /* Rouge foncé désaturé */
+    --accent-blue: #5865F2; 
     
     --logo-glow: drop-shadow(0 0 10px rgba(255, 255, 255, 0.1));
-    --shadow-box: 0 4px 10px rgba(0,0,0,0.9);
-    --shadow-hover: 0 0 8px #00aaff;
+    --shadow-box: 0 4px 10px rgba(0,0,0,0.5);
+    --shadow-hover: 0 0 8px rgba(88, 101, 242, 0.5);
     --shadow-toggle: 0 0 5px rgba(0,0,0,0.5);
 }

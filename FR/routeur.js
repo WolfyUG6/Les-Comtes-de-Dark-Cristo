@@ -127,12 +127,30 @@ window.changerTheme = function(state) {
     } else if (state == 3) {
         themeLink.href = 'theme-lumiere.css';
     }
+
+    // 3. On sauvegarde la mémoire dans les archives du navigateur
+    localStorage.setItem('themePrefere', state);
 };
 
 // --- DÉMARRAGE AUTOMATIQUE ---
 // Quand le Maître a fini de charger, on lui dit d'ouvrir le Hall direct
 document.addEventListener('DOMContentLoaded', () => {
     
+    // --- LECTURE DE LA MÉMOIRE (Thèmes) AVANT TOUTE CHOSE ---
+    const themeSauvegarde = localStorage.getItem('themePrefere');
+    if (themeSauvegarde) {
+        window.changerTheme(themeSauvegarde);
+    }
+    
+    // Écouteurs pour le Mécanisme Occulte
+    const themeButtons = document.querySelectorAll('#footer-toggle .toggle-btn');
+    themeButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const etatChoisi = e.target.getAttribute('data-state');
+            window.changerTheme(etatChoisi);
+        });
+    });
+
     // Connecter les boutons du menu principal (Navigation)
     document.querySelectorAll('.genre-menu button').forEach(btn => {
         btn.addEventListener('click', (e) => {

@@ -2,25 +2,25 @@
    THEME LUMIÈRE - Parchemin et Encre
    ========================================= */
 :root {
-    --bg-body: #f5ebd9; /* Beige parchemin clair */
+    --bg-body: #fdf6e3; /* Beige parchemin antique très clair */
     --animation-fond: none;
     
-    --bg-box: #ffffff;
-    --bg-hover: #e0d7c6;
+    --bg-box: #fcfaf5; /* Blanc cassé pour les boîtes */
+    --bg-hover: #eee8d5;
     
-    --text-main: #1a1a1a; /* Encre très sombre */
-    --text-title: #5d1a1a; /* Sang séché pour les titres */
-    --text-muted: #555555;
+    --text-main: #362f2d; /* Encre brune très foncée, plus douce que le noir */
+    --text-title: #5d1a1a; /* Sang séché pour les titres (démarcation noble) */
+    --text-muted: #655b53;
     --text-hover: #000000;
     
-    --border-color: #cccccc;
-    --border-hover: #1a1a1a;
+    --border-color: #d8ceb8;
+    --border-hover: #362f2d;
     
-    --accent-red: #8b0000;
-    --accent-blue: #005580;
+    --accent-red: #a42a2a; /* Rouge brique antique */
+    --accent-blue: #2c5f87; /* Bleu ardoise */
     
-    --logo-glow: none;
-    --shadow-box: 0 2px 10px rgba(0,0,0,0.1);
-    --shadow-hover: 0 0 5px rgba(0,0,0,0.2);
+    --logo-glow: drop-shadow(0 2px 5px rgba(0,0,0,0.4)); /* Ombre portée pour détacher le logo sur fond blanc */
+    --shadow-box: 0 2px 10px rgba(0,0,0,0.05);
+    --shadow-hover: 0 0 5px rgba(0,0,0,0.1);
     --shadow-toggle: none;
 }
