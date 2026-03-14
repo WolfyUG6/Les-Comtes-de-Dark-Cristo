@@ -68,7 +68,7 @@ window.chargerVitrine = async function(genreFilter = null) {
             <h3>${histoire.titre}</h3>
             <span class="text-small text-muted">Par Comte ${pseudo}</span>
             <p>${histoire.synopsis}</p>
-            <button class="genre-btn w-100 mt-15" onclick="ouvrirOeuvre(${histoire.id})">Lire l'œuvre</button>
+            <button class="genre-btn w-100 mt-15" onclick="localStorage.setItem('currentOeuvreId', ${histoire.id}); window.changerDePage('oeuvre');">Lire l'œuvre</button>
         `;
         
         storiesContainer.appendChild(card);

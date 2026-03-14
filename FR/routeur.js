@@ -95,6 +95,9 @@ function initialiserScriptsDePage(page) {
     else if (page === 'studio') {
         if (typeof window.chargerMesOeuvres === 'function') window.chargerMesOeuvres();
     }
+    else if (page === 'oeuvre') {
+        if (typeof window.chargerPageHistoire === 'function') window.chargerPageHistoire();
+    }
     // ---> AJOUTE CECI <---
     else if (page === 'gestion') {
         if (typeof window.chargerGestionOeuvre === 'function') window.chargerGestionOeuvre();

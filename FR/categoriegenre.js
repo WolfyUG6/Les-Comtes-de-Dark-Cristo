@@ -82,7 +82,7 @@ window.chargerGenre = async function() {
                 <span class="tag tag-statut" style="float: right;">${histoire.statut || "Inconnu"}</span>
             </div>
             
-            <button class="genre-btn btn-outline-blue mt-15 w-100" onclick="alert('Lectorat en construction...')">Ouvrir le Grimoire</button>
+            <button class="genre-btn btn-outline-blue mt-15 w-100" onclick="localStorage.setItem('currentOeuvreId', ${histoire.id}); window.changerDePage('oeuvre');">Ouvrir le Grimoire</button>
         `;
         
         conteneur.appendChild(carte);
