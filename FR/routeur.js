@@ -32,7 +32,8 @@ window.chargerPageInterne = async function(pageDemandee) {
         'gestion': 'Gestion.html',
         'editeur-chapitre': 'Editeur.html',
         'creation-story': 'CreationStory.html',
-        'statistiques': 'Statistiques.html'
+        'statistiques': 'Statistiques.html',
+        'categorie-genre': 'CategorieGenre.html'
     };
 
     const fichier = pages[pageDemandee];
@@ -97,9 +98,12 @@ function initialiserScriptsDePage(page) {
     else if (page === 'editeur-chapitre') {
         if (typeof window.chargerEditeurChapitre === 'function') window.chargerEditeurChapitre();
     }
-    // ---> AJOUTE CE BLOC AUSSI <---
     else if (page === 'creation-story') {
         if (typeof window.chargerCreationStory === 'function') window.chargerCreationStory();
+    }
+    // ---> AJOUTE LE RAYONNNAGE ICI <---
+    else if (page === 'categorie-genre') {
+        if (typeof window.chargerGenre === 'function') window.chargerGenre();
     }
 }
 
@@ -151,12 +155,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Connecter les boutons du menu principal (Navigation)
+    // Connecter les boutons du menu principal (Navigation par Genre)
     document.querySelectorAll('.genre-menu button').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const genre = e.target.getAttribute('data-genre');
-            // Pour l'instant, on recharge juste la page d'accueil (on gèrera le filtre plus tard)
-            if (genre) window.changerDePage('accueil'); 
+            if (genre === 'accueil') {
+                window.changerDePage('accueil'); 
+            } else if (genre) {
+                // On mémorise le genre choisi pour le script CategorieGenre
+                localStorage.setItem('currentGenre', genre);
+                window.changerDePage('categorie-genre');
+            }
         });
     });
 
