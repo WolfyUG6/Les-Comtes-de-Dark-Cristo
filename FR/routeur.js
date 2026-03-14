@@ -63,6 +63,11 @@ window.chargerPageInterne = async function(pageDemandee) {
             if (miniLogo) miniLogo.classList.add('hidden');
             if (heroLogo) heroLogo.classList.remove('hidden');
             if (menuGenre) menuGenre.classList.remove('hidden');
+        } else if (pageDemandee === 'categorie-genre') {
+            // Dans les rayons : Petit Logo activé, Gros Logo caché, mais Menu TOUJOURS affiché
+            if (miniLogo) miniLogo.classList.remove('hidden');
+            if (heroLogo) heroLogo.classList.add('hidden');
+            if (menuGenre) menuGenre.classList.remove('hidden');
         } else {
             // Partout ailleurs : Petit Logo activé, Gros Logo caché, Menu masqué
             if (miniLogo) miniLogo.classList.remove('hidden');
