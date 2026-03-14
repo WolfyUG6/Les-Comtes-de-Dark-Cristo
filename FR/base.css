@@ -297,6 +297,24 @@ button:hover, .genre-btn:hover {
     z-index: 1000;
 }
 
+/* =========================================
+   AVATARS DE PROFIL (Le Sceau du Seigneur)
+   ========================================= */
+#header-avatar, #profile-avatar-preview {
+    width: 45px;          /* Largeur fixe pour la navigation */
+    height: 45px;         /* Hauteur fixe */
+    border-radius: 50%;   /* Magie : rend l'image parfaitement ronde */
+    object-fit: cover;    /* Recadre l'image proprement si elle n'est pas carrée (évite l'étirement) */
+    border: 2px solid var(--border-color); 
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+#header-avatar:hover {
+    border-color: var(--border-hover);
+    box-shadow: var(--shadow-hover);
+}
+
 /* Logo de navigation miniature (En haut à gauche) */
 #mini-logo {
     position: fixed;
