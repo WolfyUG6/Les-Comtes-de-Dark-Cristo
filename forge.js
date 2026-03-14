@@ -222,6 +222,9 @@ submitChapitre.addEventListener('click', async () => {
     const compteMots = window.compteMotsLive;
 	
 	const estPublie = document.getElementById('chapitre-publie').checked;
+	const champDate = document.getElementById('chapitre-date-pub').value;
+    // Si l'auteur a choisi une date, on la prend. Sinon, on prend l'heure exacte de maintenant.
+    const datePublication = champDate ? new Date(champDate).toISOString() : new Date().toISOString();
 
     // 2. Vérification de sécurité (on force à remplir le chapitre)
     if (!numero || !titre || contenu === '<p><br></p>' || !contenu) {
@@ -244,7 +247,8 @@ submitChapitre.addEventListener('click', async () => {
                 note_debut: contenuDebut,
                 note_fin: contenuFin,
                 nombre_mots: compteMots,
-                est_publie: estPublie // <-- LA NOUVELLE LIGNE EST ICI
+                est_publie: estPublie,
+                date_publication: datePublication // <-- LA NOUVELLE LIGNE EST ICI
             })
             .eq('id', window.currentChapitreId);
         erreurGravure = error;
@@ -345,10 +349,20 @@ window.chargerChapitresAdmin = async function(idHistoire) {
         const div = document.createElement('div');
         div.style.cssText = "background: #111; border: 1px solid #333; padding: 10px; display: flex; justify-content: space-between; align-items: center;";
         
-        // L'Inquisiteur prépare l'étiquette magique JUSTE AVANT de dessiner la ligne
-        const badgeStatut = chap.est_publie 
-            ? '<span style="color: #00aaff; font-size: 0.75rem; margin-right: 10px; font-weight: bold;">[Publié]</span>' 
-            : '<span style="color: #ff4444; font-size: 0.75rem; margin-right: 10px; font-weight: bold;">[Brouillon]</span>';
+        let badgeStatut = '';
+        const maintenant = new Date();
+        const dateChap = chap.date_publication ? new Date(chap.date_publication) : new Date();
+
+        // Le triple choix : Brouillon ? Programmé dans le futur ? Ou Publié ?
+        if (!chap.est_publie) {
+            badgeStatut = '<span style="color: #ff4444; font-size: 0.75rem; margin-right: 10px; font-weight: bold;">[Brouillon]</span>';
+        } else if (dateChap > maintenant) {
+            // Affichage de la date prévue
+            const datePrevue = dateChap.toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+            badgeStatut = `<span style="color: #ffd700; font-size: 0.75rem; margin-right: 10px; font-weight: bold;">[⏳ Programmé le ${datePrevue}]</span>`;
+        } else {
+            badgeStatut = '<span style="color: #00aaff; font-size: 0.75rem; margin-right: 10px; font-weight: bold;">[Publié]</span>';
+        }
 
         div.innerHTML = `
             <div>
@@ -410,6 +424,7 @@ document.getElementById('btn-open-add-chapitre').addEventListener('click', () =>
     quillNoteFin.root.innerHTML = '';
     
 	document.getElementById('chapitre-publie').checked = true; // Par défaut, on prépare à publier
+	document.getElementById('chapitre-date-pub').value = '';
     document.getElementById('submit-chapitre').innerText = "Graver le Chapitre";
     window.changerDePage('editeur-chapitre');
 });
@@ -512,6 +527,16 @@ window.ouvrirEditeurChapitre = async function(idChapitre) {
 		
 		// On remet la case dans le bon état
         document.getElementById('chapitre-publie').checked = chapitre.est_publie !== false;
+		// Le sortilège pour formater la date de la BDD vers le calendrier HTML
+        if (chapitre.date_publication) {
+            const dateObj = new Date(chapitre.date_publication);
+            // On s'assure de compenser le fuseau horaire pour l'affichage HTML
+            const offset = dateObj.getTimezoneOffset() * 60000;
+            const dateLocale = new Date(dateObj.getTime() - offset).toISOString().slice(0, 16);
+            document.getElementById('chapitre-date-pub').value = dateLocale;
+        } else {
+            document.getElementById('chapitre-date-pub').value = '';
+        }
         
         // On change le texte du bouton pour être clair
         document.getElementById('submit-chapitre').innerText = "Graver les modifications";
