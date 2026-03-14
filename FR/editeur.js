@@ -146,81 +146,90 @@ async function recupererDonneesChapitre(id) {
 }
 
 // --- SAUVEGARDE DU CHAPITRE ---
-document.addEventListener('click', async (e) => {
-    if (e.target && e.target.id === 'submit-chapitre') {
-        const btnSubmit = document.getElementById('submit-chapitre');
-        
-        const numero = document.getElementById('chapitre-numero').value;
-        const titre = document.getElementById('chapitre-titre').value;
-        const contenu = quill.root.innerHTML;
+// Au lieu d'ajouter un event listener global qui s'exécute à chaque clic sur toute la page, 
+// on s'assure qu'il n'est attaché qu'une fois (ou mieux, on utilise une fonction attachée au DOM direct).
+// L'approche "document.addEventListener" est correcte pour la délégation d'événements dans une SPA,
+// à condition de ne l'ajouter qu'une seule fois.
 
-        let contenuDebut = quillNoteDebut.root.innerHTML;
-        if (quillNoteDebut.getText().trim() === '') contenuDebut = null;
+if (!window.editeurEventHooked) {
+    document.addEventListener('click', async (e) => {
+        if (e.target && e.target.id === 'submit-chapitre') {
+            const btnSubmit = document.getElementById('submit-chapitre');
+            
+            const numero = document.getElementById('chapitre-numero').value;
+            const titre = document.getElementById('chapitre-titre').value;
+            const contenu = quill.root.innerHTML;
 
-        let contenuFin = quillNoteFin.root.innerHTML;
-        if (quillNoteFin.getText().trim() === '') contenuFin = null;
+            let contenuDebut = quillNoteDebut.root.innerHTML;
+            if (quillNoteDebut.getText().trim() === '') contenuDebut = null;
 
-        const compteMots = window.compteMotsLive;
-        const estPublie = document.getElementById('chapitre-publie').checked;
-        const champDate = document.getElementById('chapitre-date-pub').value;
-        const datePublication = champDate ? new Date(champDate).toISOString() : new Date().toISOString();
+            let contenuFin = quillNoteFin.root.innerHTML;
+            if (quillNoteFin.getText().trim() === '') contenuFin = null;
 
-        if (!numero || !titre || contenu === '<p><br></p>' || !contenu) {
-            alert("Les Ténèbres exigent un Numéro, un Titre et un Contenu pour ce chapitre !");
-            return;
+            const compteMots = window.compteMotsLive;
+            const estPublie = document.getElementById('chapitre-publie').checked;
+            const champDate = document.getElementById('chapitre-date-pub').value;
+            const datePublication = champDate ? new Date(champDate).toISOString() : new Date().toISOString();
+
+            if (!numero || !titre || contenu === '<p><br></p>' || !contenu) {
+                alert("Les Ténèbres exigent un Numéro, un Titre et un Contenu pour ce chapitre !");
+                return;
+            }
+
+            btnSubmit.innerText = "Gravure...";
+            btnSubmit.disabled = true;
+
+            let erreurGravure = null;
+
+            if (window.currentChapitreId) {
+                // Modification
+                const { error } = await window._supabase
+                    .from('chapitres')
+                    .update({ 
+                        numero: parseInt(numero), 
+                        titre, 
+                        contenu,
+                        note_debut: contenuDebut,
+                        note_fin: contenuFin,
+                        nombre_mots: compteMots,
+                        est_publie: estPublie,
+                        date_publication: datePublication
+                    })
+                    .eq('id', window.currentChapitreId);
+                erreurGravure = error;
+            } else {
+                // Création
+                const { error } = await window._supabase
+                    .from('chapitres')
+                    .insert([{ 
+                        histoire_id: window.currentOeuvreId, 
+                        numero: parseInt(numero), 
+                        titre, 
+                        contenu,
+                        note_debut: contenuDebut,
+                        note_fin: contenuFin,
+                        nombre_mots: compteMots,
+                        est_publie: estPublie,
+                        date_publication: datePublication
+                    }]);
+                erreurGravure = error;
+            }
+
+            btnSubmit.disabled = false;
+
+            if (erreurGravure) {
+                alert("Le parchemin a pris feu : " + erreurGravure.message);
+                btnSubmit.innerText = window.currentChapitreId ? "Graver les modifications" : "Graver le Chapitre";
+            } else {
+                alert(window.currentChapitreId ? "Modifications gravées !" : "Chapitre ajouté !");
+                window.changerDePage('gestion');
+            }
         }
 
-        btnSubmit.innerText = "Gravure...";
-        btnSubmit.disabled = true;
-
-        let erreurGravure = null;
-
-        if (window.currentChapitreId) {
-            // Modification
-            const { error } = await window._supabase
-                .from('chapitres')
-                .update({ 
-                    numero: parseInt(numero), 
-                    titre, 
-                    contenu,
-                    note_debut: contenuDebut,
-                    note_fin: contenuFin,
-                    nombre_mots: compteMots,
-                    est_publie: estPublie,
-                    date_publication: datePublication
-                })
-                .eq('id', window.currentChapitreId);
-            erreurGravure = error;
-        } else {
-            // Création
-            const { error } = await window._supabase
-                .from('chapitres')
-                .insert([{ 
-                    histoire_id: window.currentOeuvreId, 
-                    numero: parseInt(numero), 
-                    titre, 
-                    contenu,
-                    note_debut: contenuDebut,
-                    note_fin: contenuFin,
-                    nombre_mots: compteMots,
-                    est_publie: estPublie,
-                    date_publication: datePublication
-                }]);
-            erreurGravure = error;
-        }
-
-        btnSubmit.disabled = false;
-
-        if (erreurGravure) {
-            alert("Le parchemin a pris feu : " + erreurGravure.message);
-            btnSubmit.innerText = window.currentChapitreId ? "Graver les modifications" : "Graver le Chapitre";
-        } else {
-            alert(window.currentChapitreId ? "Modifications gravées !" : "Chapitre ajouté !");
+        if (e.target && e.target.id === 'close-chapitre-modal') {
             window.changerDePage('gestion');
         }
-    }
+    });
 
-    if (e.target && e.target.id === 'close-chapitre-modal') {
-        window.changerDePage('gestion');
-    }
-});
+    window.editeurEventHooked = true;
+}
