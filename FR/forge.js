@@ -3,15 +3,15 @@
 // L'atelier de l'auteur : Liste de ses œuvres
 // ==========================================
 
+// La mémoire de l'Inquisiteur (pour trier sans recharger Supabase)
+window.mesHistoiresEnCache = [];
+
 window.chargerMesOeuvres = async function() {
     const conteneur = document.getElementById('mes-oeuvres-liste');
-    
-    // Si la boîte n'existe pas (on n'est pas sur la page Studio), on annule.
     if (!conteneur) return; 
 
     conteneur.innerHTML = '<p class="loading-text">Recherche de vos créations dans l\'Abysse...</p>';
 
-    // 1. On vérifie qui est le Seigneur (l'utilisateur connecté)
     const { data: { session } } = await window._supabase.auth.getSession();
     
     if (!session) {
@@ -19,31 +19,57 @@ window.chargerMesOeuvres = async function() {
         return;
     }
 
-    // 2. On fouille l'étagère pour trouver SES œuvres
+    // On fouille l'étagère UNE SEULE FOIS
     const { data: mesHistoires, error } = await window._supabase
         .from('histoires')
         .select('*')
-        .eq('auteur', session.user.email)
-        .order('id', { ascending: false }); // Les plus récentes en haut
+        .eq('auteur', session.user.email);
 
     if (error) {
         conteneur.innerHTML = `<p style="color: var(--accent-red);">Erreur : ${error.message}</p>`;
         return;
     }
 
-    // 3. Si l'auteur n'a rien écrit
     if (mesHistoires.length === 0) {
         conteneur.innerHTML = '<p class="loading-text" style="text-align:center;">Vous n\'avez encore forgé aucune œuvre.<br>Il est temps de noircir le parchemin.</p>';
         return;
     }
 
-    // 4. On affiche chaque œuvre trouvée
+    // On stocke les histoires dans la mémoire du navigateur
+    window.mesHistoiresEnCache = mesHistoires;
+    
+    // On lance l'affichage (qui va lire le tri par défaut)
+    window.afficherOeuvresTriees();
+};
+
+// --- LE MOTEUR D'AFFICHAGE ET DE TRI ---
+window.afficherOeuvresTriees = function() {
+    const conteneur = document.getElementById('mes-oeuvres-liste');
+    const selectTri = document.getElementById('tri-oeuvres');
+    
+    if (!conteneur || !window.mesHistoiresEnCache) return;
+
+    // On fait une copie de la mémoire pour la trier sans détruire l'originale
+    let histoires = [...window.mesHistoiresEnCache]; 
+    const typeTri = selectTri ? selectTri.value : 'recent';
+
+    // Les règles de l'Inquisition pour le tri
+    if (typeTri === 'recent') {
+        histoires.sort((a, b) => b.id - a.id); // L'ID le plus grand est le dernier créé
+    } else if (typeTri === 'ancien') {
+        histoires.sort((a, b) => a.id - b.id);
+    } else if (typeTri === 'az') {
+        histoires.sort((a, b) => a.titre.localeCompare(b.titre));
+    } else if (typeTri === 'za') {
+        histoires.sort((a, b) => b.titre.localeCompare(a.titre));
+    }
+
+    // On efface et on reconstruit la liste
     conteneur.innerHTML = '';
-    mesHistoires.forEach(histoire => {
-        // On crée la carte avec les classes de ton base.css
+    histoires.forEach(histoire => {
         const carte = document.createElement('div');
         carte.className = 'card'; 
-        carte.style.cssText = "display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;";
+        carte.style.cssText = "display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box;";
         
         carte.innerHTML = `
             <div>
@@ -63,25 +89,27 @@ window.chargerMesOeuvres = async function() {
 };
 
 // ==========================================
-// LES AIGUILLEURS (Navigation depuis la Forge)
+// LES AIGUILLEURS (Navigation et Écouteurs)
 // ==========================================
 
-// 1. La fonction pour ouvrir la gestion d'une œuvre précise
 window.ouvrirGestionOeuvre = function(idHistoire) {
-    window.currentOeuvreId = idHistoire; // On mémorise quelle œuvre on veut modifier
-    window.changerDePage('gestion');     // Le Chef d'Orchestre (routeur) s'occupe de changer la page
+    window.currentOeuvreId = idHistoire; 
+    window.changerDePage('gestion');     
 };
 
-// 2. Écouteurs de clics pour les boutons de la Forge
+// Écoute des clics globaux
 document.addEventListener('click', (e) => {
-    
-    // Bouton pour créer une NOUVELLE œuvre
     if (e.target && e.target.id === 'btn-publish') {
-        window.changerDePage('creation'); // Change 'creation' si ta page pour créer s'appelle différemment (ex: 'gestion')
+        window.changerDePage('creation'); 
     }
-
-    // Bouton pour retourner à l'accueil
     if (e.target && e.target.id === 'btn-retour-studio') {
         window.changerDePage('accueil');
+    }
+});
+
+// Écoute du changement dans le menu déroulant de tri
+document.addEventListener('change', (e) => {
+    if (e.target && e.target.id === 'tri-oeuvres') {
+        window.afficherOeuvresTriees();
     }
 });
