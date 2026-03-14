@@ -1,5 +1,7 @@
 // --- LE CHEF D'ORCHESTRE (routeur.js) ---
 
+// --- LE CHEF D'ORCHESTRE (routeur.js) ---
+
 window.changerDePage = async function(pageDemandee) {
     const root = document.getElementById('sanctuaire-root');
     
@@ -36,8 +38,22 @@ window.changerDePage = async function(pageDemandee) {
         // On l'injecte dans le Maître
         root.innerHTML = html;
 
-        // ⚠️ MAGIE NOIRE : Il faudra réveiller les scripts ici plus tard 
-        // (ex: dire à l'Archiviste de recharger les histoires si on est sur 'accueil')
+        // --- 🌑 L'ÉCLIPSE DU LOGO (Nouveau Mécanisme) 🌑 ---
+        const miniLogo = document.getElementById('mini-logo');
+        const heroLogo = document.getElementById('hero-logo-area');
+
+        if (pageDemandee === 'accueil') {
+            // Si on est dans le Hall : Gros Logo activé, Petit Logo caché
+            if (miniLogo) miniLogo.classList.add('hidden');
+            if (heroLogo) heroLogo.classList.remove('hidden');
+        } else {
+            // Partout ailleurs : Petit Logo activé, Gros Logo caché
+            if (miniLogo) miniLogo.classList.remove('hidden');
+            if (heroLogo) heroLogo.classList.add('hidden');
+        }
+        // ----------------------------------------------------
+
+        // On réveille les scripts de la page
         initialiserScriptsDePage(pageDemandee);
 
         // On remonte tout en haut de la page proprement
