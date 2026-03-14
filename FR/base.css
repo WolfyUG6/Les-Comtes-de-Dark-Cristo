@@ -571,3 +571,9 @@ button:hover, .genre-btn:hover {
 .btn-outline-red { border-color: var(--accent-red); color: var(--accent-red); }
 .btn-small { font-size: 0.75rem; margin-right: 10px; }
 .btn-small-last { font-size: 0.75rem; }
+
+/* -- Couleurs Classification -- */
+.age-tout-public { border-color: #28a745 !important; color: #28a745 !important; }
+.age-r15 { border-color: #ffd700 !important; color: #ffd700 !important; }
+.age-r16 { border-color: #ff8c00 !important; color: #ff8c00 !important; }
+.age-r18 { border-color: var(--accent-red) !important; color: var(--accent-red) !important; }

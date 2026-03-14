@@ -19,8 +19,8 @@
             <textarea id="story-synopsis" class="custom-input" rows="6" placeholder="Racontez-nous les prémices de votre histoire..."></textarea>
         </div>
 
-        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-            <div class="form-group" style="flex: 1; min-width: 250px;">
+        <div class="form-group-row" style="display: flex; gap: 20px; flex-wrap: wrap;"> <!-- J'utilise un flex basique ici pour préserver la structure sans figer la largeur -->
+            <div class="form-group">
                 <label for="story-genre">Genre Littéraire dominant</label>
                 <select id="story-genre" class="custom-input custom-select">
                     <option value="">-- Choisissez le genre --</option>
@@ -32,18 +32,18 @@
                 </select>
             </div>
 
-            <div class="form-group" style="flex: 1; min-width: 250px;">
+            <div class="form-group">
                 <label for="story-age">Classification par âge</label>
                 <select id="story-age" class="custom-input custom-select">
                     <option value="">-- Type de public --</option>
                     <option value="Tout public">Tout public</option>
-                    <option value="Adolescent (12+)">Adolescent (12+)</option>
-                    <option value="Jeune Adulte (16+)">Jeune Adulte (16+)</option>
-                    <option value="Mature (18+)">Mature (18+)</option>
+                    <option value="R15">R15 (Averti)</option>
+                    <option value="R16">R16 (Mature)</option>
+                    <option value="R18">R18 (Explicite)</option>
                 </select>
             </div>
             
-            <div class="form-group" style="flex: 1; min-width: 250px;">
+            <div class="form-group">
                 <label for="story-status">Statut de l'Œuvre</label>
                 <select id="story-status" class="custom-input custom-select">
                     <option value="✍️ En cours">✍️ En cours</option>

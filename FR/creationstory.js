@@ -10,7 +10,10 @@ window.chargerCreationStory = function() {
     document.getElementById('story-title').value = '';
     document.getElementById('story-synopsis').value = '';
     document.getElementById('story-genre').value = '';
-    document.getElementById('story-age').value = '';
+    const selectAge = document.getElementById('story-age');
+    selectAge.value = '';
+    window.appliquerCouleurAge(selectAge);
+
     document.getElementById('story-status').value = '✍️ En cours'; 
     document.getElementById('story-sensible').checked = false;
     document.getElementById('story-cover-file').value = '';
@@ -22,8 +25,25 @@ window.chargerCreationStory = function() {
     }
 };
 
+// Application dynamique de la couleur de classification
+window.appliquerCouleurAge = function(selectElement) {
+    if (!selectElement) return;
+    selectElement.classList.remove('age-tout-public', 'age-r15', 'age-r16', 'age-r18');
+    const val = selectElement.value;
+    if (val === 'Tout public') selectElement.classList.add('age-tout-public');
+    else if (val === 'R15') selectElement.classList.add('age-r15');
+    else if (val === 'R16') selectElement.classList.add('age-r16');
+    else if (val === 'R18') selectElement.classList.add('age-r18');
+};
+
 // --- GESTION DES CLICS (Délégation d'événements) ---
 if (!window.creationStoryEventHooked) {
+    document.addEventListener('change', (e) => {
+        if (e.target && e.target.id === 'story-age') {
+            window.appliquerCouleurAge(e.target);
+        }
+    });
+
     document.addEventListener('click', async (e) => {
         // Redirection Bouton Retour
         if (e.target && e.target.id === 'btn-retour-creation') {
