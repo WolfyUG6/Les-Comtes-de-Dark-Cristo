@@ -110,6 +110,7 @@ async function chargerChapitres(idHistoire) {
         .from('chapitres')
         .select('*')
         .eq('histoire_id', idHistoire)
+        .eq('est_publie', true) // <-- LE BOUCLIER QUI CACHE LES BROUILLONS
         .order('numero', { ascending: true });
 
     if (error) {
@@ -277,6 +278,7 @@ window.lireChapitre = async function(idChapitre) {
         .from('chapitres')
         .select('id')
         .eq('histoire_id', chapitre.histoire_id)
+        .eq('est_publie', true) // <-- AJOUTE CETTE LIGNE
         .lt('numero', chapitre.numero)
         .order('numero', { ascending: false })
         .limit(1)
@@ -292,6 +294,7 @@ window.lireChapitre = async function(idChapitre) {
         .from('chapitres')
         .select('id')
         .eq('histoire_id', chapitre.histoire_id)
+        .eq('est_publie', true) // <-- AJOUTE CETTE LIGNE
         .gt('numero', chapitre.numero)
         .order('numero', { ascending: true })
         .limit(1)

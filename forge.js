@@ -220,6 +220,8 @@ submitChapitre.addEventListener('click', async () => {
     // --- LE NOUVEAU SORTILÈGE DE COMPTAGE ---
     // On ne calcule plus rien de caché, on lit le compteur en direct
     const compteMots = window.compteMotsLive;
+	
+	const estPublie = document.getElementById('chapitre-publie').checked;
 
     // 2. Vérification de sécurité (on force à remplir le chapitre)
     if (!numero || !titre || contenu === '<p><br></p>' || !contenu) {
@@ -241,7 +243,8 @@ submitChapitre.addEventListener('click', async () => {
                 contenu,
                 note_debut: contenuDebut,
                 note_fin: contenuFin,
-                nombre_mots: compteMots // <-- NOUVELLE LIGNE ICI
+                nombre_mots: compteMots,
+                est_publie: estPublie // <-- LA NOUVELLE LIGNE EST ICI
             })
             .eq('id', window.currentChapitreId);
         erreurGravure = error;
@@ -256,7 +259,8 @@ submitChapitre.addEventListener('click', async () => {
                 contenu,
                 note_debut: contenuDebut,
                 note_fin: contenuFin,
-                nombre_mots: compteMots // <-- NOUVELLE LIGNE ICI
+                nombre_mots: compteMots,
+                est_publie: estPublie // <-- LA NOUVELLE LIGNE EST ICI
             }]);
         erreurGravure = error;
     }
@@ -341,8 +345,16 @@ window.chargerChapitresAdmin = async function(idHistoire) {
         const div = document.createElement('div');
         div.style.cssText = "background: #111; border: 1px solid #333; padding: 10px; display: flex; justify-content: space-between; align-items: center;";
         
+        // L'Inquisiteur prépare l'étiquette magique JUSTE AVANT de dessiner la ligne
+        const badgeStatut = chap.est_publie 
+            ? '<span style="color: #00aaff; font-size: 0.75rem; margin-right: 10px; font-weight: bold;">[Publié]</span>' 
+            : '<span style="color: #ff4444; font-size: 0.75rem; margin-right: 10px; font-weight: bold;">[Brouillon]</span>';
+
         div.innerHTML = `
-            <span style="color: #e0d7c6; font-family: 'Cinzel', serif;">Chapitre ${chap.numero} : ${chap.titre}</span>
+            <div>
+                ${badgeStatut}
+                <span style="color: #e0d7c6; font-family: 'Cinzel', serif;">Chapitre ${chap.numero} : ${chap.titre}</span>
+            </div>
             <div>
                 <button class="genre-btn" style="font-size: 0.7rem; margin-right: 10px; border-color: #c4a484; color: #c4a484;" onclick="ouvrirEditeurChapitre(${chap.id})">Modifier</button>
                 <button class="genre-btn" style="font-size: 0.7rem; border-color: red; color: red;" onclick="supprimerChapitre(${chap.id}, ${idHistoire})">Supprimer</button>
@@ -397,6 +409,7 @@ document.getElementById('btn-open-add-chapitre').addEventListener('click', () =>
     quillNoteDebut.root.innerHTML = '';
     quillNoteFin.root.innerHTML = '';
     
+	document.getElementById('chapitre-publie').checked = true; // Par défaut, on prépare à publier
     document.getElementById('submit-chapitre').innerText = "Graver le Chapitre";
     window.changerDePage('editeur-chapitre');
 });
@@ -496,6 +509,9 @@ window.ouvrirEditeurChapitre = async function(idChapitre) {
         
         // 🔴 ON FORCE LE COMPTEUR À LIRE LE CHAPITRE QU'ON VIENT D'OUVRIR
         setTimeout(() => { window.actualiserCompteur(); }, 100);
+		
+		// On remet la case dans le bon état
+        document.getElementById('chapitre-publie').checked = chapitre.est_publie !== false;
         
         // On change le texte du bouton pour être clair
         document.getElementById('submit-chapitre').innerText = "Graver les modifications";
