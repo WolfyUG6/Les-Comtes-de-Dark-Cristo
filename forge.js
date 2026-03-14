@@ -265,6 +265,7 @@ submitChapitre.addEventListener('click', async () => {
                 note_fin: contenuFin,
                 nombre_mots: compteMots,
                 est_publie: estPublie // <-- LA NOUVELLE LIGNE EST ICI
+				date_publication: datePublication // <-- LA NOUVELLE LIGNE EST ICI
             }]);
         erreurGravure = error;
     }
