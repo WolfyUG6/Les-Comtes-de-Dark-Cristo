@@ -38,20 +38,23 @@ window.changerDePage = async function(pageDemandee) {
         // On l'injecte dans le Maître
         root.innerHTML = html;
 
-        // --- 🌑 L'ÉCLIPSE DU LOGO (Nouveau Mécanisme) 🌑 ---
+        // --- 🌑 L'ÉCLIPSE DU LOGO & DU MENU (Nouveau Mécanisme) 🌑 ---
         const miniLogo = document.getElementById('mini-logo');
         const heroLogo = document.getElementById('hero-logo-area');
+        const menuGenre = document.getElementById('main-genre-menu'); // <-- Le menu des catégories
 
         if (pageDemandee === 'accueil') {
-            // Si on est dans le Hall : Gros Logo activé, Petit Logo caché
+            // Si on est dans le Hall : Gros Logo activé, Petit Logo caché, Menu affiché
             if (miniLogo) miniLogo.classList.add('hidden');
             if (heroLogo) heroLogo.classList.remove('hidden');
+            if (menuGenre) menuGenre.classList.remove('hidden');
         } else {
-            // Partout ailleurs : Petit Logo activé, Gros Logo caché
+            // Partout ailleurs : Petit Logo activé, Gros Logo caché, Menu masqué
             if (miniLogo) miniLogo.classList.remove('hidden');
             if (heroLogo) heroLogo.classList.add('hidden');
+            if (menuGenre) menuGenre.classList.add('hidden');
         }
-        // ----------------------------------------------------
+        // -------------------------------------------------------------
 
         // On réveille les scripts de la page
         initialiserScriptsDePage(pageDemandee);
