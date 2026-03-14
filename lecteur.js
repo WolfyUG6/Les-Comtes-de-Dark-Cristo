@@ -328,6 +328,19 @@ window.lireChapitre = async function(idChapitre) {
 document.getElementById('btn-retour-oeuvre').addEventListener('click', () => {
     // On cache la jauge dans les ténèbres
     document.getElementById('lecture-progress-container').style.display = 'none';
+    
+    // --- LE DISSIPATEUR D'ILLUSION (Annulation du Mode Zen) ---
+    // 1. On arrache le manteau d'invisibilité du site
+    document.body.classList.remove('mode-zen');
+    
+    // 2. On remet le bouton du Pupitre dans son état d'origine
+    const btnModeZen = document.getElementById('btn-mode-zen');
+    if (btnModeZen) {
+        btnModeZen.innerText = "👁️ Plein Écran";
+        btnModeZen.style.borderColor = "#00aaff";
+        btnModeZen.style.color = "#00aaff";
+    }
+
     // On utilise la fonction existante en lui redonnant l'ID de l'œuvre en cours
     window.ouvrirOeuvre(window.currentOeuvreId); 
 });
