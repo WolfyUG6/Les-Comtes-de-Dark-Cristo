@@ -1,33 +1,33 @@
-<div class="page-gestion" style="padding-top: 40px; padding-bottom: 80px; width: 80%; max-width: 1200px; margin: 0 auto;">
+<div class="page-gestion">
     
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <div class="gestion-header">
         <button id="btn-retour-gestion" class="genre-btn">← Retour à l'Atelier</button>
-        <button id="btn-edit-histoire" class="genre-btn" style="border-color: var(--accent-blue); color: var(--accent-blue); box-shadow: var(--shadow-hover);">⚙️ Modifier les infos du Grimoire</button>
+        <button id="btn-edit-histoire" class="genre-btn btn-outline-blue shadow-active">⚙️ Modifier les infos du Grimoire</button>
     </div>
 
-    <section id="info-histoire-panel" class="card" style="display: flex; gap: 25px; margin-bottom: 50px; align-items: flex-start;">
+    <section id="info-histoire-panel" class="card info-panel">
         <p class="loading-text">Déchiffrage des runes en cours...</p>
     </section>
 
     <section class="chapitres-section">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px;">
-            <h2 style="margin: 0;">Les Parchemins (Chapitres)</h2>
-            <button id="btn-add-chapitre" class="btn-primary" style="padding: 10px 20px;">+ Forger un Chapitre</button>
+        <div class="chapters-header">
+            <h2 class="title-m0">Les Parchemins (Chapitres)</h2>
+            <button id="btn-add-chapitre" class="btn-primary">+ Forger un Chapitre</button>
         </div>
 
-        <div style="margin-bottom: 40px;">
-            <h3 style="color: var(--text-muted); border-bottom: 1px dashed var(--border-color); padding-bottom: 5px;">📝 Brouillons (Cachés)</h3>
-            <div id="liste-brouillons" style="display: flex; flex-direction: column; gap: 10px;"></div>
+        <div class="chapter-section">
+            <h3 class="chapter-section-title-brouillon">📝 Brouillons (Cachés)</h3>
+            <div id="liste-brouillons" class="chapter-list"></div>
         </div>
 
-        <div style="margin-bottom: 40px;">
-            <h3 style="color: #ffd700; border-bottom: 1px dashed var(--border-color); padding-bottom: 5px;">⏳ Programmés (En attente)</h3>
-            <div id="liste-programmes" style="display: flex; flex-direction: column; gap: 10px;"></div>
+        <div class="chapter-section">
+            <h3 class="chapter-section-title-programme">⏳ Programmés (En attente)</h3>
+            <div id="liste-programmes" class="chapter-list"></div>
         </div>
 
-        <div style="margin-bottom: 40px;">
-            <h3 style="color: var(--accent-blue); border-bottom: 1px dashed var(--border-color); padding-bottom: 5px;">👁️ Publiés (Visibles de tous)</h3>
-            <div id="liste-publies" style="display: flex; flex-direction: column; gap: 10px;"></div>
+        <div class="chapter-section">
+            <h3 class="chapter-section-title-publie">👁️ Publiés (Visibles de tous)</h3>
+            <div id="liste-publies" class="chapter-list"></div>
         </div>
     </section>
 

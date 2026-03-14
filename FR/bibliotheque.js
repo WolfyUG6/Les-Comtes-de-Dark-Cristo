@@ -24,7 +24,7 @@ window.chargerVitrine = async function(genreFilter = null) {
     const { data: histoires, error } = await query;
 
     if (error) {
-        storiesContainer.innerHTML = `<p style="color: var(--accent-red);">Erreur de lecture : ${error.message}</p>`;
+        storiesContainer.innerHTML = `<p class="text-error">Erreur de lecture : ${error.message}</p>`;
         return;
     }
 
@@ -66,9 +66,9 @@ window.chargerVitrine = async function(genreFilter = null) {
                 }
             </div>
             <h3>${histoire.titre}</h3>
-            <span style="font-size: 0.8rem; color: var(--text-muted);">Par Comte ${pseudo}</span>
+            <span class="text-small text-muted">Par Comte ${pseudo}</span>
             <p>${histoire.synopsis}</p>
-            <button class="genre-btn" onclick="ouvrirOeuvre(${histoire.id})" style="width: 100%; margin-top: 15px;">Lire l'œuvre</button>
+            <button class="genre-btn w-100 mt-15" onclick="ouvrirOeuvre(${histoire.id})">Lire l'œuvre</button>
         `;
         
         storiesContainer.appendChild(card);

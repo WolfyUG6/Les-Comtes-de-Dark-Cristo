@@ -19,7 +19,7 @@ window.chargerPageInterne = async function(pageDemandee) {
     const root = document.getElementById('sanctuaire-root');
     
     // Petit texte d'attente pendant que le fichier voyage
-    root.innerHTML = '<p style="text-align: center; color: var(--text-muted); font-style: italic; padding: 50px;">Ouverture du parchemin...</p>';
+    root.innerHTML = '<p class="text-center text-muted-italic p-50">Ouverture du parchemin...</p>';
 
     // L'Aiguilleur : on relie le mot-clé au bon fichier HTML
     const pages = {
@@ -37,7 +37,7 @@ window.chargerPageInterne = async function(pageDemandee) {
     const fichier = pages[pageDemandee];
 
     if (!fichier) {
-        root.innerHTML = '<p style="color: red; text-align: center;">Ce parchemin n\'existe pas.</p>';
+        root.innerHTML = '<p class="text-error text-center">Ce parchemin n\'existe pas.</p>';
         return;
     }
 
@@ -76,7 +76,7 @@ window.chargerPageInterne = async function(pageDemandee) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
     } catch (erreur) {
-        root.innerHTML = `<p style="color: red; text-align: center;">Erreur du Sanctuaire : ${erreur.message}</p>`;
+        root.innerHTML = `<p class="text-error text-center">Erreur du Sanctuaire : ${erreur.message}</p>`;
     }
 };
 

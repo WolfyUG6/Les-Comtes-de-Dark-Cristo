@@ -197,6 +197,7 @@ button:hover, .genre-btn:hover {
 .loading-text {
     color: var(--text-title);
     font-style: italic;
+    text-align: center;
 }
 
 /* --- Les Cartes de Grimoire (Préparation pour le JS) --- */
@@ -238,6 +239,7 @@ button:hover, .genre-btn:hover {
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 4;
+    line-clamp: 4;
     -webkit-box-orient: vertical;
     margin-bottom: 0;
 }
@@ -486,3 +488,66 @@ button:hover, .genre-btn:hover {
 
 .dropdown-item:last-child { border-bottom: none; }
 .dropdown-item:hover { background-color: var(--bg-hover); color: var(--text-hover); }
+
+/* =========================================
+   NOUVELLES CLASSES COMPOSANTS (Forge, Gestion)
+   ========================================= */
+
+/* Utilitaires de texte et d'espacement */
+.text-error { color: var(--accent-red); }
+.text-muted { color: var(--text-muted); }
+.text-muted-italic { color: var(--text-muted); font-style: italic; }
+.text-center { text-align: center; }
+.text-small { font-size: 0.8rem; }
+.w-100 { width: 100%; }
+.mt-15 { margin-top: 15px; }
+.mb-15 { margin-bottom: 15px; }
+.p-50 { padding: 50px; }
+.shadow-active { box-shadow: var(--shadow-hover); }
+.title-m0 { margin: 0; }
+.story-title-m0 { margin: 0 0 10px 0; }
+
+/* -- Forge -- */
+.page-forge { padding-top: 40px; padding-bottom: 80px; }
+.forge-actions { margin-top: 20px; }
+.my-stories-section { width: 75%; max-width: 1200px; margin: 0 auto; }
+.section-title { text-align: center; margin-bottom: 30px; text-transform: uppercase; }
+.sort-container { display: flex; justify-content: flex-end; margin-bottom: 20px; }
+.custom-select { 
+    padding: 10px; 
+    background: var(--bg-box); 
+    color: var(--text-main); 
+    border: 1px solid var(--accent-red); 
+    font-family: 'Segoe UI', sans-serif; 
+    font-size: 0.9rem; 
+    cursor: pointer; 
+    outline: none; 
+    box-shadow: var(--shadow-box); 
+}
+.stories-list-col { display: flex; flex-direction: column; gap: 20px; }
+.story-card-horizontal {
+    display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box;
+}
+
+/* -- Gestion -- */
+.page-gestion { padding-top: 40px; padding-bottom: 80px; width: 80%; max-width: 1200px; margin: 0 auto; }
+.gestion-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.info-panel { display: flex; gap: 25px; margin-bottom: 50px; align-items: flex-start; }
+.book-cover { width: 160px; height: 230px; object-fit: cover; border: 1px solid var(--border-color); border-radius: 5px; }
+.book-cover-placeholder { width: 160px; height: 230px; background: #000; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; color: var(--text-muted); text-align: center; }
+.book-info-content { flex: 1; }
+.book-synopsis { color: var(--text-muted); line-height: 1.6; font-size: 0.95rem; }
+.chapters-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; }
+.chapter-section { margin-bottom: 40px; }
+.chapter-section-title-brouillon { color: var(--text-muted); border-bottom: 1px dashed var(--border-color); padding-bottom: 5px; }
+.chapter-section-title-programme { color: #ffd700; border-bottom: 1px dashed var(--border-color); padding-bottom: 5px; }
+.chapter-section-title-publie { color: var(--accent-blue); border-bottom: 1px dashed var(--border-color); padding-bottom: 5px; }
+.chapter-list { display: flex; flex-direction: column; gap: 10px; }
+.chapter-item { background: var(--bg-box); border: 1px solid var(--border-color); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; transition: 0.3s; }
+.chapter-title { color: var(--text-main); font-family: 'Cinzel', serif; }
+.scheduled-date { font-size: 0.8rem; color: #ffd700; margin-left: 10px; font-style: italic; }
+.published-date { font-size: 0.8rem; color: var(--text-muted); margin-left: 10px; font-style: italic; }
+.btn-outline-blue { border-color: var(--accent-blue); color: var(--accent-blue); }
+.btn-outline-red { border-color: var(--accent-red); color: var(--accent-red); }
+.btn-small { font-size: 0.75rem; margin-right: 10px; }
+.btn-small-last { font-size: 0.75rem; }

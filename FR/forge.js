@@ -15,7 +15,7 @@ window.chargerMesOeuvres = async function() {
     const { data: { session } } = await window._supabase.auth.getSession();
     
     if (!session) {
-        conteneur.innerHTML = '<p style="color: var(--accent-red);">Vous devez être connecté pour accéder à la Forge.</p>';
+        conteneur.innerHTML = '<p class="text-error">Vous devez être connecté pour accéder à la Forge.</p>';
         return;
     }
 
@@ -26,12 +26,12 @@ window.chargerMesOeuvres = async function() {
         .eq('auteur', session.user.email);
 
     if (error) {
-        conteneur.innerHTML = `<p style="color: var(--accent-red);">Erreur : ${error.message}</p>`;
+        conteneur.innerHTML = `<p class="text-error">Erreur : ${error.message}</p>`;
         return;
     }
 
     if (mesHistoires.length === 0) {
-        conteneur.innerHTML = '<p class="loading-text" style="text-align:center;">Vous n\'avez encore forgé aucune œuvre.<br>Il est temps de noircir le parchemin.</p>';
+        conteneur.innerHTML = '<p class="loading-text">Vous n\'avez encore forgé aucune œuvre.<br>Il est temps de noircir le parchemin.</p>';
         return;
     }
 
@@ -68,12 +68,11 @@ window.afficherOeuvresTriees = function() {
     conteneur.innerHTML = '';
     histoires.forEach(histoire => {
         const carte = document.createElement('div');
-        carte.className = 'card'; 
-        carte.style.cssText = "display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box;";
+        carte.className = 'card story-card-horizontal'; 
         
         carte.innerHTML = `
             <div>
-                <h3 style="margin: 0 0 10px 0;">${histoire.titre}</h3>
+                <h3 class="story-title-m0">${histoire.titre}</h3>
                 <div class="story-tags">
                     <span class="tag tag-genre">${histoire.genre}</span>
                     <span class="tag tag-statut">${histoire.statut || '✍️ En cours'}</span>
@@ -81,7 +80,7 @@ window.afficherOeuvresTriees = function() {
                 </div>
             </div>
             <div>
-                <button class="genre-btn" style="border-color: var(--accent-blue); color: var(--accent-blue);" onclick="ouvrirGestionOeuvre(${histoire.id})">Gérer le Grimoire</button>
+                <button class="genre-btn btn-outline-blue" onclick="ouvrirGestionOeuvre(${histoire.id})">Gérer le Grimoire</button>
             </div>
         `;
         conteneur.appendChild(carte);

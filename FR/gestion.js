@@ -17,26 +17,26 @@ window.chargerGestionOeuvre = async function() {
         .single();
 
     if (errHistoire || !histoire) {
-        infoPanel.innerHTML = `<p style="color: var(--accent-red);">Erreur : L'œuvre est introuvable dans les abysses.</p>`;
+        infoPanel.innerHTML = `<p class="text-error">Erreur : L'œuvre est introuvable dans les abysses.</p>`;
         return;
     }
 
     // 2. Affichage des infos avec le style de base.css
     const imgHtml = histoire.image_couverture 
-        ? `<img src="${histoire.image_couverture}" style="width: 160px; height: 230px; object-fit: cover; border: 1px solid var(--border-color); border-radius: 5px;">` 
-        : `<div style="width: 160px; height: 230px; background: #000; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; color: var(--text-muted); text-align: center;">Pas de couverture</div>`;
+        ? `<img src="${histoire.image_couverture}" class="book-cover">` 
+        : `<div class="book-cover-placeholder">Pas de couverture</div>`;
 
     infoPanel.innerHTML = `
         ${imgHtml}
-        <div style="flex: 1;">
-            <h2 style="margin: 0 0 10px 0;">${histoire.titre}</h2>
-            <div class="story-tags" style="margin-bottom: 15px;">
+        <div class="book-info-content">
+            <h2 class="story-title-m0">${histoire.titre}</h2>
+            <div class="story-tags mb-15">
                 <span class="tag tag-genre">${histoire.genre}</span>
                 <span class="tag tag-statut">${histoire.statut || '✍️ En cours'}</span>
                 <span class="tag tag-age">${histoire.classification || 'Tout public'}</span>
                 ${histoire.contenu_sensible ? `<span class="tag tag-sensible">⚠️ Sensible</span>` : ''}
             </div>
-            <p style="color: var(--text-muted); line-height: 1.6; font-size: 0.95rem;">${histoire.synopsis}</p>
+            <p class="book-synopsis">${histoire.synopsis}</p>
         </div>
     `;
 
@@ -62,7 +62,7 @@ window.chargerChapitresCategories = async function() {
         .order('numero', { ascending: true }); // On trie par numéro de chapitre (1, 2, 3...)
 
     if (error) {
-        listeBrouillons.innerHTML = `<p style="color: var(--accent-red);">Erreur: ${error.message}</p>`;
+        listeBrouillons.innerHTML = `<p class="text-error">Erreur: ${error.message}</p>`;
         return;
     }
 
@@ -78,25 +78,25 @@ window.chargerChapitresCategories = async function() {
         
         // Création de la barre du chapitre
         const div = document.createElement('div');
-        div.style.cssText = "background: var(--bg-box); border: 1px solid var(--border-color); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; transition: 0.3s;";
+        div.className = "chapter-item";
         
         let infoDate = '';
         if (chap.est_publie && dateChap > maintenant) {
             const dateAffichee = dateChap.toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-            infoDate = `<span style="font-size: 0.8rem; color: #ffd700; margin-left: 10px; font-style: italic;">(Prévu le ${dateAffichee})</span>`;
+            infoDate = `<span class="scheduled-date">(Prévu le ${dateAffichee})</span>`;
         } else if (chap.est_publie) {
             const dateAffichee = dateChap.toLocaleDateString('fr-FR');
-            infoDate = `<span style="font-size: 0.8rem; color: var(--text-muted); margin-left: 10px; font-style: italic;">(Publié le ${dateAffichee})</span>`;
+            infoDate = `<span class="published-date">(Publié le ${dateAffichee})</span>`;
         }
 
         div.innerHTML = `
             <div>
-                <strong style="color: var(--text-main); font-family: 'Cinzel', serif;">Chapitre ${chap.numero} : ${chap.titre}</strong>
+                <strong class="chapter-title">Chapitre ${chap.numero} : ${chap.titre}</strong>
                 ${infoDate}
             </div>
             <div>
-                <button class="genre-btn" style="font-size: 0.75rem; border-color: var(--accent-blue); color: var(--accent-blue); margin-right: 10px;" onclick="alert('Modifier arrivera plus tard !')">Modifier</button>
-                <button class="genre-btn" style="font-size: 0.75rem; border-color: var(--accent-red); color: var(--accent-red);" onclick="supprimerChapitre(${chap.id})">Supprimer</button>
+                <button class="genre-btn btn-outline-blue btn-small" onclick="alert('Modifier arrivera plus tard !')">Modifier</button>
+                <button class="genre-btn btn-outline-red btn-small-last" onclick="supprimerChapitre(${chap.id})">Supprimer</button>
             </div>
         `;
 
@@ -114,9 +114,9 @@ window.chargerChapitresCategories = async function() {
     });
 
     // Messages si les cases sont vides
-    if (countBrouillons === 0) listeBrouillons.innerHTML = '<p style="color: var(--text-muted); font-style: italic; font-size: 0.9rem;">Aucun parchemin en brouillon.</p>';
-    if (countProgrammes === 0) listeProgrammes.innerHTML = '<p style="color: var(--text-muted); font-style: italic; font-size: 0.9rem;">Aucun parchemin en attente.</p>';
-    if (countPublies === 0) listePublies.innerHTML = '<p style="color: var(--text-muted); font-style: italic; font-size: 0.9rem;">Aucun parchemin visible.</p>';
+    if (countBrouillons === 0) listeBrouillons.innerHTML = '<p class="text-muted-italic text-small">Aucun parchemin en brouillon.</p>';
+    if (countProgrammes === 0) listeProgrammes.innerHTML = '<p class="text-muted-italic text-small">Aucun parchemin en attente.</p>';
+    if (countPublies === 0) listePublies.innerHTML = '<p class="text-muted-italic text-small">Aucun parchemin visible.</p>';
 };
 
 // --- LE POUVOIR DE DESTRUCTION ---

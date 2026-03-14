@@ -1,0 +1,583 @@
+// Connexion à Supabase
+const supabaseUrl = 'https://kbpefbjyuuzadssdbahl.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImticGVmYmp5dXV6YWRzc2RiYWhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4NzAzOTcsImV4cCI6MjA4ODQ0NjM5N30.XKqPt0rJO7pAL1M7PapMLf4f7uw2PQQAUhMOG-PexzI';
+
+const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+console.log("Le sanctuaire de Dark & Cristo est connecté.");
+
+// --- LOGIQUE DE CONNEXION ET D'INSCRIPTION ---
+
+// 1. On cible les éléments de la page (les boutons et la boîte)
+const btnLogin = document.getElementById('btn-login');
+const btnSignup = document.getElementById('btn-signup');
+const authModal = document.getElementById('auth-modal');
+const closeModal = document.getElementById('close-modal');
+const submitAuth = document.getElementById('submit-auth');
+const emailInput = document.getElementById('email-input');
+const passwordInput = document.getElementById('password-input');
+
+let isSignUp = false; // Ce petit drapeau nous dira si l'utilisateur veut s'inscrire ou se connecter
+
+// 2. Ouvrir la boîte pour "Se connecter"
+btnLogin.addEventListener('click', () => {
+    isSignUp = false;
+    authModal.style.display = 'block';
+    submitAuth.innerText = "Se connecter"; // Change le texte du bouton de validation
+});
+
+// 3. Ouvrir la boîte pour "Créer un compte"
+btnSignup.addEventListener('click', () => {
+    isSignUp = true;
+    authModal.style.display = 'block';
+    submitAuth.innerText = "Créer mon compte";
+});
+
+// 4. Fermer la boîte quand on clique sur "Fermer"
+closeModal.addEventListener('click', () => {
+    authModal.style.display = 'none';
+    emailInput.value = ''; // On vide les champs
+    passwordInput.value = '';
+});
+
+// 5. L'action principale : Quand on clique sur le bouton de validation de la boîte
+submitAuth.addEventListener('click', async () => {
+    const email = emailInput.value;
+    const password = passwordInput.value;
+
+    // Petite vérification de sécurité
+    if (!email || !password) {
+        alert("Il faut remplir les deux champs pour entrer dans le sanctuaire.");
+        return;
+    }
+
+    if (isSignUp) {
+        // --- MODE CRÉATION DE COMPTE ---
+        const { data, error } = await _supabase.auth.signUp({
+            email: email,
+            password: password,
+        });
+
+        if (error) {
+            alert("Erreur lors de la création : " + error.message);
+        } else {
+            alert("Compte créé avec succès ! Bienvenue parmi les Comtes.");
+            authModal.style.display = 'none'; // On cache la boîte
+        }
+    } else {
+        // --- MODE CONNEXION ---
+        const { data, error } = await _supabase.auth.signInWithPassword({
+            email: email,
+            password: password,
+        });
+
+        if (error) {
+            alert("Erreur de connexion : " + error.message);
+        } else {
+            alert("Connexion réussie ! Le sanctuaire s'ouvre à vous.");
+            authModal.style.display = 'none';
+        }
+    }
+});
+
+// --- GESTION DE L'AFFICHAGE SELON LA CONNEXION ---
+const authContainer = document.getElementById('auth-container');
+const userContainer = document.getElementById('user-container');
+const userNameDisplay = document.getElementById('user-name');
+const btnLogout = document.getElementById('btn-logout');
+
+// Supabase écoute en permanence si quelqu'un est connecté
+_supabase.auth.onAuthStateChange((event, session) => {
+    if (session) {
+        // Un utilisateur est connecté !
+        authContainer.style.display = 'none'; // On cache les boutons de connexion
+        userContainer.style.display = 'flex'; // On affiche le menu du profil
+        
+        // On affiche temporairement le début de son mail (avant qu'il ait choisi un vrai pseudo)
+        userNameDisplay.innerText = "Comte " + session.user.email.split('@')[0]; 
+    } else {
+        // Personne n'est connecté
+        authContainer.style.display = 'flex'; // On remet les boutons normaux
+        userContainer.style.display = 'none'; // On cache le menu
+    }
+});
+
+// Action du bouton pour se déconnecter
+btnLogout.addEventListener('click', async () => {
+    const { error } = await _supabase.auth.signOut();
+    if (!error) {
+        alert("Vous avez quitté le sanctuaire.");
+    }
+});
+
+// --- PUBLICATION D'UNE HISTOIRE ---
+const btnPublish = document.getElementById('btn-publish');
+const publishModal = document.getElementById('publish-modal');
+const closePublishModal = document.getElementById('close-publish-modal');
+const submitStory = document.getElementById('submit-story');
+
+// 1. Ouvrir et fermer la boîte de publication
+btnPublish.addEventListener('click', () => {
+    publishModal.style.display = 'block';
+});
+
+closePublishModal.addEventListener('click', () => {
+    publishModal.style.display = 'none';
+});
+
+// 2. Envoyer l'histoire et l'image dans la base de données
+submitStory.addEventListener('click', async () => {
+    const title = document.getElementById('story-title').value;
+    const synopsis = document.getElementById('story-synopsis').value;
+    const genre = document.getElementById('story-genre').value;
+    const coverInput = document.getElementById('story-cover-file');
+    const file = coverInput.files[0]; // On attrape le fichier sélectionné
+
+    // Vérification de connexion
+    const { data: { session } } = await _supabase.auth.getSession();
+    if (!session) {
+        alert("Vous devez être connecté pour publier.");
+        return;
+    }
+
+    // Vérification des champs obligatoires
+    if (!title || !synopsis || !genre) {
+        alert("Le titre, le synopsis et le genre sont obligatoires pour sceller une œuvre.");
+        return;
+    }
+
+    // On change le texte du bouton pendant que l'ordinateur travaille
+    submitStory.innerText = "Forgeage en cours...";
+    submitStory.disabled = true;
+
+    let imageUrl = null;
+
+    // ETAPE A : Si le joueur a mis une image, on l'envoie dans le Storage
+    if (file) {
+        // On crée un nom unique pour l'image (pour éviter que deux auteurs écrasent "couverture.jpg")
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+
+        const { data: uploadData, error: uploadError } = await _supabase.storage
+            .from('couvertures')
+            .upload(fileName, file);
+
+        if (uploadError) {
+            alert("Erreur lors de l'envoi de l'image : " + uploadError.message);
+            submitStory.innerText = "Publier";
+            submitStory.disabled = false;
+            return;
+        }
+
+        // On récupère le lien public officiel de l'image stockée
+        const { data: urlData } = _supabase.storage
+            .from('couvertures')
+            .getPublicUrl(fileName);
+        
+        imageUrl = urlData.publicUrl;
+    }
+
+    // ETAPE B : On envoie l'histoire (avec le lien de l'image) dans la table 'histoires'
+    const { data, error } = await _supabase
+        .from('histoires')
+        .insert([
+            { 
+                titre: title, 
+                synopsis: synopsis, 
+                genre: genre, 
+                auteur: session.user.email,
+                image_couverture: imageUrl 
+            }
+        ]);
+
+    if (error) {
+        alert("Erreur lors de la publication : " + error.message);
+    } else {
+        alert("Votre œuvre a été gravée dans le sanctuaire avec succès !");
+        publishModal.style.display = 'none'; // On ferme la boîte
+        
+        // On vide tous les champs
+        document.getElementById('story-title').value = '';
+        document.getElementById('story-synopsis').value = '';
+        document.getElementById('story-genre').value = '';
+        coverInput.value = '';
+    }
+    
+    // On remet le bouton à son état normal
+    submitStory.innerText = "Publier";
+    submitStory.disabled = false;
+});
+
+// --- AFFICHAGE DES HISTOIRES ET FILTRES ---
+const storiesContainer = document.getElementById('stories-container');
+
+// 1. La grande fonction qui charge les livres (avec un filtre de genre optionnel)
+async function loadStories(genreFilter = null) {
+    storiesContainer.innerHTML = '<p style="color: #c4a484; font-style: italic;">Ouverture des grimoires...</p>';
+
+    // On prépare la question : "Donne-moi toutes les histoires, de la plus récente à la plus ancienne"
+    let query = _supabase.from('histoires').select('*').order('date_publication', { ascending: false });
+    
+    // Si on a cliqué sur un bouton, on ajoute le filtre à la question
+    if (genreFilter) {
+        query = query.eq('genre', genreFilter);
+    }
+
+    // On pose la question à Supabase
+    const { data: histoires, error } = await query;
+
+    if (error) {
+        storiesContainer.innerHTML = '<p style="color: red;">Erreur de lecture : ' + error.message + '</p>';
+        return;
+    }
+
+    storiesContainer.innerHTML = ''; // On vide la zone de recherche
+
+    if (histoires.length === 0) {
+        storiesContainer.innerHTML = '<p style="color: #777; font-style: italic;">Aucune œuvre trouvée dans ces ténèbres pour le moment...</p>';
+        return;
+    }
+
+    // 2. On fabrique le design pour chaque histoire trouvée
+    histoires.forEach(histoire => {
+        const card = document.createElement('div');
+        card.style.cssText = "background-color: #0a0a0a; border: 1px solid #5d1a1a; width: 280px; padding: 15px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.8);";
+
+        // L'image de couverture (ou un carré noir de secours)
+        const imgHtml = histoire.image_couverture 
+            ? `<img src="${histoire.image_couverture}" alt="${histoire.titre}" style="width: 100%; height: 380px; object-fit: cover; border: 1px solid #333;">` 
+            : `<div style="width: 100%; height: 380px; background-color: #111; border: 1px solid #333; display: flex; align-items: center; justify-content: center; color: #555;">Pas de couverture</div>`;
+
+        // On coupe le nom de l'auteur pour faire un pseudo (ex: "test@mail.com" devient "test")
+        const pseudo = histoire.auteur.split('@')[0];
+
+        // Le code HTML complet d'une carte d'histoire
+        card.innerHTML = `
+            ${imgHtml}
+            <span style="font-size: 0.7rem; background-color: #5d1a1a; color: white; padding: 3px 6px; align-self: flex-start; text-transform: uppercase;">${histoire.genre}</span>
+            <h3 style="color: #c4a484; font-family: 'Cinzel', serif; margin: 5px 0 0 0; font-size: 1.2rem;">${histoire.titre}</h3>
+            <span style="font-size: 0.8rem; color: #777;">Par Comte ${pseudo}</span>
+            <p style="color: #aaa; font-size: 0.9rem; flex-grow: 1; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; margin-bottom: 0;">${histoire.synopsis}</p>
+            <button class="genre-btn" onclick="ouvrirOeuvre(${histoire.id})" style="width: 100%; margin-top: 15px; border-color: #c4a484; color: #c4a484;">Lire l'œuvre</button>
+        `;
+        
+        // On pose la carte sur l'étagère
+        storiesContainer.appendChild(card);
+    });
+}
+
+// 3. On charge toutes les histoires au démarrage du site
+loadStories();
+
+// 4. On donne vie à tes boutons de menu "Dark Fantasy", "Sci-Fi", etc.
+const genreButtons = document.querySelectorAll('.genre-menu button');
+genreButtons.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        const genreChoisi = e.target.innerText; // Récupère le texte du bouton cliqué
+        loadStories(genreChoisi); // Relance la recherche avec ce filtre
+    });
+});
+
+// --- GESTION DE LA PAGE DE L'ŒUVRE ---
+const oeuvrePage = document.getElementById('oeuvre-page');
+const btnRetour = document.getElementById('btn-retour');
+
+// 1. Le bouton pour revenir à l'accueil
+btnRetour.addEventListener('click', () => {
+    oeuvrePage.style.display = 'none';
+    storiesContainer.style.display = 'flex'; // On réaffiche la vitrine
+});
+
+// 2. La magie quand on clique sur "Lire l'œuvre"
+window.ouvrirOeuvre = async function(idHistoire) {
+    // On cache la vitrine, on affiche la page détaillée
+    storiesContainer.style.display = 'none';
+    oeuvrePage.style.display = 'block';
+
+    // On dit "Chargement..." le temps d'interroger la base de données
+    document.getElementById('oeuvre-titre').innerText = "Ouverture du grimoire...";
+
+    // On va chercher l'histoire précise dans Supabase grâce à son ID
+    const { data: histoire, error } = await _supabase
+        .from('histoires')
+        .select('*')
+        .eq('id', idHistoire)
+        .single(); // On précise qu'on en veut une seule
+
+    if (error) {
+        alert("Erreur de chargement : " + error.message);
+        return;
+    }
+
+    // On remplit les encadrés avec les vraies informations !
+    document.getElementById('oeuvre-cover').src = histoire.image_couverture || '';
+    document.getElementById('oeuvre-genre').innerText = histoire.genre;
+    document.getElementById('oeuvre-titre').innerText = histoire.titre;
+    document.getElementById('oeuvre-auteur').innerText = "Comte " + histoire.auteur.split('@')[0];
+    document.getElementById('oeuvre-synopsis').innerText = histoire.synopsis;
+
+    // -- NOUVEAU : VÉRIFICATION DE L'AUTEUR POUR LE BOUTON D'AJOUT --
+    window.currentOeuvreId = idHistoire; // On mémorise de quelle histoire on parle
+    const { data: { session } } = await _supabase.auth.getSession();
+    
+    // Si on est connecté ET que notre email est le même que celui de l'auteur de l'histoire
+    if (session && session.user.email === histoire.auteur) {
+        document.getElementById('btn-add-chapitre').style.display = 'block'; // On affiche le bouton
+    } else {
+        document.getElementById('btn-add-chapitre').style.display = 'none'; // On le cache
+    }
+	
+	// --- LA LIGNE À AJOUTER EST JUSTE ICI ---
+    chargerChapitres(idHistoire);
+};
+
+// --- PUBLICATION D'UN CHAPITRE ---
+const btnAddChapitre = document.getElementById('btn-add-chapitre');
+const chapitreModal = document.getElementById('chapitre-modal');
+const closeChapitreModal = document.getElementById('close-chapitre-modal');
+const submitChapitre = document.getElementById('submit-chapitre');
+
+// Ouvrir / Fermer la boîte d'écriture
+btnAddChapitre.addEventListener('click', () => {
+    chapitreModal.style.display = 'block';
+});
+
+closeChapitreModal.addEventListener('click', () => {
+    chapitreModal.style.display = 'none';
+});
+
+// Envoyer le chapitre à Supabase
+submitChapitre.addEventListener('click', async () => {
+    const numero = document.getElementById('chapitre-numero').value;
+    const titre = document.getElementById('chapitre-titre').value;
+    const contenu = document.getElementById('chapitre-contenu').value;
+
+    if (!numero || !titre || !contenu) {
+        alert("Le numéro, le titre et le contenu sont obligatoires pour forger le chapitre.");
+        return;
+    }
+
+    submitChapitre.innerText = "Gravure en cours...";
+    submitChapitre.disabled = true;
+
+    // On envoie dans la table 'chapitres' avec le lien vers l'histoire actuelle (currentOeuvreId)
+    const { data, error } = await _supabase
+        .from('chapitres')
+        .insert([
+            { 
+                histoire_id: window.currentOeuvreId, 
+                numero: parseInt(numero), 
+                titre: titre, 
+                contenu: contenu 
+            }
+        ]);
+
+    if (error) {
+        alert("Erreur lors de la publication : " + error.message);
+    } else {
+        alert("Le chapitre a été ajouté à votre œuvre !");
+        chapitreModal.style.display = 'none'; // On ferme la boîte
+		
+		// --- LA LIGNE À AJOUTER EST JUSTE ICI ---
+        chargerChapitres(window.currentOeuvreId);
+        
+        // On vide les champs pour la prochaine fois
+        document.getElementById('chapitre-numero').value = '';
+        document.getElementById('chapitre-titre').value = '';
+        document.getElementById('chapitre-contenu').value = '';
+    }
+    
+    // On remet le bouton à son état normal
+    submitChapitre.innerText = "Publier le Chapitre";
+    submitChapitre.disabled = false;
+});
+
+// --- AFFICHAGE DE LA LISTE DES CHAPITRES ---
+async function chargerChapitres(idHistoire) {
+    const chapitresListe = document.getElementById('chapitres-liste');
+    chapitresListe.innerHTML = '<p style="color: #c4a484; font-style: italic;">Recherche des écrits enfouis...</p>';
+
+    // On demande à Supabase tous les chapitres liés à cette histoire, triés du 1er au dernier
+    const { data: chapitres, error } = await _supabase
+        .from('chapitres')
+        .select('*')
+        .eq('histoire_id', idHistoire)
+        .order('numero', { ascending: true });
+
+    if (error) {
+        chapitresListe.innerHTML = '<p style="color: red;">Erreur de lecture : ' + error.message + '</p>';
+        return;
+    }
+
+    // Si on n'a rien trouvé
+    if (chapitres.length === 0) {
+        chapitresListe.innerHTML = '<p style="color: #777; font-style: italic;">Aucun chapitre n\'a encore été forgé pour cette œuvre.</p>';
+        return;
+    }
+
+    // Si on a trouvé des chapitres, on vide la zone et on fabrique la liste
+    chapitresListe.innerHTML = '';
+    
+    const ul = document.createElement('ul');
+    ul.style.listStyleType = 'none';
+    ul.style.padding = '0';
+    ul.style.margin = '0';
+
+    chapitres.forEach(chapitre => {
+        const li = document.createElement('li');
+        li.style.backgroundColor = '#0a0a0a';
+        li.style.border = '1px solid #333';
+        li.style.padding = '15px';
+        li.style.marginBottom = '10px';
+        li.style.display = 'flex';
+        li.style.justifyContent = 'space-between';
+        li.style.alignItems = 'center';
+
+        // Formatage de la date 
+        const datePub = new Date(chapitre.date_publication).toLocaleDateString('fr-FR');
+
+        li.innerHTML = `
+            <div style="text-align: left;">
+                <span style="color: #00aaff; font-weight: bold; margin-right: 10px;">Chapitre ${chapitre.numero}</span>
+                <span style="color: #e0d7c6;">${chapitre.titre}</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <span style="color: #555; font-size: 0.8rem;">${datePub}</span>
+                <button class="genre-btn" style="padding: 5px 15px; font-size: 0.8rem; border-color: #c4a484; color: #c4a484;" onclick="alert('La lecture du chapitre arrive à la prochaine étape !')">Lire</button>
+            </div>
+        `;
+        ul.appendChild(li);
+    });
+
+    chapitresListe.appendChild(ul);
+}
+
+// --- GESTION DU STUDIO AUTEUR (MON PROFIL) ---
+const btnProfile = document.getElementById('btn-profile');
+const studioPage = document.getElementById('studio-page');
+const btnRetourStudio = document.getElementById('btn-retour-studio');
+const mesOeuvresListe = document.getElementById('mes-oeuvres-liste');
+
+// 1. Fermer le studio et revenir à l'accueil
+btnRetourStudio.addEventListener('click', () => {
+    studioPage.style.display = 'none';
+    document.getElementById('stories-container').style.display = 'flex';
+});
+
+// 2. Ouvrir le studio
+btnProfile.addEventListener('click', async () => {
+    // On cache l'accueil et la page de lecture, on affiche le studio
+    document.getElementById('stories-container').style.display = 'none';
+    document.getElementById('oeuvre-page').style.display = 'none';
+    studioPage.style.display = 'block';
+
+    mesOeuvresListe.innerHTML = '<p style="color: #c4a484; font-style: italic;">Recherche de vos grimoires...</p>';
+
+    // On vérifie qui est connecté
+    const { data: { session } } = await _supabase.auth.getSession();
+    if (!session) return;
+
+    // On demande à Supabase UNIQUEMENT les histoires de cet auteur
+    const { data: mesHistoires, error } = await _supabase
+        .from('histoires')
+        .select('*')
+        .eq('auteur', session.user.email)
+        .order('date_publication', { ascending: false });
+
+    if (error) {
+        mesOeuvresListe.innerHTML = '<p style="color: red;">Erreur : ' + error.message + '</p>';
+        return;
+    }
+
+    if (mesHistoires.length === 0) {
+        mesOeuvresListe.innerHTML = '<p style="color: #777; font-style: italic;">Vous n\'avez forgé aucune œuvre pour le moment.</p>';
+        return;
+    }
+
+    // On affiche chaque histoire avec ses boutons d'administration
+    mesOeuvresListe.innerHTML = '';
+    mesHistoires.forEach(hist => {
+        const div = document.createElement('div');
+        div.style.backgroundColor = '#0a0a0a';
+        div.style.border = '1px solid #5d1a1a';
+        div.style.padding = '20px';
+        div.style.display = 'flex';
+        div.style.justifyContent = 'space-between';
+        div.style.alignItems = 'center';
+        div.style.boxShadow = '0 4px 10px rgba(0,0,0,0.8)';
+
+        div.innerHTML = `
+            <div style="flex: 1;">
+                <span style="font-size: 0.7rem; background-color: #5d1a1a; color: white; padding: 2px 5px; text-transform: uppercase;">${hist.genre}</span>
+                <h3 style="color: #00aaff; margin: 10px 0 5px 0; font-family: 'Cinzel', serif;">${hist.titre}</h3>
+                <span style="font-size: 0.8rem; color: #777;">👁️ 0 vues | ❤️ 0 likes</span>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="genre-btn" style="border-color: #00aaff; color: #00aaff; padding: 8px 15px; font-size: 0.8rem;" onclick="ouvrirGestionChapitres(${hist.id}, '${hist.titre.replace(/'/g, "\\'")}')">Gérer les chapitres</button>
+                <button class="genre-btn" style="border-color: transparent; color: #ff0055; padding: 8px 15px; font-size: 0.8rem;" onclick="alert('Bientôt : Supprimer l\'œuvre')">Supprimer</button>
+            </div>
+        `;
+        mesOeuvresListe.appendChild(div);
+    });
+});
+
+// --- LOGIQUE DE GESTION DES CHAPITRES DANS LE STUDIO ---
+
+window.ouvrirGestionChapitres = async function(idHistoire, titre) {
+    const container = document.getElementById('gestion-chapitres-container');
+    const listeAdmin = document.getElementById('liste-chapitres-admin');
+    const titreHeader = document.getElementById('gestion-titre-oeuvre');
+
+    container.style.display = 'block';
+    titreHeader.innerText = "Gestion : " + titre;
+    listeAdmin.innerHTML = '<p>Chargement des chapitres...</p>';
+
+    // On va chercher les chapitres de cette histoire
+    const { data: chapitres, error } = await _supabase
+        .from('chapitres')
+        .select('*')
+        .eq('histoire_id', idHistoire)
+        .order('numero', { ascending: true });
+
+    if (error) {
+        listeAdmin.innerHTML = '<p style="color:red;">Erreur : ' + error.message + '</p>';
+        return;
+    }
+
+    listeAdmin.innerHTML = '';
+    chapitres.forEach(chap => {
+        const row = document.createElement('div');
+        row.style.cssText = "display: flex; justify-content: space-between; align-items: center; background: #111; padding: 10px 15px; border: 1px solid #333;";
+        
+        row.innerHTML = `
+            <span>Chapitre ${chap.numero} : ${chap.titre}</span>
+            <div style="display: flex; gap: 10px;">
+                <button class="genre-btn" style="font-size: 0.7rem; border-color: #c4a484;" onclick="alert('Modification bientôt disponible !')">Modifier</button>
+                <button class="genre-btn" style="font-size: 0.7rem; border-color: #ff0055; color: #ff0055;" onclick="supprimerChapitre(${chap.id}, ${idHistoire}, '${titre}')">Supprimer</button>
+            </div>
+        `;
+        listeAdmin.appendChild(row);
+    });
+};
+
+// Fonction pour supprimer un chapitre
+window.supprimerChapitre = async function(idChap, idHist, titreHist) {
+    if (confirm("Voulez-vous vraiment effacer ce chapitre des archives ?")) {
+        const { error } = await _supabase
+            .from('chapitres')
+            .delete()
+            .eq('id', idChap);
+
+        if (error) {
+            alert("Erreur lors de la suppression : " + error.message);
+        } else {
+            alert("Chapitre supprimé.");
+            ouvrirGestionChapitres(idHist, titreHist); // On rafraîchit la liste
+        }
+    }
+};
+
+// Bouton pour fermer la gestion
+document.getElementById('btn-fermer-gestion').addEventListener('click', () => {
+    document.getElementById('gestion-chapitres-container').style.display = 'none';
+});
