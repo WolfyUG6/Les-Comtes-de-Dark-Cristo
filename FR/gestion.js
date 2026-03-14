@@ -95,7 +95,7 @@ window.chargerChapitresCategories = async function() {
                 ${infoDate}
             </div>
             <div>
-                <button class="genre-btn btn-outline-blue btn-small" onclick="alert('Modifier arrivera plus tard !')">Modifier</button>
+                <button class="genre-btn btn-outline-blue btn-small" onclick="window.ouvrirEditeurChapitre(${chap.id})">Modifier</button>
                 <button class="genre-btn btn-outline-red btn-small-last" onclick="supprimerChapitre(${chap.id})">Supprimer</button>
             </div>
         `;
@@ -128,10 +128,19 @@ window.supprimerChapitre = async function(id) {
     }
 };
 
+// --- SAUTS VERS L'ÉDITEUR ---
+window.ouvrirEditeurChapitre = function(idChapitre) {
+    window.currentChapitreId = idChapitre;
+    window.changerDePage('editeur-chapitre');
+};
+
 // --- ECOUTE DES CLICS DE NAVIGATION ---
 document.addEventListener('click', (e) => {
     if (e.target && e.target.id === 'btn-retour-gestion') {
         window.changerDePage('studio');
     }
-    // Les autres boutons (Modifier, Ajouter) sont justes des alertes pour le moment
+    if (e.target && e.target.id === 'btn-add-chapitre') {
+        window.currentChapitreId = null; // C'est une création
+        window.changerDePage('editeur-chapitre');
+    }
 });

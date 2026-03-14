@@ -507,6 +507,26 @@ button:hover, .genre-btn:hover {
 .title-m0 { margin: 0; }
 .story-title-m0 { margin: 0 0 10px 0; }
 
+/* =========================================
+   NOUVELLES CLASSES COMPOSANTS (Editeur)
+   ========================================= */
+
+.page-editeur { padding-top: 40px; padding-bottom: 80px; width: 80%; max-width: 1200px; margin: 0 auto; }
+.editor-container { background-color: var(--bg-box); border: 1px solid var(--border-color); padding: 20px; box-shadow: var(--shadow-box); }
+.editor-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; }
+.editor-actions { display: flex; gap: 10px; }
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; margin-bottom: 8px; font-family: 'Cinzel', serif; color: var(--text-title); }
+.custom-input { width: 100%; padding: 10px; background: var(--bg-body); color: var(--text-main); border: 1px solid var(--border-color); font-family: 'Segoe UI', sans-serif; box-sizing: border-box; }
+.word-counter { color: var(--accent-blue); font-size: 1.1rem; font-family: 'Cinzel', serif; text-align: right; font-weight: bold; margin-bottom: 10px; }
+.quill-editor-main { height: 400px; margin-bottom: 20px; background-color: var(--bg-body); color: var(--text-main); }
+.quill-editor-note { height: 100px; margin-bottom: 20px; background-color: var(--bg-body); color: var(--text-main); }
+.ql-toolbar { background-color: var(--bg-box); border-color: var(--border-color) !important; }
+.ql-container { border-color: var(--border-color) !important; font-family: 'Segoe UI', sans-serif; font-size: 1rem; }
+.ql-editor { color: var(--text-main); }
+.publish-options { margin-top: 30px; padding: 20px; border: 1px dashed var(--border-color); background: rgba(0, 0, 0, 0.2); }
+.checkbox-label { display: flex; align-items: center; gap: 10px; cursor: pointer; color: var(--text-main); }
+
 /* -- Forge -- */
 .page-forge { padding-top: 40px; padding-bottom: 80px; }
 .forge-actions { margin-top: 20px; }

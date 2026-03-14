@@ -92,6 +92,10 @@ function initialiserScriptsDePage(page) {
     else if (page === 'gestion') {
         if (typeof window.chargerGestionOeuvre === 'function') window.chargerGestionOeuvre();
     }
+    // ---> AJOUTE CELA <---
+    else if (page === 'editeur-chapitre') {
+        if (typeof window.chargerEditeurChapitre === 'function') window.chargerEditeurChapitre();
+    }
 }
 
 // --- LE NOUVEAU MÉCANISME DU PIÉDESTAL (Interrupteur de Thèmes) ---

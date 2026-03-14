@@ -1,0 +1,52 @@
+<div class="page-editeur">
+    <div class="editor-header">
+        <button id="close-chapitre-modal" class="genre-btn">← Annuler</button>
+        <h2 class="title-m0">L'Atelier d'Écriture</h2>
+        <div class="editor-actions">
+            <button id="submit-chapitre" class="genre-btn btn-primary shadow-active">Graver le Chapitre</button>
+        </div>
+    </div>
+
+    <div class="editor-container">
+        
+        <div style="display: flex; gap: 20px;">
+            <div class="form-group" style="flex: 1;">
+                <label for="chapitre-numero">Numéro du Chapitre</label>
+                <input type="number" id="chapitre-numero" class="custom-input" placeholder="Ex: 1">
+            </div>
+            <div class="form-group" style="flex: 3;">
+                <label for="chapitre-titre">Titre du Chapitre</label>
+                <input type="text" id="chapitre-titre" class="custom-input" placeholder="Le Réveil des Ombres">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Note de Début (Optionnel)</label>
+            <div id="note-debut-contenu" class="quill-editor-note"></div>
+        </div>
+
+        <div class="form-group">
+            <label>Le Parchemin</label>
+            <div id="compteur-mots-container" class="word-counter">Mots gravés : 0</div>
+            <div id="chapitre-contenu" class="quill-editor-main"></div>
+        </div>
+
+        <div class="form-group">
+            <label>Note de Fin (Optionnel)</label>
+            <div id="note-fin-contenu" class="quill-editor-note"></div>
+        </div>
+
+        <div class="publish-options">
+            <label class="checkbox-label mb-15">
+                <input type="checkbox" id="chapitre-publie" checked>
+                <strong>Publier ce chapitre (décocher pour garder en brouillon)</strong>
+            </label>
+            
+            <div class="form-group title-m0">
+                <label for="chapitre-date-pub">Programmer la publication (Optionnel) :</label>
+                <input type="text" id="chapitre-date-pub" class="custom-input" placeholder="Sélectionnez une date (laissez vide pour publier immédiatement)">
+            </div>
+        </div>
+
+    </div>
+</div>
