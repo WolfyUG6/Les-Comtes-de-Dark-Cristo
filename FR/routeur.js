@@ -49,8 +49,13 @@ window.changerDePage = async function(pageDemandee) {
 };
 
 function initialiserScriptsDePage(page) {
-    // Cette fonction servira de réveil-matin pour tes autres fichiers JS.
-    // Pour l'instant on la laisse vide, on la remplira quand on adaptera bibliotheque.js et forge.js.
+    // Cette fonction sert de réveil-matin pour tes autres fichiers JS.
+    if (page === 'accueil') {
+        // On demande à l'Archiviste de remplir la vitrine
+        if (typeof window.chargerVitrine === 'function') {
+            window.chargerVitrine();
+        }
+    }
 }
 
 // --- LE NOUVEAU MÉCANISME DU PIÉDESTAL (Interrupteur de Thèmes) ---
