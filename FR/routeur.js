@@ -2,7 +2,20 @@
 
 // --- LE CHEF D'ORCHESTRE (routeur.js) ---
 
-window.changerDePage = async function(pageDemandee) {
+// L'Aiguilleur (Modifie l'URL sans recharger la page)
+window.changerDePage = function(pageDemandee) {
+    window.location.hash = pageDemandee;
+};
+
+// Le Détecteur de Mouvement (Écoute quand l'URL change, même via les flèches du navigateur)
+window.addEventListener('hashchange', () => {
+    // On lit le mot après le '#' (s'il n'y a rien, on va dans le Hall)
+    const pageDemandee = window.location.hash.replace('#', '') || 'accueil';
+    window.chargerPageInterne(pageDemandee);
+});
+
+// L'Ouvrier (Va chercher le fichier HTML et l'injecte)
+window.chargerPageInterne = async function(pageDemandee) {
     const root = document.getElementById('sanctuaire-root');
     
     // Petit texte d'attente pendant que le fichier voyage
@@ -120,6 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Lancer l'accueil
-    window.changerDePage('accueil');
+    // Lancer la page demandée dans l'URL (ou l'accueil par défaut)
+    const pageInitiale = window.location.hash.replace('#', '') || 'accueil';
+    window.chargerPageInterne(pageInitiale);
 });
