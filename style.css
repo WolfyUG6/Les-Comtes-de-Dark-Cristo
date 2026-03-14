@@ -422,9 +422,26 @@ body.mode-zen #lecture-progress-container {
 body.mode-zen #barre-titre-lecture {
     top: 0 !important; /* Le titre remonte tout en haut */
 }
+/* On empêche le Pupitre de remonter trop haut et de se glisser sous le titre */
 body.mode-zen #lecture-settings {
-    top: 20px !important; /* Le pupitre remonte aussi */
+    top: 100px !important; 
 }
+
+/* Le sortilège d'adaptation : Si l'écran est trop petit, le Pupitre ne déborde plus en bas */
+#lecture-settings {
+    max-height: calc(100vh - 190px); /* Il calcule la taille de l'écran pour ne jamais toucher le fond */
+    overflow-y: auto; /* S'il manque de place, il crée sa propre petite barre de défilement invisible */
+}
+
+/* En mode Zen, comme le haut disparaît, on lui donne le droit de s'étirer un peu plus vers le bas */
+body.mode-zen #lecture-settings {
+    max-height: calc(100vh - 120px) !important;
+}
+
+/* (Optionnel) Pour rendre la barre de défilement du pupitre discrète aux couleurs du Sanctuaire */
+#lecture-settings::-webkit-scrollbar { width: 5px; }
+#lecture-settings::-webkit-scrollbar-track { background: #0a0a0a; }
+#lecture-settings::-webkit-scrollbar-thumb { background: #5d1a1a; border-radius: 5px; }
 
 /* --- L'ILLUSION DU PUPITRE (Coulissant) --- */
 /* Quand le pupitre est caché, il s'écrase sur lui-même */
