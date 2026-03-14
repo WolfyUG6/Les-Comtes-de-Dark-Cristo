@@ -429,17 +429,6 @@ body.mode-zen #lecture-settings {
     top: 100px !important; 
 }
 
-/* Le sortilège d'adaptation : Si l'écran est trop petit, le Pupitre ne déborde plus en bas */
-#lecture-settings {
-    max-height: calc(100vh - 190px); /* Il calcule la taille de l'écran pour ne jamais toucher le fond */
-    overflow-y: auto; /* S'il manque de place, il crée sa propre petite barre de défilement invisible */
-}
-
-/* En mode Zen, comme le haut disparaît, on lui donne le droit de s'étirer un peu plus vers le bas */
-body.mode-zen #lecture-settings {
-    max-height: calc(100vh - 120px) !important;
-}
-
 /* (Optionnel) Pour rendre la barre de défilement du pupitre discrète aux couleurs du Sanctuaire */
 #lecture-settings::-webkit-scrollbar { width: 5px; }
 #lecture-settings::-webkit-scrollbar-track { background: #0a0a0a; }
