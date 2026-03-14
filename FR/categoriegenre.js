@@ -28,7 +28,7 @@ window.chargerGenre = async function() {
         .from('histoires')
         .select('*')
         .eq('genre', genreChoisi)
-        .order('created_at', { ascending: false });
+        .order('date_publication', { ascending: false });
 
     if (error) {
         console.error("Erreur de bibliothèque :", error);
