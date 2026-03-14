@@ -93,6 +93,7 @@ window.afficherOeuvresTriees = function() {
 
 window.ouvrirGestionOeuvre = function(idHistoire) {
     window.currentOeuvreId = idHistoire; 
+    localStorage.setItem('currentOeuvreId', idHistoire);
     window.changerDePage('gestion');     
 };
 

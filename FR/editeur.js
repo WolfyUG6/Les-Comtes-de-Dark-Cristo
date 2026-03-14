@@ -8,6 +8,12 @@ let quill, quillNoteDebut, quillNoteFin;
 window.compteMotsLive = 0;
 
 window.chargerEditeurChapitre = function() {
+    // 0. Restauration des IDs après un F5
+    if (!window.currentOeuvreId) window.currentOeuvreId = localStorage.getItem('currentOeuvreId');
+    if (!window.currentChapitreId && localStorage.getItem('currentChapitreId')) {
+        window.currentChapitreId = localStorage.getItem('currentChapitreId');
+    }
+
     console.log("Chargement de l'éditeur pour l'œuvre ID:", window.currentOeuvreId, "Chapitre ID:", window.currentChapitreId);
     if (!window.currentOeuvreId) {
         alert("Erreur: Aucune œuvre sélectionnée !");
@@ -15,8 +21,8 @@ window.chargerEditeurChapitre = function() {
         return;
     }
 
-    // 1. Initialisation des Plumes si ce n'est pas déjà fait
-    if (!quill) initialiserPlumes();
+    // 1. Initialisation des Plumes (Le DOM est recréé par le routeur à chaque passage)
+    initialiserPlumes();
 
     // 2. Nettoyage de l'ardoise (très important quand on ouvre l'éditeur)
     document.getElementById('chapitre-numero').value = '';

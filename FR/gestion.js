@@ -4,8 +4,14 @@
 // ==========================================
 
 window.chargerGestionOeuvre = async function() {
+    // 0. Restauration de l'ID après un F5
+    if (!window.currentOeuvreId) window.currentOeuvreId = localStorage.getItem('currentOeuvreId');
+
     const infoPanel = document.getElementById('info-histoire-panel');
-    if (!infoPanel || !window.currentOeuvreId) return;
+    if (!infoPanel || !window.currentOeuvreId) {
+        window.changerDePage('studio'); // Retour au studio si rien n'est trouvé
+        return;
+    }
 
     infoPanel.innerHTML = '<p class="loading-text">Déchiffrage des runes en cours...</p>';
 
@@ -131,6 +137,7 @@ window.supprimerChapitre = async function(id) {
 // --- SAUTS VERS L'ÉDITEUR ---
 window.ouvrirEditeurChapitre = function(idChapitre) {
     window.currentChapitreId = idChapitre;
+    localStorage.setItem('currentChapitreId', idChapitre);
     window.changerDePage('editeur-chapitre');
 };
 
@@ -141,6 +148,7 @@ document.addEventListener('click', (e) => {
     }
     if (e.target && e.target.id === 'btn-add-chapitre') {
         window.currentChapitreId = null; // C'est une création
+        localStorage.removeItem('currentChapitreId');
         window.changerDePage('editeur-chapitre');
     }
 });
