@@ -129,6 +129,18 @@ if (!window.creationStoryEventHooked) {
                         useWebWorker: true
                     };
                     fichierAEnvoyer = await imageCompression(file, options);
+                    
+                    // Fallback extrême : si le fichier compresse mal (ex: de gros PNG), forcer en JPEG avec perte
+                    if (fichierAEnvoyer.size > 500 * 1024) {
+                        const optionsJpegForce = {
+                            maxSizeMB: 0.5,
+                            maxWidthOrHeight: 1920,
+                            useWebWorker: true,
+                            fileType: 'image/jpeg',
+                            initialQuality: 0.85
+                        };
+                        fichierAEnvoyer = await imageCompression(file, optionsJpegForce);
+                    }
                 } catch (compressionError) {
                     console.error("Erreur de compression, envoi du fichier original :", compressionError);
                 }
