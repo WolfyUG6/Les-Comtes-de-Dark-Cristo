@@ -49,12 +49,12 @@ window.changerDePage = async function(pageDemandee) {
 };
 
 function initialiserScriptsDePage(page) {
-    // Cette fonction sert de réveil-matin pour tes autres fichiers JS.
     if (page === 'accueil') {
-        // On demande à l'Archiviste de remplir la vitrine
-        if (typeof window.chargerVitrine === 'function') {
-            window.chargerVitrine();
-        }
+        if (typeof window.chargerVitrine === 'function') window.chargerVitrine();
+    }
+    // ---> AJOUTE CE BLOC ICI <---
+    else if (page === 'studio') {
+        if (typeof window.chargerMesOeuvres === 'function') window.chargerMesOeuvres();
     }
 }
 
