@@ -390,3 +390,81 @@ button:hover, .genre-btn:hover {
 .discord-link:hover {
     filter: brightness(1.2);
 }
+
+/* =========================================
+   MODALES (Boîtes de connexion) & DROPDOWN
+   ========================================= */
+
+.modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--bg-box);
+    padding: 40px;
+    border: 1px solid var(--text-title);
+    z-index: 2000;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(0,0,0,0.9);
+    width: 90%;
+    max-width: 400px;
+}
+
+.modal input {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 15px 0;
+    padding: 10px;
+    background: var(--bg-body);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.modal-actions {
+    margin-top: 25px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+/* --- LE MENU DÉROULANT DU PROFIL --- */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--bg-body);
+    min-width: 180px;
+    box-shadow: var(--shadow-box);
+    border: 1px solid var(--text-title);
+    z-index: 1000;
+    flex-direction: column;
+}
+
+.dropdown:hover .dropdown-content {
+    display: flex; /* Fait apparaître le menu au survol */
+}
+
+.dropdown-item {
+    background: transparent;
+    color: var(--text-main);
+    padding: 12px 16px;
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    text-align: center;
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.dropdown-item:last-child { border-bottom: none; }
+.dropdown-item:hover { background-color: var(--bg-hover); color: var(--text-hover); }

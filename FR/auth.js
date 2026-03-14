@@ -1,13 +1,14 @@
-// --- LE GARDIEN (auth.js) ---
+// ==========================================
+// LE GARDIEN (auth.js)
+// Gestion de la connexion et de l'identité
+// ==========================================
 
-// On attend que toute la page soit chargée pour activer les boutons
 document.addEventListener('DOMContentLoaded', () => {
     
     const authModal = document.getElementById('auth-modal');
     const emailInput = document.getElementById('email-input');
     const passwordInput = document.getElementById('password-input');
     const submitAuth = document.getElementById('submit-auth');
-    const userNameDisplay = document.getElementById('user-name');
     const btnLogin = document.getElementById('btn-login');
     const btnSignup = document.getElementById('btn-signup');
     const closeModal = document.getElementById('close-modal');
@@ -15,20 +16,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let isSignUp = false;
 
-    // 1. Ouvrir pour connexion
+    // 1. Ouvrir la boîte pour connexion
     if(btnLogin) {
         btnLogin.addEventListener('click', () => {
             isSignUp = false;
-            authModal.style.display = 'block';
+            authModal.classList.remove('hidden');
             submitAuth.innerText = "Se connecter";
         });
     }
 
-    // 2. Ouvrir pour inscription
+    // 2. Ouvrir la boîte pour inscription
     if(btnSignup) {
         btnSignup.addEventListener('click', () => {
             isSignUp = true;
-            authModal.style.display = 'block';
+            authModal.classList.remove('hidden');
             submitAuth.innerText = "Créer mon compte";
         });
     }
@@ -36,14 +37,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. Fermer la boîte
     if(closeModal) {
         closeModal.addEventListener('click', () => {
-            authModal.style.display = 'none';
+            authModal.classList.add('hidden');
         });
     }
 
-    // 4. Action de validation (Connexion / Inscription)
+    // 4. Action de validation (Supabase)
     if(submitAuth) {
         submitAuth.addEventListener('click', async () => {
-            const email = emailInput.value;
+            const email = emailInput.value.trim();
             const password = passwordInput.value;
 
             if (!email || !password) {
@@ -51,15 +52,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            // On bloque le bouton le temps que Supabase réponde
+            submitAuth.innerText = "Incantation...";
+            submitAuth.disabled = true;
+
             if (isSignUp) {
                 const { error } = await window._supabase.auth.signUp({ email, password });
                 if (error) alert("Erreur : " + error.message);
-                else alert("Compte créé ! Bienvenue.");
+                else alert("Compte créé ! Bienvenue dans le Sanctuaire.");
             } else {
                 const { error } = await window._supabase.auth.signInWithPassword({ email, password });
                 if (error) alert("Erreur : " + error.message);
             }
-            authModal.style.display = 'none';
+            
+            // On nettoie et on ferme
+            authModal.classList.add('hidden');
+            submitAuth.disabled = false;
+            emailInput.value = '';
+            passwordInput.value = '';
         });
     }
 
@@ -68,43 +78,58 @@ document.addEventListener('DOMContentLoaded', () => {
         btnLogout.addEventListener('click', async () => {
             await window._supabase.auth.signOut();
             alert("Vous avez quitté le sanctuaire.");
+            window.changerDePage('accueil'); // Retour au Hall de force
         });
     }
+
+    // 6. Navigation du Menu Profil (Connexion au Routeur)
+    document.getElementById('btn-quartiers-nav')?.addEventListener('click', () => window.changerDePage('quartiers'));
+    document.getElementById('btn-lectures-nav')?.addEventListener('click', () => window.changerDePage('lectures'));
+    document.getElementById('btn-atelier-nav')?.addEventListener('click', () => window.changerDePage('studio'));
 });
 
-// 6. Surveillance de l'état (Toujours actif, même hors du chargement)
+// ==========================================
+// SURVEILLANCE DE L'ÉTAT (Le Radar)
+// ==========================================
 window._supabase.auth.onAuthStateChange((event, session) => {
     const authContainer = document.getElementById('auth-container');
     const userContainer = document.getElementById('user-container');
     const userNameDisplay = document.getElementById('user-name');
+    const headerAvatar = document.getElementById('header-avatar');
     
     if (session) {
-        if(authContainer) authContainer.style.display = 'none';
-        if(userContainer) userContainer.style.display = 'flex';
-        // On cherche le pseudo, sinon on prend l'email coupé par défaut
+        // Le Seigneur est connecté
+        if(authContainer) authContainer.classList.add('hidden');
+        if(userContainer) userContainer.classList.remove('hidden');
+        
+        // Pseudo
         const nomAAfficher = session.user.user_metadata?.pseudo || session.user.email.split('@')[0];
         if(userNameDisplay) userNameDisplay.innerText = "Comte " + nomAAfficher;
         
-        // --- NOUVEAU : Chargement de l'avatar ---
+        // Avatar
         const avatarUrl = session.user.user_metadata?.avatar_url || 'default-avatar.png';
-        const headerAvatar = document.getElementById('header-avatar');
-        const previewAvatar = document.getElementById('profile-avatar-preview');
-        
         if (headerAvatar) headerAvatar.src = avatarUrl;
+        
+        // (Optionnel) Si la page des Quartiers est affichée au même moment, on met à jour la preview
+        const previewAvatar = document.getElementById('profile-avatar-preview');
         if (previewAvatar) previewAvatar.src = avatarUrl;
-		// --- IDENTIFICATION DU MAÎTRE DU SANCTUAIRE ---
-        // Remplace l'email ci-dessous par ton VRAI email de compte Supabase
+
+        // Identification du Maître (L'Admin)
         if (session.user.email === "nitroapex@gmail.com") {
             window.estAdmin = true;
         } else {
             window.estAdmin = false;
         }
-        window.activerBouclier(); // On met à jour le bouclier selon l'identité
+        
+        // On active le bouclier (Anti-copie) qui est dans config.js
+        if(typeof window.activerBouclier === 'function') window.activerBouclier();
 
     } else {
-        if(authContainer) authContainer.style.display = 'flex';
-        if(userContainer) userContainer.style.display = 'none';
-		window.estAdmin = false;
-        window.activerBouclier();
+        // Le Seigneur est un simple visiteur
+        if(authContainer) authContainer.classList.remove('hidden');
+        if(userContainer) userContainer.classList.add('hidden');
+        
+        window.estAdmin = false;
+        if(typeof window.activerBouclier === 'function') window.activerBouclier();
     }
 });
