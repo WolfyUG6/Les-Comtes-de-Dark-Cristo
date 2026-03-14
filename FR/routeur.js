@@ -31,6 +31,7 @@ window.chargerPageInterne = async function(pageDemandee) {
         'studio': 'Forge.html',
         'gestion': 'Gestion.html',
         'editeur-chapitre': 'Editeur.html',
+        'creation-story': 'CreationStory.html',
         'statistiques': 'Statistiques.html'
     };
 
@@ -95,6 +96,10 @@ function initialiserScriptsDePage(page) {
     // ---> AJOUTE CELA <---
     else if (page === 'editeur-chapitre') {
         if (typeof window.chargerEditeurChapitre === 'function') window.chargerEditeurChapitre();
+    }
+    // ---> AJOUTE CE BLOC AUSSI <---
+    else if (page === 'creation-story') {
+        if (typeof window.chargerCreationStory === 'function') window.chargerCreationStory();
     }
 }
 

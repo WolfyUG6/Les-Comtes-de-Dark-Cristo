@@ -100,7 +100,7 @@ window.ouvrirGestionOeuvre = function(idHistoire) {
 // Écoute des clics globaux
 document.addEventListener('click', (e) => {
     if (e.target && e.target.id === 'btn-publish') {
-        window.changerDePage('creation'); 
+        window.changerDePage('creation-story'); 
     }
     if (e.target && e.target.id === 'btn-retour-studio') {
         window.changerDePage('accueil');
