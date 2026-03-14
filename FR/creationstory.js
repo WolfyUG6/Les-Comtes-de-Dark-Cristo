@@ -119,7 +119,21 @@ if (!window.creationStoryEventHooked) {
             if (file) {
                 btnSubmit.innerText = "Téléversement de l'image...";
                 const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`; // Sécurité nom de fichier
-                const { error: upErr } = await window._supabase.storage.from('couvertures').upload(fileName, file);
+                
+                // Compression silencieuse
+                let fichierAEnvoyer = file;
+                try {
+                    const options = {
+                        maxSizeMB: 0.5,           // Max 500 Ko
+                        maxWidthOrHeight: 1920,   // Max largeur/hauteur 1920px
+                        useWebWorker: true
+                    };
+                    fichierAEnvoyer = await imageCompression(file, options);
+                } catch (compressionError) {
+                    console.error("Erreur de compression, envoi du fichier original :", compressionError);
+                }
+
+                const { error: upErr } = await window._supabase.storage.from('couvertures').upload(fileName, fichierAEnvoyer);
                 
                 if (!upErr) {
                     const { data } = window._supabase.storage.from('couvertures').getPublicUrl(fileName);
