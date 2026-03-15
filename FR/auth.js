@@ -120,7 +120,7 @@ window._supabase.auth.onAuthStateChange(async (event, session) => {
                 .from('noms_de_plume')
                 .select('*')
                 .eq('user_id', session.user.id)
-                .single();
+                .maybeSingle();
 
             let finalPseudo = session.user.email.split('@')[0];
             let finalAvatar = 'default-avatar.png';
