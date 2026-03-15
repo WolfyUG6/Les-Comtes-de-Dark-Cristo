@@ -91,12 +91,28 @@ async function remplirDonneesProfil() {
         }
         
         // Coche les switchs selon la DB (ou True par défaut comme demandé)
-        if (switchAuteur) switchAuteur.checked = profil.mode_auteur === true;
-        if (switchComs) switchComs.checked = profil.afficher_commentaires !== false;
+        if (switchAuteur) {
+            switchAuteur.checked = profil.mode_auteur === true;
+            localStorage.setItem('modeAuteur', profil.mode_auteur === true);
+            const btnForge = document.getElementById('btn-atelier-nav');
+            if (btnForge) btnForge.style.display = profil.mode_auteur === true ? "block" : "none";
+        }
+        if (switchComs) {
+            switchComs.checked = profil.afficher_commentaires !== false;
+            localStorage.setItem('afficherCommentaires', profil.afficher_commentaires !== false);
+        }
     } else {
         // Profil vierge : Les booléens sont TRUE par défaut selon vos consignes
-        if (switchAuteur) switchAuteur.checked = true;
-        if (switchComs) switchComs.checked = true;
+        if (switchAuteur) {
+            switchAuteur.checked = true;
+            localStorage.setItem('modeAuteur', 'true');
+            const btnForge = document.getElementById('btn-atelier-nav');
+            if (btnForge) btnForge.style.display = "block";
+        }
+        if (switchComs) {
+            switchComs.checked = true;
+            localStorage.setItem('afficherCommentaires', 'true');
+        }
     }
 }
 
@@ -213,10 +229,13 @@ window.switcherPreference = async function(colonneSQL, valeurBool) {
     } else {
         afficherFeedback(feedback, "Loi décrétée dans la base de données.", "text-success", true);
         
-        // Appliquer visuellement la forge si on la modifie
+        // Appliquer visuellement la forge et stocker en LocalStorage (Sans interroger de Base de données sur les autres pages)
         if (colonneSQL === 'mode_auteur') {
+            localStorage.setItem('modeAuteur', valeurBool);
             const btnForge = document.getElementById('btn-atelier-nav');
             if (btnForge) btnForge.style.display = valeurBool ? "block" : "none";
+        } else if (colonneSQL === 'afficher_commentaires') {
+            localStorage.setItem('afficherCommentaires', valeurBool);
         }
     }
 };
