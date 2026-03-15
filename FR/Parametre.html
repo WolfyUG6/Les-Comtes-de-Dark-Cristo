@@ -1,116 +1,109 @@
-<div class="page-accueil quartiers-page">
-    
-    <div class="accueil-header mb-30 text-center">
-        <h1 class="accueil-title-m0">Vos Quartiers</h1>
-        <p class="text-muted-italic">L'antre de votre identité au sein du Sanctuaire.</p>
+<div class="quartiers-page">
+    <div class="btn-retour-container" style="margin-bottom: 20px;">
+        <button class="genre-btn btn-ghost" onclick="window.changerDePage('accueil')">⟵ Retour au Sanctuaire</button>
     </div>
 
+    <!-- Layout Container -->
     <div class="quartiers-container">
         
-        <!-- SIDEBAR GAUCHE -->
-        <aside class="quartiers-sidebar">
-            <button class="quartier-tab-btn active" data-target="q-identite">🎭 Identité</button>
-            <button class="quartier-tab-btn" data-target="q-securite">🛡️ Sécurité</button>
-            <button class="quartier-tab-btn" data-target="q-preferences">⚙️ Préférences</button>
-            <button class="quartier-tab-btn danger-tab" data-target="q-compte">🩸 Compte</button>
-        </aside>
+        <!-- Sidebar Navigation -->
+        <div class="quartiers-sidebar">
+            <button class="quartier-tab-btn active" data-target="section-identite">🛡️ Identité</button>
+            <button class="quartier-tab-btn" data-target="section-securite">🛡️ Sécurité</button>
+            <button class="quartier-tab-btn" data-target="section-preferences">⚙️ Préférences</button>
+            <button class="quartier-tab-btn danger-tab" data-target="section-compte">🩸 Compte</button>
+        </div>
 
-        <!-- CONTENU DROIT -->
-        <main class="quartiers-content">
-            
-            <!-- SECTION : IDENTITÉ -->
-            <section id="q-identite" class="quartier-section active">
-                <h2 style="font-family: 'Cinzel', serif; color: var(--text-title); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 25px;">Votre Masque</h2>
-                
-                <!-- Avatar Upload -->
-                <div class="form-group mb-30" style="display: flex; flex-direction: column; align-items: flex-start; gap: 15px;">
-                    <label style="color: var(--text-muted);">Portrait (Avatar)</label>
-                    <div style="display: flex; align-items: center; gap: 20px;">
-                        <img id="quartiers-avatar-preview" src="default-avatar.png" alt="Aperçu Avatar" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-color);">
-                        <div>
-                            <input type="file" id="quartiers-avatar-file" accept="image/png, image/jpeg, image/webp" style="display: none;">
-                            <label for="quartiers-avatar-file" class="genre-btn btn-outline-blue" style="cursor: pointer; display: inline-block;">Choisir une toile</label>
-                            <p class="text-small text-muted-italic mt-10">L'image sera gravée (compressée) automatiquement.</p>
-                        </div>
+        <!-- Content Area -->
+        <div class="quartiers-content">
+
+            <!-- 1. IDENTITÉ -->
+            <div id="section-identite" class="quartier-section active">
+                <h2 class="cinzel-title">Votre Masque</h2>
+                <hr class="separator">
+
+                <div class="form-group" style="margin-top: 20px;">
+                    <label>Portrait (Avatar)</label>
+                    <div style="display: flex; align-items: center; gap: 20px; margin-top: 10px;">
+                        <img id="quartiers-avatar-preview" src="default-avatar.png" alt="Aperçu Avatar" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-color);">
+                        <input type="file" id="quartiers-avatar-file" accept="image/png, image/jpeg, image/webp" style="display: none;">
+                        <button class="genre-btn btn-ghost" onclick="document.getElementById('quartiers-avatar-file').click()">Choisir une toile</button>
                     </div>
+                    <small style="color: var(--text-muted); display: block; margin-top: 10px;">(L'image sera gravée et compressée automatiquement)</small>
                 </div>
 
-                <!-- Pseudo Update -->
-                <div class="form-group mb-30">
-                    <label for="quartiers-pseudo">Nom de Plume</label>
-                    <input type="text" id="quartiers-pseudo" class="custom-input" placeholder="Votre pseudonyme...">
+                <div class="form-group" style="margin-top: 30px;">
+                    <label>Nom de Plume</label>
+                    <input type="text" id="quartiers-pseudo" class="input-field" placeholder="Votre pseudonyme...">
                 </div>
 
-                <button id="btn-save-identite" class="genre-btn btn-primary shadow-active">Sceller l'Identité</button>
-                <div id="identite-feedback" class="text-small mt-10"></div>
-            </section>
+                <button id="btn-save-identite" class="genre-btn btn-primary" style="margin-top: 20px;" onclick="window.sauvegarderIdentite()">Sceller l'Identité</button>
+                <div id="identite-feedback"></div>
+            </div>
 
-            <!-- SECTION : SÉCURITÉ -->
-            <section id="q-securite" class="quartier-section">
-                <h2 style="font-family: 'Cinzel', serif; color: var(--text-title); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 25px;">Verrous du Sanctuaire</h2>
-                
-                <div class="form-group mb-30">
-                    <label for="quartiers-email">Nouveau Parchemin de Contact (Email)</label>
-                    <div style="display: flex; gap: 10px;">
-                        <input type="email" id="quartiers-email" class="custom-input" placeholder="nouvel@email.com">
-                        <button id="btn-update-email" class="genre-btn btn-outline-blue">Changer</button>
-                    </div>
-                    <p class="text-small text-muted-italic mt-5">Vous devrez confirmer via un lien envoyé à la nouvelle adresse.</p>
+            <!-- 2. SÉCURITÉ (UI ISOLÉE) -->
+            <div id="section-securite" class="quartier-section">
+                <h2 class="cinzel-title">Vos Sceaux</h2>
+                <hr class="separator">
+
+                <div class="form-group" style="margin-top: 20px;">
+                    <label>Nouvelle incantation de communication (Email)</label>
+                    <input type="email" id="quartiers-email" class="input-field" placeholder="Nouvel email...">
+                    <button id="btn-save-email" class="genre-btn btn-primary" style="margin-top: 10px;">Changer l'Email</button>
                 </div>
 
-                <div class="form-group mb-30">
-                    <label for="quartiers-password">Nouveau Mot de Passe</label>
-                    <div style="display: flex; gap: 10px;">
-                        <input type="password" id="quartiers-password" class="custom-input" placeholder="Nouveau mot de passe...">
-                        <button id="btn-update-password" class="genre-btn btn-outline-blue">Changer</button>
-                    </div>
+                <div class="form-group" style="margin-top: 40px;">
+                    <label>Nouveau Sceau de Garde (Mot de passe)</label>
+                    <input type="password" id="quartiers-password" class="input-field" placeholder="Minimum 6 caractères...">
+                    <button id="btn-save-password" class="genre-btn btn-primary" style="margin-top: 10px;">Forger le Sceau</button>
                 </div>
+            </div>
 
-                <div id="securite-feedback" class="text-small"></div>
-            </section>
+            <!-- 3. PRÉFÉRENCES -->
+            <div id="section-preferences" class="quartier-section">
+                <h2 class="cinzel-title">Vos Lois</h2>
+                <hr class="separator">
 
-            <!-- SECTION : PRÉFÉRENCES -->
-            <section id="q-preferences" class="quartier-section">
-                <h2 style="font-family: 'Cinzel', serif; color: var(--text-title); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 25px;">Vos Lois</h2>
-
-                <!-- Switch Mode Auteur -->
-                <div class="preference-row mb-30" style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 5px; border: 1px solid var(--border-color);">
+                <div class="pref-item" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--border-color);">
                     <div>
-                        <strong style="color: var(--text-title); display: block; margin-bottom: 5px;">Voie de l'Auteur</strong>
-                        <span class="text-small text-muted-italic">Déverrouille l'accès à La Forge (Création et édition d'œuvres).</span>
+                        <h3 class="cinzel-title" style="margin: 0; font-size: 1.2rem;">Voie de l'Auteur</h3>
+                        <p style="margin: 5px 0 0 0; color: var(--text-muted); font-size: 0.9rem; font-family: 'EB Garamond', serif;">Déverrouille l'accès à La Forge (Création et édition d'œuvres).</p>
                     </div>
                     <label class="switch">
-                        <input type="checkbox" id="quartiers-pref-auteur">
+                        <input type="checkbox" id="switch-auteur" onchange="window.switcherPreference('mode_auteur', this.checked)">
                         <span class="slider round"></span>
                     </label>
                 </div>
 
-                <!-- Switch Commentaires -->
-                <div class="preference-row mb-30" style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 5px; border: 1px solid var(--border-color);">
+                <div class="pref-item" style="display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--border-color);">
                     <div>
-                        <strong style="color: var(--text-title); display: block; margin-bottom: 5px;">Murmures des Lecteurs</strong>
-                        <span class="text-small text-muted-italic">Affiche la section des commentaires en bas des chapitres.</span>
+                        <h3 class="cinzel-title" style="margin: 0; font-size: 1.2rem;">Murmures des Lecteurs</h3>
+                        <p style="margin: 5px 0 0 0; color: var(--text-muted); font-size: 0.9rem; font-family: 'EB Garamond', serif;">Affiche la section des commentaires en bas des chapitres.</p>
                     </div>
                     <label class="switch">
-                        <input type="checkbox" id="quartiers-pref-coms">
+                        <input type="checkbox" id="switch-coms" onchange="window.switcherPreference('afficher_commentaires', this.checked)">
                         <span class="slider round"></span>
                     </label>
                 </div>
-
-                <div id="preferences-feedback" class="text-small text-success"></div>
-            </section>
-
-            <!-- SECTION : COMPTE -->
-            <section id="q-compte" class="quartier-section">
-                <h2 style="font-family: 'Cinzel', serif; color: #cc0000; border-bottom: 1px solid #cc0000; padding-bottom: 10px; margin-bottom: 25px;">Anéantissement</h2>
                 
-                <p class="text-muted-italic mb-30">Briser votre pacte dissoudra définitivement votre compte, votre nom de plume, ainsi que l'intégralité de vos statistiques. Toutes vos œuvres rédigées (si vous êtes auteur) seront pulvérisées. Cette action est <strong>irréversible</strong>.</p>
-                
-                <button id="btn-delete-account" class="genre-btn btn-danger shadow-active">Résilier le Pacte (Supprimer mon compte)</button>
-                <div id="compte-feedback" class="text-small mt-10"></div>
-            </section>
+                <div id="preferences-feedback"></div>
+            </div>
 
-        </main>
+            <!-- 4. COMPTE (UI ISOLÉE) -->
+            <div id="section-compte" class="quartier-section">
+                <h2 class="cinzel-title" style="color: #cc0000;">L'Anéantissement</h2>
+                <hr class="separator">
+
+                <p style="font-family: 'EB Garamond', serif; font-size: 1.1rem; line-height: 1.6; margin-top: 20px;">
+                    Briser le pacte qui vous lie au Sanctuaire est une action <strong>irréversible</strong>.
+                    Votre masque, votre nom et toutes vos œuvres seront dispersés dans le Néant de manière permanente.
+                </p>
+
+                <button id="btn-delete-account" class="genre-btn" style="background-color: #550000; color: white; border: 1px solid #ff0000; margin-top: 30px;">
+                    Pulvériser mon existence
+                </button>
+            </div>
+
+        </div>
     </div>
-
 </div>
