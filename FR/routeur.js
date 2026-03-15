@@ -33,7 +33,7 @@ window.chargerPageInterne = async function(pageDemandee) {
         'editeur-chapitre': 'Editeur.html',
 
 
-@@ -102,95 +102,99 @@
+ 102,95 102,99 
     else if (page === 'lecture') {
         if (typeof window.lireChapitre === 'function') window.lireChapitre();
     }

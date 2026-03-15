@@ -91,12 +91,13 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 await window._supabase.auth.signOut();
                 alert("Vous avez quitté le sanctuaire.");
-                window.changerDePage('accueil'); // Retour au Hall de force
+                window.changerDePage('accueil');
             } catch (err) {
                 console.error("Erreur de déconnexion", err);
             }
         });
     }
+});
 
 // ==========================================
 // SURVEILLANCE DE L'ÉTAT (Le Radar)
