@@ -97,58 +97,51 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-});
 
 // ==========================================
-// SURVEILLANCE DE L'ÉTAT (Radar Amputé & Ultra-Stable)
+// SURVEILLANCE DE L'ÉTAT (Le Radar)
 // ==========================================
-window._supabase.auth.onAuthStateChange(async (event, session) => {
+window._supabase.auth.onAuthStateChange((event, session) => {
     try {
         const authContainer = document.getElementById('auth-container');
         const userContainer = document.getElementById('user-container');
         const userNameDisplay = document.getElementById('user-name');
         const headerAvatar = document.getElementById('header-avatar');
-        const btnForge = document.getElementById('btn-atelier-nav');
         
-        // 1. Déconnexion ou pas de session
-        if (!session || !session.user) {
+        if (session) {
+            // Le Seigneur est connecté
+            if(authContainer) authContainer.classList.add('hidden');
+            if(userContainer) userContainer.classList.remove('hidden');
+            
+            // Gestion du Pseudo
+            const nomAAfficher = session.user.user_metadata?.pseudo || session.user.email.split('@')[0];
+            if(userNameDisplay) userNameDisplay.innerText = "Comte " + nomAAfficher;
+            
+            // Gestion de l'Avatar
+            const avatarUrl = session.user.user_metadata?.avatar_url || 'default-avatar.png';
+            if (headerAvatar) headerAvatar.src = avatarUrl;
+            
+            const previewAvatar = document.getElementById('profile-avatar-preview');
+            if (previewAvatar) previewAvatar.src = avatarUrl;
+
+            // Identification de l'Admin
+            if (session.user.email === "nitroapex@gmail.com") {
+                window.estAdmin = true;
+            } else {
+                window.estAdmin = false;
+            }
+            
+            if(typeof window.activerBouclier === 'function') window.activerBouclier();
+
+        } else {
+            // Le Seigneur est un simple visiteur
             if(authContainer) authContainer.classList.remove('hidden');
             if(userContainer) userContainer.classList.add('hidden');
-            if(btnForge) btnForge.style.display = "none";
-            return;
+            
+            window.estAdmin = false;
+            if(typeof window.activerBouclier === 'function') window.activerBouclier();
         }
-
-        // 2. Utilisateur Connecté
-        if(authContainer) authContainer.classList.add('hidden');
-        if(userContainer) userContainer.classList.remove('hidden');
-        
-        // 3. On interroge la base (sans planter si elle est vide)
-        const { data: profil } = await window._supabase
-            .from('noms_de_plume')
-            .select('pseudo, avatar_url')
-            .eq('user_id', session.user.id)
-            .maybeSingle();
-
-        // 4. Fallback (Secours)
-        let finalPseudo = session.user.email ? session.user.email.split('@')[0] : "Comte";
-        let finalAvatar = 'default-avatar.png';
-
-        if (profil) {
-            if (profil.pseudo) finalPseudo = profil.pseudo;
-            if (profil.avatar_url) finalAvatar = profil.avatar_url;
-        }
-
-        // 5. Affichage brutal et direct
-        if(userNameDisplay) userNameDisplay.innerText = "Comte " + finalPseudo;
-        if(headerAvatar) headerAvatar.src = finalAvatar;
-        
-        // ON FORCE L'AFFICHAGE DE LA FORGE POUR TOUS LES CONNECTÉS
-        if(btnForge) btnForge.style.display = "block";
-
-        window.estAdmin = (session.user.email === "nitroapex@gmail.com");
-        if(typeof window.activerBouclier === 'function') window.activerBouclier();
-
     } catch (e) {
-        console.warn("Le radar a capturé une anomalie mineure :", e.message);
+        console.error("Le radar a trébuché :", e);
     }
 });

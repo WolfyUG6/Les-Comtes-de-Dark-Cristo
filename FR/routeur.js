@@ -26,78 +26,14 @@ window.chargerPageInterne = async function(pageDemandee) {
         'accueil': 'Accueil.html',
         'oeuvre': 'Histoire.html',
         'lecture': 'Lecteur.html',
+        'quartiers': 'Parametre.html',
         'lectures': 'Favoris.html',
         'studio': 'Forge.html',
         'gestion': 'Gestion.html',
         'editeur-chapitre': 'Editeur.html',
-        'creation-story': 'CreationStory.html',
-        'statistiques': 'Statistiques.html',
-        'categorie-genre': 'CategorieGenre.html'
-    };
 
-    const fichier = pages[pageDemandee];
 
-    if (!fichier) {
-        root.innerHTML = '<p class="text-error text-center">Ce parchemin n\'existe pas.</p>';
-        return;
-    }
-
-    try {
-        // On aspire le contenu du fichier HTML
-        const reponse = await fetch(fichier);
-        if (!reponse.ok) throw new Error("Impossible de lire le fichier " + fichier);
-        
-        const html = await reponse.text();
-        
-        // On l'injecte dans le Maître
-        root.innerHTML = html;
-
-        // --- 🌑 L'ÉCLIPSE DU LOGO & DU MENU (Nouveau Mécanisme) 🌑 ---
-        const miniLogo = document.getElementById('mini-logo');
-        const heroLogo = document.getElementById('hero-logo-area');
-        const menuGenre = document.getElementById('main-genre-menu'); // <-- Le menu des catégories
-
-        if (pageDemandee === 'accueil') {
-            // Si on est dans le Hall : Gros Logo activé, Petit Logo caché, Menu affiché
-            if (miniLogo) miniLogo.classList.add('hidden');
-            if (heroLogo) heroLogo.classList.remove('hidden');
-            if (menuGenre) menuGenre.classList.remove('hidden');
-        } else if (pageDemandee === 'categorie-genre') {
-            // Dans les rayons : Petit Logo activé, Gros Logo caché, mais Menu TOUJOURS affiché
-            if (miniLogo) miniLogo.classList.remove('hidden');
-            if (heroLogo) heroLogo.classList.add('hidden');
-            if (menuGenre) menuGenre.classList.remove('hidden');
-        } else {
-            // Partout ailleurs : Petit Logo activé, Gros Logo caché, Menu masqué
-            if (miniLogo) miniLogo.classList.remove('hidden');
-            if (heroLogo) heroLogo.classList.add('hidden');
-            if (menuGenre) menuGenre.classList.add('hidden');
-        }
-        // -------------------------------------------------------------
-
-        // On réveille les scripts de la page
-        initialiserScriptsDePage(pageDemandee);
-
-        // On remonte tout en haut de la page proprement
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-
-    } catch (erreur) {
-        root.innerHTML = `<p class="text-error text-center">Erreur du Sanctuaire : ${erreur.message}</p>`;
-    }
-};
-
-function initialiserScriptsDePage(page) {
-    if (page === 'accueil') {
-        if (typeof window.chargerVitrine === 'function') window.chargerVitrine();
-    }
-    // ---> AJOUTE CE BLOC ICI <---
-    else if (page === 'studio') {
-        if (typeof window.chargerMesOeuvres === 'function') window.chargerMesOeuvres();
-    }
-    else if (page === 'oeuvre') {
-        if (typeof window.chargerPageHistoire === 'function') window.chargerPageHistoire();
-    }
-    // ---> LECTURE ICI <---
+@@ -102,95 +102,99 @@
     else if (page === 'lecture') {
         if (typeof window.lireChapitre === 'function') window.lireChapitre();
     }
