@@ -16,7 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let isSignUp = false;
 
-    // 1. Ouvrir la boîte pour connexion
     if(btnLogin) {
         btnLogin.addEventListener('click', () => {
             isSignUp = false;
@@ -25,7 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 2. Ouvrir la boîte pour inscription
     if(btnSignup) {
         btnSignup.addEventListener('click', () => {
             isSignUp = true;
@@ -34,14 +32,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 3. Fermer la boîte manuellement
     if(closeModal) {
         closeModal.addEventListener('click', () => {
             authModal.classList.add('hidden');
         });
     }
 
-    // 4. Action de validation blindée
     if(submitAuth) {
         submitAuth.addEventListener('click', async () => {
             const email = emailInput.value.trim();
@@ -52,40 +48,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // On bloque le bouton
             submitAuth.innerText = "Incantation...";
             submitAuth.disabled = true;
 
             try {
                 if (isSignUp) {
                     const { data, error } = await window._supabase.auth.signUp({ email, password });
-                    if (error) throw error; // S'il y a une erreur, on saute directement au "catch"
-                    
+                    if (error) throw error;
                     alert("Compte créé ! Bienvenue dans le Sanctuaire.");
-                    authModal.classList.add('hidden'); // Succès, on ferme la boîte
+                    authModal.classList.add('hidden');
                     emailInput.value = '';
                 } else {
                     const { data, error } = await window._supabase.auth.signInWithPassword({ email, password });
                     if (error) throw error;
-                    
-                    // Succès, on ferme la boîte
                     authModal.classList.add('hidden');
                     emailInput.value = '';
                 }
             } catch (erreur) {
-                // Si ça plante (mauvais mot de passe, etc.), on affiche l'erreur MAIS on ne ferme pas la boîte
                 alert("Refus du Sanctuaire : " + erreur.message);
             } finally {
-                // FINALLY : Ce bloc s'exécute TOUJOURS, qu'il y ait eu une erreur ou non !
-                // C'est la garantie absolue que ton bouton ne restera jamais bloqué.
                 submitAuth.innerText = isSignUp ? "Créer mon compte" : "Se connecter";
                 submitAuth.disabled = false;
-                passwordInput.value = ''; // On vide toujours le mot de passe par sécurité
+                passwordInput.value = '';
             }
         });
     }
 
-    // 5. Déconnexion
     if(btnLogout) {
         btnLogout.addEventListener('click', async () => {
             try {
@@ -101,91 +89,98 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ==========================================
 // SURVEILLANCE DE L'ÉTAT (Le Radar)
+// Version stable : lit user_metadata en priorité
+// puis tente noms_de_plume en fallback silencieux
 // ==========================================
-window._supabase.auth.onAuthStateChange(async (event, session) => {
+window._supabase.auth.onAuthStateChange((event, session) => {
     try {
         const authContainer = document.getElementById('auth-container');
         const userContainer = document.getElementById('user-container');
         const userNameDisplay = document.getElementById('user-name');
         const headerAvatar = document.getElementById('header-avatar');
         const btnForge = document.getElementById('btn-atelier-nav');
-        
+
         if (session) {
-            // Le Seigneur est connecté
             if(authContainer) authContainer.classList.add('hidden');
             if(userContainer) userContainer.classList.remove('hidden');
-            
-            // 1. Récupération Sécurisée des Informations de Profil
-            let profil = null;
-            try {
-                const res = await window._supabase
-                    .from('noms_de_plume')
-                    .select('*')
-                    .eq('user_id', session.user.id)
-                    .maybeSingle();
-                profil = res.data;
-            } catch (err) {
-                console.warn("Impossible de récupérer le profil depuis la DB, utilisation du cache local.", err);
+
+            // Priorité 1 : user_metadata (toujours disponible, même au F5)
+            let finalPseudo = session.user.user_metadata?.pseudo || null;
+            let finalAvatar = session.user.user_metadata?.avatar_url || null;
+            let isAuteur = session.user.user_metadata?.mode_auteur === true;
+
+            // Priorité 2 : localStorage (fallback si user_metadata vide)
+            if (!finalPseudo) {
+                const stored = localStorage.getItem('userPseudo');
+                if (stored && stored !== "undefined" && stored !== "null") finalPseudo = stored;
             }
-
-            let finalPseudo = session.user.email.split('@')[0];
-            let finalAvatar = 'default-avatar.png';
-            let isAuteur = false;
-
-            if (profil) {
-                // Ignore les valeurs NULL de Supabase pour ne pas polluer l'affichage
-                if (profil.pseudo && profil.pseudo !== "null") finalPseudo = profil.pseudo;
-                if (profil.avatar_url && profil.avatar_url !== "null") finalAvatar = profil.avatar_url;
-                isAuteur = profil.mode_auteur === true;
-                
-                // Mettre à jour le localStorage (Synchronisation DB -> Cache)
-                localStorage.setItem('userPseudo', finalPseudo);
-                localStorage.setItem('userAvatar', finalAvatar);
-                localStorage.setItem('modeAuteur', isAuteur);
-                localStorage.setItem('afficherCommentaires', profil.afficher_commentaires !== false);
-            } else {
-                // S'il y a un lag DB ou un RLS bloquant, on check le LocalStorage proprement
-                let storedPseudo = localStorage.getItem('userPseudo');
-                if (storedPseudo && storedPseudo !== "undefined" && storedPseudo !== "null") finalPseudo = storedPseudo;
-                
-                let storedAvatar = localStorage.getItem('userAvatar');
-                if (storedAvatar && storedAvatar !== "undefined" && storedAvatar !== "null") finalAvatar = storedAvatar;
-                
+            if (!finalAvatar) {
+                const stored = localStorage.getItem('userAvatar');
+                if (stored && stored !== "undefined" && stored !== "null") finalAvatar = stored;
+            }
+            if (!isAuteur) {
                 isAuteur = localStorage.getItem('modeAuteur') === 'true';
             }
 
-            // Gestion du Pseudo (Priorité DB/Cache, puis metadata, puis email)
-            const nomAAfficher = finalPseudo || session.user.user_metadata?.pseudo || session.user.email.split('@')[0];
-            if(userNameDisplay) userNameDisplay.innerText = "Comte " + nomAAfficher;
-            
-            // Gestion de l'Avatar
-            const avatarUrl = finalAvatar || session.user.user_metadata?.avatar_url || 'default-avatar.png';
-            if (headerAvatar) headerAvatar.src = avatarUrl;
-            
+            // Priorité 3 : email comme dernier recours
+            if (!finalPseudo) finalPseudo = session.user.email.split('@')[0];
+            if (!finalAvatar) finalAvatar = 'default-avatar.png';
+
+            // Affichage
+            if(userNameDisplay) userNameDisplay.innerText = "Comte " + finalPseudo;
+            if(headerAvatar) headerAvatar.src = finalAvatar;
+
             const previewAvatar = document.getElementById('profile-avatar-preview');
-            if (previewAvatar) previewAvatar.src = avatarUrl;
-            
-            // Gestion de l'affichage de "La Forge"
+            if (previewAvatar) previewAvatar.src = finalAvatar;
+
             if (btnForge) {
                 btnForge.style.display = isAuteur ? "block" : "none";
             }
 
-            // Identification de l'Admin
+            // Tentative silencieuse de migration pour les anciens comptes
+            // Si user_metadata.pseudo est vide, on essaie de le remplir depuis noms_de_plume
+            if (!session.user.user_metadata?.pseudo) {
+                window._supabase
+                    .from('noms_de_plume')
+                    .select('pseudo, avatar_url, mode_auteur')
+                    .eq('user_id', session.user.id)
+                    .maybeSingle()
+                    .then(({ data: profil }) => {
+                        if (profil && profil.pseudo) {
+                            // On migre les données vers user_metadata pour les prochains F5
+                            window._supabase.auth.updateUser({
+                                data: {
+                                    pseudo: profil.pseudo,
+                                    avatar_url: profil.avatar_url || undefined,
+                                    mode_auteur: profil.mode_auteur === true
+                                }
+                            }).then(() => {
+                                // Mise à jour visuelle immédiate
+                                if(userNameDisplay) userNameDisplay.innerText = "Comte " + profil.pseudo;
+                                if(headerAvatar && profil.avatar_url) headerAvatar.src = profil.avatar_url;
+                                if(btnForge) btnForge.style.display = profil.mode_auteur === true ? "block" : "none";
+                                localStorage.setItem('userPseudo', profil.pseudo);
+                                if(profil.avatar_url) localStorage.setItem('userAvatar', profil.avatar_url);
+                                localStorage.setItem('modeAuteur', profil.mode_auteur === true);
+                            });
+                        }
+                    })
+                    .catch(() => {}); // Silencieux si ça plante
+            }
+
+            // Admin
             if (session.user.email === "nitroapex@gmail.com") {
                 window.estAdmin = true;
             } else {
                 window.estAdmin = false;
             }
-            
+
             if(typeof window.activerBouclier === 'function') window.activerBouclier();
 
         } else {
-            // Le Seigneur est un simple visiteur
             if(authContainer) authContainer.classList.remove('hidden');
             if(userContainer) userContainer.classList.add('hidden');
-            
             if (btnForge) btnForge.style.display = "none";
-            
             window.estAdmin = false;
             if(typeof window.activerBouclier === 'function') window.activerBouclier();
         }

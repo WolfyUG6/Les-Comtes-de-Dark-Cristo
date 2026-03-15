@@ -191,6 +191,14 @@ window.sauvegarderIdentite = async function() {
         afficherFeedback(feedback, "Le pacte a été rejeté : " + updateErr.message, "text-error");
     } else {
         afficherFeedback(feedback, "Identité forgée avec succès dans le marbre du Sanctuaire.", "text-success");
+        
+        let metaDataPayload = { pseudo: pseudo };
+        if (finalAvatarUrl) metaDataPayload.avatar_url = finalAvatarUrl;
+        
+        await window._supabase.auth.updateUser({
+            data: metaDataPayload
+        });
+
         // Update purement visuel de l'en-tête (Pas de LocalStorage, pas de Auth.js)
         const headerName = document.getElementById('user-name');
         if (headerName) headerName.innerText = "Comte " + pseudo;
