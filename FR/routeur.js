@@ -106,6 +106,10 @@ function initialiserScriptsDePage(page) {
     else if (page === 'lectures') {
         if (typeof window.chargerFavoris === 'function') window.chargerFavoris();
     }
+    // ---> QUARTIERS ICI <---
+    else if (page === 'quartiers') {
+        if (typeof window.chargerQuartiers === 'function') window.chargerQuartiers();
+    }
     // ---> AJOUTE CECI <---
     else if (page === 'gestion') {
         if (typeof window.chargerGestionOeuvre === 'function') window.chargerGestionOeuvre();
