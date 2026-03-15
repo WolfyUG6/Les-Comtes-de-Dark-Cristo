@@ -15,7 +15,7 @@ window.chargerFavoris = async function() {
     // 3. Ecouteur de tri
     const sortSelect = document.getElementById('sort-pactes');
     if (sortSelect) {
-        sortSelect.addEventListener('change', await chargerMesPactes);
+        sortSelect.addEventListener('change', chargerMesPactes);
     }
 };
 
@@ -96,6 +96,32 @@ async function chargerMesPactes() {
         return;
     }
 
+    // 3.5 Pré-calculer les likes et chapitres pour éviter les requêtes N+1
+    const { data: allLikes } = await window._supabase
+        .from('favoris')
+        .select('histoire_id')
+        .in('histoire_id', idsHistoires);
+        
+    const { data: allChapitres } = await window._supabase
+        .from('chapitres')
+        .select('histoire_id')
+        .in('histoire_id', idsHistoires)
+        .eq('est_publie', true);
+
+    const likesParHistoire = new Map();
+    if (allLikes) {
+        allLikes.forEach(like => {
+            likesParHistoire.set(like.histoire_id, (likesParHistoire.get(like.histoire_id) || 0) + 1);
+        });
+    }
+
+    const chapitresParHistoire = new Map();
+    if (allChapitres) {
+        allChapitres.forEach(chap => {
+            chapitresParHistoire.set(chap.histoire_id, (chapitresParHistoire.get(chap.histoire_id) || 0) + 1);
+        });
+    }
+
     // 4. Fusionner les données pour le tri (Histoires + Date d'ajout)
     let oeuvresFusionnees = histoires.map(h => {
         const reference = pactesRefs.find(p => p.histoire_id === h.id);
@@ -144,18 +170,11 @@ async function chargerMesPactes() {
             ? `<span class="tag tag-sensible">⚠️ Sensible</span>` 
             : `<span class="tag tag-sensible-off">Sensible</span>`;
 
-        // Nombre de favoris (Likes) pour cette histoire (requête par histoire)
-        const { count: likes } = await window._supabase
-            .from('favoris')
-            .select('*', { count: 'exact', head: true })
-            .eq('histoire_id', h.id);
+        // Nombre de favoris (Likes) pour cette histoire (données précalculées)
+        const likes = likesParHistoire.get(h.id) || 0;
 
-        // Nombre de chapitres
-        const { count: nbChapitres } = await window._supabase
-            .from('chapitres')
-            .select('*', { count: 'exact', head: true })
-            .eq('histoire_id', h.id)
-            .eq('est_publie', true);
+        // Nombre de chapitres publiés (données précalculées)
+        const nbChapitres = chapitresParHistoire.get(h.id) || 0;
 
         // -- CORRECTION CSS -- (Ajout de l'encapsulateur story-card-wrapper)
         const wrapper = document.createElement('div');
