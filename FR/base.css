@@ -596,9 +596,17 @@ button:hover, .genre-btn:hover {
 .lecture-titre-m0 { font-size: 1.5rem; margin: 0; text-transform: uppercase; letter-spacing: 2px; }
 
 /* Thèmes adaptables pour le bandeau fixé (identique au pupitre) */
-.lecture-header-fixe[data-theme-lecture="abysses"] { background: rgba(5, 5, 5, 0.98); border-bottom-color: #333; color: #ff0055; }
-.lecture-header-fixe[data-theme-lecture="lumiere"] { background: rgba(253, 251, 247, 0.98); border-bottom-color: #c4a484; color: #8b0000; }
-.lecture-header-fixe[data-theme-lecture="sepia"] { background: rgba(244, 236, 216, 0.98); border-bottom-color: #a88a68; color: #8b0000; }
+.lecture-header-fixe[data-theme-lecture="abysses"] { background: rgba(5, 5, 5, 0.98); border-bottom-color: #333; }
+.lecture-header-fixe[data-theme-lecture="abysses"] .lecture-titre-m0 { color: #ff0055; }
+.lecture-header-fixe[data-theme-lecture="abysses"] .btn-lecture-nav-fixe { color: #c4a484; border-color: #333; }
+
+.lecture-header-fixe[data-theme-lecture="lumiere"] { background: rgba(253, 251, 247, 0.98); border-bottom-color: #c4a484; }
+.lecture-header-fixe[data-theme-lecture="lumiere"] .lecture-titre-m0 { color: #1a1a1a; }
+.lecture-header-fixe[data-theme-lecture="lumiere"] .btn-lecture-nav-fixe { color: #1a1a1a; border-color: #c4a484; }
+
+.lecture-header-fixe[data-theme-lecture="sepia"] { background: rgba(244, 236, 216, 0.98); border-bottom-color: #a88a68; }
+.lecture-header-fixe[data-theme-lecture="sepia"] .lecture-titre-m0 { color: #3b3024; }
+.lecture-header-fixe[data-theme-lecture="sepia"] .btn-lecture-nav-fixe { color: #3b3024; border-color: #a88a68; }
 
 /* Navigation Précédent/Suivant intégrée au bandeau */
 .lecture-nav-fixe { display: flex; gap: 15px; }
