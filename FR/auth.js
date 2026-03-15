@@ -136,7 +136,6 @@ window._supabase.auth.onAuthStateChange(async (event, session) => {
                 localStorage.setItem('userPseudo', finalPseudo);
                 localStorage.setItem('userAvatar', finalAvatar);
                 localStorage.setItem('modeAuteur', isAuteur);
-                localStorage.setItem('afficherCommentaires', profil.afficher_commentaires !== false);
             } else {
                 // S'il y a un lag DB ou un profil vierge, on check le LocalStorage proprement
                 let storedPseudo = localStorage.getItem('userPseudo');
