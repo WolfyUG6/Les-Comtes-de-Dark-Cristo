@@ -54,34 +54,18 @@ async function chargerMesPactes() {
 
     const userId = session.user.id;
 
-    // 2. Récupérer les favoris de l'utilisateur
-    // On fait une jointure implicite avec Supabase en demandant les infos de l'histoire liées
-    const { data: pactes, error } = await window._supabase
+    // 2. Récupérer les IDs des oeuvres favorites de l'utilisateur
+    const { data: pactesRefs, error: errRefs } = await window._supabase
         .from('favoris')
-        .select(`
-            histoire_id,
-            histoires (
-                id,
-                titre,
-                synopsis,
-                image_couverture,
-                genre,
-                classification,
-                statut,
-                pseudo_auteur,
-                auteur,
-                vues,
-                contenu_sensible
-            )
-        `)
+        .select('histoire_id')
         .eq('user_id', userId);
 
-    if (error) {
-        grille.innerHTML = `<p class="text-error text-center">Erreur lors de l'accès aux archives : ${error.message}</p>`;
+    if (errRefs) {
+        grille.innerHTML = `<p class="text-error text-center">Erreur lors de l'accès aux archives : ${errRefs.message}</p>`;
         return;
     }
 
-    if (!pactes || pactes.length === 0) {
+    if (!pactesRefs || pactesRefs.length === 0) {
         grille.innerHTML = `
             <div style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 50px;">
                 <h2 style="font-family: 'Cinzel', serif; color: var(--text-title); font-size: 2rem;">Le silence règne ici...</h2>
@@ -91,12 +75,24 @@ async function chargerMesPactes() {
         return;
     }
 
-    // 3. Dessiner les cartes
+    // Extraction de la liste des IDs pour faire une seconde requête ciblée
+    const idsHistoires = pactesRefs.map(p => p.histoire_id);
+
+    // 3. Récupérer le détail des histoires correspondantes
+    const { data: histoires, error: errHistoires } = await window._supabase
+        .from('histoires')
+        .select('*')
+        .in('id', idsHistoires);
+
+    if (errHistoires) {
+        grille.innerHTML = `<p class="text-error text-center">Erreur lors de la lecture des grimoires : ${errHistoires.message}</p>`;
+        return;
+    }
+
+    // 4. Dessiner les cartes
     grille.innerHTML = '';
 
-    for (const pacte of pactes) {
-        const h = pacte.histoires;
-        // Si l'histoire a été supprimée mais le favoris est resté (théoriquement bloqué par le onDelete cascade)
+    for (const h of histoires) {
         if (!h) continue; 
 
         // Style pour l'âge (comme sur la page d'accueil)
