@@ -114,6 +114,11 @@ window._supabase.auth.onAuthStateChange(async (event, session) => {
         if (session) {
             console.log("📡 RADAR 2 : Session trouvée pour", session.user.email, "- Interrogation de la table noms_de_plume...");
             
+            // --- VOICI LES LIGNES QUE J'AVAIS OUBLIÉES ---
+            if(authContainer) authContainer.classList.add('hidden');
+            if(userContainer) userContainer.classList.remove('hidden');
+            // ---------------------------------------------
+
             // 1. Récupérer les vraies données depuis Supabase
             const { data: profil, error } = await window._supabase
                 .from('noms_de_plume')
