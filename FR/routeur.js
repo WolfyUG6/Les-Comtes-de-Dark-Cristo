@@ -98,6 +98,10 @@ function initialiserScriptsDePage(page) {
     else if (page === 'oeuvre') {
         if (typeof window.chargerPageHistoire === 'function') window.chargerPageHistoire();
     }
+    // ---> LECTURE ICI <---
+    else if (page === 'lecture') {
+        if (typeof window.lireChapitre === 'function') window.lireChapitre();
+    }
     // ---> AJOUTE CECI <---
     else if (page === 'gestion') {
         if (typeof window.chargerGestionOeuvre === 'function') window.chargerGestionOeuvre();

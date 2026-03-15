@@ -196,7 +196,7 @@ async function chargerListeChapitres(idHistoire) {
                     <span class="published-date ml-10">(Publié le ${dateAffichee})</span>
                 </div>
                 <div>
-                    <button class="genre-btn btn-outline-blue btn-small" onclick="alert('Lectorat en construction...')">Lire</button>
+                    <button class="genre-btn btn-outline-blue btn-small" onclick="localStorage.setItem('currentChapitreId', ${chap.id}); window.changerDePage('lecture');">Lire</button>
                 </div>
             `;
             chapitresListe.appendChild(div);

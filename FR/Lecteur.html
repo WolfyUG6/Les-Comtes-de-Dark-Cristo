@@ -1,0 +1,79 @@
+<div class="page-lecteur">
+    <!-- LA JAUGE DE SANG (Toujours visible, même en mode Zen) -->
+    <div id="lecture-progress-container" class="lecture-progress-container">
+        <div id="lecture-progress-bar" class="lecture-progress-bar"></div>
+    </div>
+    
+    <!-- LA BULLE DE PROGRESSION -->
+    <div id="lecture-pourcentage-bulle" class="lecture-pourcentage-bulle">0%</div>
+
+    <!-- LE PUPITRE DES RÉGLAGES (Menu latéral) -->
+    <div id="lecture-settings" class="lecture-settings">
+        <button id="btn-toggle-pupitre" class="btn-toggle-pupitre" aria-label="Afficher/Masquer les réglages">«</button>
+        <div class="pupitre-content">
+            <h3 class="pupitre-title">Le Pupitre</h3>
+            
+            <div class="pupitre-group">
+                <label>Fonds de Parchemin</label>
+                <div class="theme-buttons">
+                    <button id="btn-theme-sombre" class="genre-btn btn-small">Abysses</button>
+                    <button id="btn-theme-sepia" class="genre-btn btn-small">Vieux Papier</button>
+                    <button id="btn-theme-clair" class="genre-btn btn-small">Lumière</button>
+                </div>
+            </div>
+
+            <div class="pupitre-group">
+                <label>Taille de la Plume</label>
+                <div class="size-buttons">
+                    <button id="btn-text-minus" class="genre-btn btn-small">A-</button>
+                    <button id="btn-text-plus" class="genre-btn btn-small">A+</button>
+                </div>
+            </div>
+
+            <div class="pupitre-group">
+                <label>Calligraphie</label>
+                <select id="select-font" class="custom-select pupitre-select w-100">
+                    <option value="'Raleway', sans-serif">Raleway (Moderne)</option>
+                    <option value="'Garamond', serif">Garamond (Classique)</option>
+                    <option value="'Cinzel', serif">Cinzel (Ancienne)</option>
+                    <option value="'Times New Roman', Times, serif">Times New Roman</option>
+                </select>
+            </div>
+
+            <div class="pupitre-group mt-15">
+                <button id="btn-mode-zen" class="genre-btn btn-outline-blue w-100">👁️ Plein Écran</button>
+            </div>
+            
+            <div class="pupitre-group mt-15">
+                <button id="btn-retour-oeuvre" class="genre-btn btn-outline-red w-100">← Quitter la lecture</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EN-TÊTE DU CHAPITRE -->
+    <div class="lecteur-header text-center mb-15 mt-15">
+        <h1 id="lecture-titre" class="lecture-titre">Déchiffrement du parchemin...</h1>
+    </div>
+
+    <!-- NAVIGATION HAUT -->
+    <div class="lecteur-navigation nav-haut mb-15">
+        <button id="btn-chap-prec-haut" class="genre-btn btn-lecture-nav hidden">← Précédent</button>
+        <button id="btn-chap-suiv-haut" class="genre-btn btn-lecture-nav hidden">Suivant →</button>
+    </div>
+
+    <!-- LE CONTENU DU CHAPITRE -->
+    <div id="lecture-contenu" class="lecture-contenu card">
+        <!-- Les notes de début, le texte, et les notes de fin s'injecteront ici -->
+    </div>
+
+    <!-- NAVIGATION BAS -->
+    <div class="lecteur-navigation nav-bas mt-15 mb-15">
+        <button id="btn-chap-prec-bas" class="genre-btn btn-lecture-nav hidden">← Précédent</button>
+        <button id="btn-chap-suiv-bas" class="genre-btn btn-lecture-nav hidden">Suivant →</button>
+    </div>
+
+    <!-- BOUTONS DE DÉFILEMENT RAPIDE -->
+    <button id="btn-scroll-top" class="btn-scroll btn-scroll-top" aria-label="Haut de page">▲</button>
+    <button id="btn-scroll-bottom" class="btn-scroll btn-scroll-bottom" aria-label="Bas de page">▼</button>
+
+</div>

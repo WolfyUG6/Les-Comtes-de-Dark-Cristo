@@ -584,3 +584,65 @@ button:hover, .genre-btn:hover {
 .histoire-actions-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 25px; }
 .histoire-actions { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; width: 100%; }
 .prochain-chapitre { width: 100%; border-bottom: 1px dashed var(--border-color); padding-bottom: 15px; margin-bottom: 15px; }
+
+/* =========================================
+   LA SALLE DE LECTURE (Lecteur)
+   ========================================= */
+
+.page-lecteur { width: 100%; max-width: 900px; margin: 0 auto; padding-top: 50px; padding-bottom: 100px; position: relative; }
+.lecture-titre { font-size: 2rem; border-bottom: 2px solid var(--accent-red); display: inline-block; padding-bottom: 10px; margin-bottom: 30px; }
+
+/* --- Jauge de sang (Progression) --- */
+.lecture-progress-container { position: fixed; top: 0; left: 0; width: 100%; height: 5px; background: rgba(0,0,0,0.5); z-index: 9999; }
+.lecture-progress-bar { width: 0%; height: 100%; background-color: #8b0000; transition: width 0.2s; box-shadow: 0 0 10px #ff0055; }
+.lecture-pourcentage-bulle { position: fixed; top: 20px; right: 20px; background: #8b0000; color: white; padding: 10px 15px; border-radius: 5px; font-weight: bold; z-index: 10000; opacity: 0; transition: 0.3s; pointer-events: none; border: 1px solid #ff0055; box-shadow: 0 0 15px rgba(255, 0, 85, 0.5); }
+
+/* --- Contenu de lecture --- */
+.lecture-contenu { padding: 40px; min-height: 80vh; transition: background 0.3s, color 0.3s, font-size 0.3s; line-height: 1.8; text-align: justify; }
+.lecture-contenu[data-theme-lecture="abysses"] { background: #050505; color: #e0d7c6; border-color: #333; }
+.lecture-contenu[data-theme-lecture="lumiere"] { background: #fdfbf7; color: #1a1a1a; border-color: #c4a484; }
+.lecture-contenu[data-theme-lecture="sepia"] { background: #f4ecd8; color: #3b3024; border-color: #a88a68; }
+
+.vrai-contenu-chapitre p { margin-bottom: 15px; }
+
+/* Notes d'auteur */
+.note-auteur { padding: 15px; font-family: 'Segoe UI', sans-serif; background: rgba(0,0,0,0.3); }
+.note-debut { border-left: 3px solid var(--accent-red); }
+.note-fin { border-left: 3px solid var(--accent-blue); }
+.note-title { font-size: 0.8rem; text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 10px; }
+.note-debut .note-title { color: var(--accent-red); }
+.note-fin .note-title { color: var(--accent-blue); }
+.note-content { font-size: 0.95rem; font-style: italic; color: #c4a484; }
+.lecture-contenu[data-theme-lecture="lumiere"] .note-content, 
+.lecture-contenu[data-theme-lecture="sepia"] .note-content { color: #555; }
+
+/* --- Le Pupitre (Réglages fixes et indépendants du thème du site) --- */
+.lecture-settings { position: fixed; top: 100px; left: 0; width: 280px; background: #0a0a0a; border: 1px solid #333; border-left: none; box-shadow: 5px 0 15px rgba(0,0,0,0.8); z-index: 1500; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 0 10px 10px 0; color: #e0d7c6; }
+.pupitre-cache { transform: translateX(-280px); }
+
+.btn-toggle-pupitre { position: absolute; right: -30px; top: 20px; width: 30px; height: 50px; background: #0a0a0a; border: 1px solid #333; border-left: none; color: #c4a484; cursor: pointer; border-radius: 0 5px 5px 0; font-weight: bold; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+.btn-toggle-pupitre:hover { background: #1a1a1a; color: #fff; }
+
+.pupitre-content { padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+.pupitre-title { margin: 0; border-bottom: 1px dashed #333; padding-bottom: 10px; color: #ff0055; text-transform: uppercase; letter-spacing: 2px; text-align: center; }
+.pupitre-group label { display: block; font-size: 0.8rem; text-transform: uppercase; color: #777; margin-bottom: 8px; font-family: 'Segoe UI', sans-serif; }
+
+.theme-buttons { display: flex; gap: 5px; flex-wrap: wrap; }
+.size-buttons { display: flex; gap: 10px; }
+.pupitre-select { background: #111; color: #e0d7c6; border-color: #333; }
+
+/* Navigation Précédent/Suivant */
+.lecteur-navigation { display: flex; justify-content: space-between; width: 100%; gap: 15px; }
+.btn-lecture-nav { flex: 1; padding: 15px; font-weight: bold; font-size: 1.1rem; border-color: var(--border-color); color: var(--text-main); }
+.btn-lecture-nav:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+
+/* --- Mode Zen (Plein écran de lecture) --- */
+body.mode-zen header, body.mode-zen footer, body.mode-zen .genre-menu { display: none !important; }
+body.mode-zen .page-lecteur { padding-top: 20px; }
+
+/* Boutons de scroll rapide */
+.btn-scroll { position: fixed; right: 30px; width: 45px; height: 45px; border-radius: 50%; background: #0a0a0a; color: #c4a484; border: 1px solid #333; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+.btn-scroll.visible { opacity: 0.8; pointer-events: auto; }
+.btn-scroll.visible:hover { opacity: 1; border-color: #ff0055; color: #fff; transform: scale(1.1); }
+.btn-scroll-top { bottom: 90px; }
+.btn-scroll-bottom { bottom: 30px; }
