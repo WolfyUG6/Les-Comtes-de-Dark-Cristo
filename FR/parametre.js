@@ -180,14 +180,12 @@ async function sauvegarderIdentite() {
     }
 
     // B. Étape de mise à jour Profil
-    let updatePayload = { user_id: userId, pseudo: pseudo };
+    let updatePayload = { pseudo: pseudo };
     if (finalAvatarUrl) {
         updatePayload.avatar_url = finalAvatarUrl;
     }
 
-    const { error: updateErr } = await window._supabase
-        .from('noms_de_plume')
-        .upsert(updatePayload, { onConflict: 'user_id' });
+    const { error: updateErr } = await safePartialUpdate(userId, updatePayload);
 
     if (updateErr) {
         afficherFeedback(feedback, "Le pacte a été rejeté : " + updateErr.message, "text-error");
@@ -257,12 +255,10 @@ async function switcherPreference(colonneSQL, valeurBool) {
 
     afficherFeedback(feedback, "Gravure...", "");
 
-    const payload = { user_id: session.user.id };
+    const payload = {};
     payload[colonneSQL] = valeurBool;
 
-    const { error } = await window._supabase
-        .from('noms_de_plume')
-        .upsert(payload, { onConflict: 'user_id' });
+    const { error } = await safePartialUpdate(session.user.id, payload);
 
     if (error) {
         afficherFeedback(feedback, "Échec de la loi : " + error.message, "text-error", true);
@@ -319,5 +315,29 @@ function afficherFeedback(element, message, className = "", clearAfter = false) 
     
     if (clearAfter) {
         setTimeout(() => element.innerText = "", 3000);
+    }
+}
+
+// Fonction de Sauvegarde Silencieuse et Sans Destruction
+async function safePartialUpdate(userId, partialPayload) {
+    // 1. Vérifier si la ligne existe
+    const { data: existing } = await window._supabase
+        .from('noms_de_plume')
+        .select('user_id')
+        .eq('user_id', userId)
+        .single();
+    
+    if (existing) {
+        // UPDATE (ne supprime pas les autres colonnes)
+        return await window._supabase
+            .from('noms_de_plume')
+            .update(partialPayload)
+            .eq('user_id', userId);
+    } else {
+        // INSERT (crée la ligne vierge + les data fournies)
+        const insertPayload = { user_id: userId, ...partialPayload };
+        return await window._supabase
+            .from('noms_de_plume')
+            .insert(insertPayload);
     }
 }
