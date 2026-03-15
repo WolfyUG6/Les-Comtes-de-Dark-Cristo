@@ -120,10 +120,6 @@ function initialiserScriptsDePage(page) {
     else if (page === 'categorie-genre') {
         if (typeof window.chargerGenre === 'function') window.chargerGenre();
     }
-	// ---> AJOUTE CE BLOC POUR LES PARAMÈTRES <---
-    else if (page === 'quartiers') {
-        if (typeof window.chargerQuartiers === 'function') window.chargerQuartiers();
-    }
 }
 
 // --- LE NOUVEAU MÉCANISME DU PIÉDESTAL (Interrupteur de Thèmes) ---
