@@ -16,7 +16,23 @@
     
     <!-- 1. MES PACTES (Favoris) -->
     <div id="tab-pactes" class="tab-content-favoris">
-        <div id="pactes-grid" class="stories-grid">
+        
+        <!-- Barre d'outils (Tri & Retour) -->
+        <div class="favoris-toolbar mb-30" style="display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto 30px auto;">
+            <div class="favoris-sort">
+                <label for="sort-pactes" style="font-family: 'Cinzel', serif; color: var(--text-title); margin-right: 10px;">Trier par :</label>
+                <select id="sort-pactes" class="custom-select" style="min-width: 200px;">
+                    <option value="recent">Récemment scellé</option>
+                    <option value="ancien">Plus ancien pacte</option>
+                    <option value="az">Alphabétique (A-Z)</option>
+                    <option value="za">Alphabétique (Z-A)</option>
+                </select>
+            </div>
+            
+            <button class="genre-btn btn-outline-blue" onclick="window.changerDePage('accueil')">← Retourner au Sanctuaire</button>
+        </div>
+
+        <div id="pactes-grid" class="stories-grid-auto">
             <!-- Les cartes des oeuvres soutenues s'afficheront ici -->
         </div>
     </div>

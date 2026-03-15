@@ -11,6 +11,12 @@ window.chargerFavoris = async function() {
 
     // 2. Charger les pactes (Favoris)
     await chargerMesPactes();
+
+    // 3. Ecouteur de tri
+    const sortSelect = document.getElementById('sort-pactes');
+    if (sortSelect) {
+        sortSelect.addEventListener('change', await chargerMesPactes);
+    }
 };
 
 function initialiserOngletsFavoris() {
@@ -54,10 +60,11 @@ async function chargerMesPactes() {
 
     const userId = session.user.id;
 
-    // 2. Récupérer les IDs des oeuvres favorites de l'utilisateur
+    // 2. Récupérer les données des oeuvres favorites de l'utilisateur
+    // On récupère "histoire_id" et "created_at" (qui représente la date du pacte)
     const { data: pactesRefs, error: errRefs } = await window._supabase
         .from('favoris')
-        .select('histoire_id')
+        .select('histoire_id, created_at')
         .eq('user_id', userId);
 
     if (errRefs) {
@@ -89,10 +96,37 @@ async function chargerMesPactes() {
         return;
     }
 
-    // 4. Dessiner les cartes
-    grille.innerHTML = '';
+    // 4. Fusionner les données pour le tri (Histoires + Date d'ajout)
+    let oeuvresFusionnees = histoires.map(h => {
+        const reference = pactesRefs.find(p => p.histoire_id === h.id);
+        return {
+            ...h,
+            date_pacte: reference ? new Date(reference.created_at) : new Date(0)
+        };
+    });
 
-    for (const h of histoires) {
+    // 5. Appliquer le tri selon le Selecteur
+    const sortSelect = document.getElementById('sort-pactes');
+    const sortBy = sortSelect ? sortSelect.value : 'recent';
+
+    oeuvresFusionnees.sort((a, b) => {
+        if (sortBy === 'recent') {
+            return b.date_pacte - a.date_pacte; // Du plus récent au plus ancien
+        } else if (sortBy === 'ancien') {
+            return a.date_pacte - b.date_pacte; // Du plus ancien au plus récent
+        } else if (sortBy === 'az') {
+            return a.titre.localeCompare(b.titre); // Alphabétique
+        } else if (sortBy === 'za') {
+            return b.titre.localeCompare(a.titre); // Anti-Alphabétique
+        }
+        return 0;
+    });
+
+    // 6. Dessiner les cartes
+    grille.innerHTML = '';
+    grille.className = 'stories-grid'; // Re-base class standard de base.css pour la grille
+
+    for (const h of oeuvresFusionnees) {
         if (!h) continue; 
 
         // Style pour l'âge (comme sur la page d'accueil)
@@ -123,12 +157,19 @@ async function chargerMesPactes() {
             .eq('histoire_id', h.id)
             .eq('est_publie', true);
 
+        // -- CORRECTION CSS -- (Ajout de l'encapsulateur story-card-wrapper)
+        const wrapper = document.createElement('div');
+        wrapper.className = "story-card-wrapper";
+        
         const card = document.createElement('div');
         card.className = "story-card";
         
         // Raccourcir le synopsis s'il est trop long
         let synopsisCourt = h.synopsis || "Aucun synopsis disponible.";
         if (synopsisCourt.length > 150) synopsisCourt = synopsisCourt.substring(0, 150) + "...";
+
+        // Date du pacte formatée pour l'esthétique
+        const dateAjout = h.date_pacte.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
 
         card.innerHTML = `
             <div class="story-cover" onclick="localStorage.setItem('currentOeuvreId', ${h.id}); window.changerDePage('oeuvre');" style="cursor:pointer;">
@@ -152,9 +193,17 @@ async function chargerMesPactes() {
                     <span title="Chapitres">📜 ${nbChapitres || 0}</span>
                 </div>
                 
-                <button class="genre-btn btn-primary shadow-active btn-lire-oeuvre" onclick="localStorage.setItem('currentOeuvreId', ${h.id}); window.changerDePage('oeuvre');">Reprendre la Lecture</button>
+                <div class="text-center text-muted-italic text-small" style="margin-bottom: 10px;">
+                    Pacte scellé le : ${dateAjout}
+                </div>
+
+                <div style="display: flex; justify-content: center;">
+                    <button class="genre-btn btn-primary shadow-active btn-lire-oeuvre" onclick="localStorage.setItem('currentOeuvreId', ${h.id}); window.changerDePage('oeuvre');">Reprendre la Lecture</button>
+                </div>
             </div>
         `;
-        grille.appendChild(card);
+        
+        wrapper.appendChild(card);
+        grille.appendChild(wrapper);
     }
 }
