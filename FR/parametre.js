@@ -54,22 +54,20 @@ async function remplirDonneesProfil() {
         .eq('user_id', userId)
         .single();
 
-    if (error || !profil) return;
+    if (profil) {
+        // --- IDENTITÉ ---
+        document.getElementById('quartiers-pseudo').value = profil.pseudo || '';
+        if (profil.avatar_url) {
+            document.getElementById('quartiers-avatar-preview').src = profil.avatar_url;
+        }
 
-    // --- IDENTITÉ ---
-    document.getElementById('quartiers-pseudo').value = profil.pseudo || '';
-    if (profil.avatar_url) {
-        document.getElementById('quartiers-avatar-preview').src = profil.avatar_url;
+        // --- PRÉFÉRENCES ---
+        document.getElementById('quartiers-pref-auteur').checked = profil.mode_auteur === true;
+        document.getElementById('quartiers-pref-coms').checked = profil.afficher_commentaires !== false; 
     }
 
-    // --- SÉCURITÉ ---
-    document.getElementById('quartiers-email').value = session.user.email || '';
-
-    // --- PRÉFÉRENCES ---
-    // Les booléens depuis Supabase
-    document.getElementById('quartiers-pref-auteur').checked = profil.mode_auteur === true;
-    // Si afficher_commentaires est null ou pas créé, on assume 'true' par défaut pour ne pas pénaliser
-    document.getElementById('quartiers-pref-coms').checked = profil.afficher_commentaires !== false; 
+    // --- SÉCURITÉ (Indépendant du profil) ---
+    document.getElementById('quartiers-email').value = session.user.email || ''; 
 }
 
 
@@ -182,15 +180,14 @@ async function sauvegarderIdentite() {
     }
 
     // B. Étape de mise à jour Profil
-    let updatePayload = { pseudo: pseudo };
+    let updatePayload = { user_id: userId, pseudo: pseudo };
     if (finalAvatarUrl) {
         updatePayload.avatar_url = finalAvatarUrl;
     }
 
     const { error: updateErr } = await window._supabase
         .from('noms_de_plume')
-        .update(updatePayload)
-        .eq('user_id', userId);
+        .upsert(updatePayload, { onConflict: 'user_id' });
 
     if (updateErr) {
         afficherFeedback(feedback, "Le pacte a été rejeté : " + updateErr.message, "text-error");
@@ -260,13 +257,12 @@ async function switcherPreference(colonneSQL, valeurBool) {
 
     afficherFeedback(feedback, "Gravure...", "");
 
-    const payload = {};
+    const payload = { user_id: session.user.id };
     payload[colonneSQL] = valeurBool;
 
     const { error } = await window._supabase
         .from('noms_de_plume')
-        .update(payload)
-        .eq('user_id', session.user.id);
+        .upsert(payload, { onConflict: 'user_id' });
 
     if (error) {
         afficherFeedback(feedback, "Échec de la loi : " + error.message, "text-error", true);

@@ -137,9 +137,13 @@ window._supabase.auth.onAuthStateChange(async (event, session) => {
                 localStorage.setItem('modeAuteur', isAuteur);
                 localStorage.setItem('afficherCommentaires', profil.afficher_commentaires !== false);
             } else {
-                // S'il y a un lag DB, on check le LocalStorage en Fallback
-                finalPseudo = localStorage.getItem('userPseudo') || finalPseudo;
-                finalAvatar = localStorage.getItem('userAvatar') || finalAvatar;
+                // S'il y a un lag DB ou un profil vierge, on check le LocalStorage proprement
+                let storedPseudo = localStorage.getItem('userPseudo');
+                if (storedPseudo && storedPseudo !== "undefined" && storedPseudo !== "null") finalPseudo = storedPseudo;
+                
+                let storedAvatar = localStorage.getItem('userAvatar');
+                if (storedAvatar && storedAvatar !== "undefined" && storedAvatar !== "null") finalAvatar = storedAvatar;
+                
                 isAuteur = localStorage.getItem('modeAuteur') === 'true';
             }
 
