@@ -26,7 +26,6 @@ window.chargerPageInterne = async function(pageDemandee) {
         'accueil': 'Accueil.html',
         'oeuvre': 'Histoire.html',
         'lecture': 'Lecteur.html',
-        'quartiers': 'Parametre.html',
         'lectures': 'Favoris.html',
         'studio': 'Forge.html',
         'gestion': 'Gestion.html',
@@ -120,6 +119,10 @@ function initialiserScriptsDePage(page) {
     // ---> AJOUTE LE RAYONNNAGE ICI <---
     else if (page === 'categorie-genre') {
         if (typeof window.chargerGenre === 'function') window.chargerGenre();
+    }
+	// ---> AJOUTE CE BLOC POUR LES PARAMÈTRES <---
+    else if (page === 'quartiers') {
+        if (typeof window.chargerQuartiers === 'function') window.chargerQuartiers();
     }
 }
 

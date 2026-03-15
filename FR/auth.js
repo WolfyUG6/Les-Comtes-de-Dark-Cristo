@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// SURVEILLANCE DE L'ÉTAT (Le Radar)
+// SURVEILLANCE DE L'ÉTAT (Radar Amputé & Ultra-Stable)
 // ==========================================
 window._supabase.auth.onAuthStateChange(async (event, session) => {
     try {
@@ -110,7 +110,7 @@ window._supabase.auth.onAuthStateChange(async (event, session) => {
         const headerAvatar = document.getElementById('header-avatar');
         const btnForge = document.getElementById('btn-atelier-nav');
         
-        // Sécurité : Si on n'a pas de session, on nettoie et on sort
+        // 1. Déconnexion ou pas de session
         if (!session || !session.user) {
             if(authContainer) authContainer.classList.remove('hidden');
             if(userContainer) userContainer.classList.add('hidden');
@@ -118,52 +118,37 @@ window._supabase.auth.onAuthStateChange(async (event, session) => {
             return;
         }
 
-        // Le Seigneur est connecté
+        // 2. Utilisateur Connecté
         if(authContainer) authContainer.classList.add('hidden');
         if(userContainer) userContainer.classList.remove('hidden');
         
-        // 1. Récupération sécurisée du profil
+        // 3. On interroge la base (sans planter si elle est vide)
         const { data: profil } = await window._supabase
             .from('noms_de_plume')
-            .select('*')
+            .select('pseudo, avatar_url')
             .eq('user_id', session.user.id)
             .maybeSingle();
 
-        // 2. Initialisation prudente (BOUCLIER ANTI-CRASH)
-        let finalPseudo = "Comte";
-        if (session.user.email) finalPseudo = session.user.email.split('@')[0];
-        
+        // 4. Fallback (Secours)
+        let finalPseudo = session.user.email ? session.user.email.split('@')[0] : "Comte";
         let finalAvatar = 'default-avatar.png';
-        let isAuteur = false;
 
         if (profil) {
             if (profil.pseudo) finalPseudo = profil.pseudo;
             if (profil.avatar_url) finalAvatar = profil.avatar_url;
-            isAuteur = (profil.mode_auteur === true);
-            
-            localStorage.setItem('userPseudo', finalPseudo);
-            localStorage.setItem('userAvatar', finalAvatar);
-            localStorage.setItem('modeAuteur', isAuteur);
-        } else {
-            // Secours via LocalStorage si la DB est lente
-            finalPseudo = localStorage.getItem('userPseudo') || finalPseudo;
-            finalAvatar = localStorage.getItem('userAvatar') || finalAvatar;
-            isAuteur = (localStorage.getItem('modeAuteur') === 'true');
         }
 
-        // 3. Mise à jour de l'interface (Vérification de chaque élément)
+        // 5. Affichage brutal et direct
         if(userNameDisplay) userNameDisplay.innerText = "Comte " + finalPseudo;
         if(headerAvatar) headerAvatar.src = finalAvatar;
         
-        const previewAvatar = document.getElementById('profile-avatar-preview');
-        if(previewAvatar) previewAvatar.src = finalAvatar;
-
-        if(btnForge) btnForge.style.display = isAuteur ? "block" : "none";
+        // ON FORCE L'AFFICHAGE DE LA FORGE POUR TOUS LES CONNECTÉS
+        if(btnForge) btnForge.style.display = "block";
 
         window.estAdmin = (session.user.email === "nitroapex@gmail.com");
         if(typeof window.activerBouclier === 'function') window.activerBouclier();
 
     } catch (e) {
-        console.warn("Le radar a capturé une instabilité :", e.message);
+        console.warn("Le radar a capturé une anomalie mineure :", e.message);
     }
 });
