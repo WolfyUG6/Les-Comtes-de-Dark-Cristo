@@ -51,7 +51,7 @@ async function remplirDonneesProfil() {
     const { data: profil, error } = await window._supabase
         .from('noms_de_plume')
         .select('*')
-        .eq('id', userId)
+        .eq('user_id', userId)
         .single();
 
     if (error || !profil) return;
@@ -139,7 +139,7 @@ async function sauvegarderIdentite() {
     if (file) {
         try {
             // Demande de l'existant pour écraser le fantôme
-            const { data: ancient } = await window._supabase.from('noms_de_plume').select('avatar_url').eq('id', userId).single();
+            const { data: ancient } = await window._supabase.from('noms_de_plume').select('avatar_url').eq('user_id', userId).single();
             if (ancient && ancient.avatar_url) {
                 try {
                     const cheminASupprimer = ancient.avatar_url.split('/').pop();
@@ -190,7 +190,7 @@ async function sauvegarderIdentite() {
     const { error: updateErr } = await window._supabase
         .from('noms_de_plume')
         .update(updatePayload)
-        .eq('id', userId);
+        .eq('user_id', userId);
 
     if (updateErr) {
         afficherFeedback(feedback, "Le pacte a été rejeté : " + updateErr.message, "text-error");
@@ -263,7 +263,7 @@ async function switcherPreference(colonneSQL, valeurBool) {
     const { error } = await window._supabase
         .from('noms_de_plume')
         .update(payload)
-        .eq('id', session.user.id);
+        .eq('user_id', session.user.id);
 
     if (error) {
         afficherFeedback(feedback, "Échec de la loi : " + error.message, "text-error", true);
