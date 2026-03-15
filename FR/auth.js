@@ -127,8 +127,9 @@ window._supabase.auth.onAuthStateChange(async (event, session) => {
             let isAuteur = false;
 
             if (profil) {
-                if (profil.pseudo) finalPseudo = profil.pseudo;
-                if (profil.avatar_url) finalAvatar = profil.avatar_url;
+                // Ignore les valeurs NULL corrompues de Supabase
+                if (profil.pseudo && profil.pseudo !== "null") finalPseudo = profil.pseudo;
+                if (profil.avatar_url && profil.avatar_url !== "null") finalAvatar = profil.avatar_url;
                 isAuteur = profil.mode_auteur === true;
                 
                 // Mettre à jour le localStorage (Synchronisation)

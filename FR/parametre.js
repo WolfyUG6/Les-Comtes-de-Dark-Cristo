@@ -39,7 +39,9 @@ function initialiserNavigationQuartiers() {
 // =====================================
 
 async function remplirDonneesProfil() {
-    const { data: { session } } = await window._supabase.auth.getSession();
+    const { data: authData } = await window._supabase.auth.getSession();
+    const session = authData?.session;
+    
     if (!session) {
         window.changerDePage('accueil');
         return;
@@ -118,7 +120,8 @@ async function sauvegarderIdentite() {
     const fileInput = document.getElementById('quartiers-avatar-file');
     const file = fileInput.files[0];
 
-    const { data: { session } } = await window._supabase.auth.getSession();
+    const { data: authData, error: authErr } = await window._supabase.auth.getSession();
+    const session = authData?.session;
     if (!session) return;
     const userId = session.user.id;
 
@@ -251,7 +254,8 @@ async function updaterPassword() {
 async function switcherPreference(colonneSQL, valeurBool) {
     const feedback = document.getElementById('preferences-feedback');
     
-    const { data: { session } } = await window._supabase.auth.getSession();
+    const { data: authData } = await window._supabase.auth.getSession();
+    const session = authData?.session;
     if (!session) return;
 
     afficherFeedback(feedback, "Gravure...", "");
@@ -330,15 +334,28 @@ async function safePartialUpdate(userId, partialPayload) {
     
     if (existing) {
         // UPDATE (ne supprime pas les autres colonnes)
-        return await window._supabase
+        const res = await window._supabase
             .from('noms_de_plume')
             .update(partialPayload)
-            .eq('user_id', userId);
+            .eq('user_id', userId)
+            .select();
+        
+        // Si RLS bloque silencieusement, data sera un tableau vide []
+        if (!res.error && (!res.data || res.data.length === 0)) {
+            return { error: { message: "Vos règles de sécurité (RLS) Supabase bloquent la modification en secret (0 ligne modifiée)." } };
+        }
+        return res;
     } else {
         // INSERT (crée la ligne vierge + les data fournies)
         const insertPayload = { user_id: userId, ...partialPayload };
-        return await window._supabase
+        const res = await window._supabase
             .from('noms_de_plume')
-            .insert(insertPayload);
+            .insert(insertPayload)
+            .select();
+            
+        if (!res.error && (!res.data || res.data.length === 0)) {
+            return { error: { message: "Vos règles de sécurité (RLS) Supabase bloquent l'insertion en secret." } };
+        }
+        return res;
     }
 }
