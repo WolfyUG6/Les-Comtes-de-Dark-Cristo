@@ -196,10 +196,13 @@ async function sauvegarderIdentite() {
         afficherFeedback(feedback, "Le pacte a été rejeté : " + updateErr.message, "text-error");
     } else {
         afficherFeedback(feedback, "Identité forgée avec succès.", "text-success");
-        // Update du Header visuel en direct
+        // Update du Header visuel en direct et du LocalStorage
         document.getElementById('user-name').innerText = pseudo;
+        localStorage.setItem('userPseudo', pseudo);
+
         if (finalAvatarUrl) {
             document.getElementById('header-avatar').src = finalAvatarUrl;
+            localStorage.setItem('userAvatar', finalAvatarUrl);
         }
     }
 
@@ -270,13 +273,15 @@ async function switcherPreference(colonneSQL, valeurBool) {
     } else {
         afficherFeedback(feedback, "Loi décrétée dans le Sanctuaire.", "text-success", true);
         
-        // --- Répercussions directes sur l'UI locale ---
+        // --- Répercussions directes sur le LocalStorage ---
         if (colonneSQL === 'mode_auteur') {
-            // Afficher ou masquer le bouton de la Forge dans le header
+            localStorage.setItem('modeAuteur', valeurBool);
             const btnForge = document.getElementById('btn-atelier-nav');
             if (btnForge) {
                 btnForge.style.display = valeurBool ? "block" : "none";
             }
+        } else if (colonneSQL === 'afficher_commentaires') {
+            localStorage.setItem('afficherCommentaires', valeurBool);
         }
     }
 }

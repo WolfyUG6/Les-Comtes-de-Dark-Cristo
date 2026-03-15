@@ -102,28 +102,59 @@ document.addEventListener('DOMContentLoaded', () => {
 // ==========================================
 // SURVEILLANCE DE L'ÉTAT (Le Radar)
 // ==========================================
-window._supabase.auth.onAuthStateChange((event, session) => {
+window._supabase.auth.onAuthStateChange(async (event, session) => {
     try {
         const authContainer = document.getElementById('auth-container');
         const userContainer = document.getElementById('user-container');
         const userNameDisplay = document.getElementById('user-name');
         const headerAvatar = document.getElementById('header-avatar');
+        const btnForge = document.getElementById('btn-atelier-nav');
         
         if (session) {
             // Le Seigneur est connecté
             if(authContainer) authContainer.classList.add('hidden');
             if(userContainer) userContainer.classList.remove('hidden');
             
+            // 1. Récupérer les vraies données depuis Supabase
+            const { data: profil } = await window._supabase
+                .from('noms_de_plume')
+                .select('*')
+                .eq('user_id', session.user.id)
+                .single();
+
+            let finalPseudo = session.user.email.split('@')[0];
+            let finalAvatar = 'default-avatar.png';
+            let isAuteur = false;
+
+            if (profil) {
+                if (profil.pseudo) finalPseudo = profil.pseudo;
+                if (profil.avatar_url) finalAvatar = profil.avatar_url;
+                isAuteur = profil.mode_auteur === true;
+                
+                // Mettre à jour le localStorage (Synchronisation)
+                localStorage.setItem('userPseudo', finalPseudo);
+                localStorage.setItem('userAvatar', finalAvatar);
+                localStorage.setItem('modeAuteur', isAuteur);
+                localStorage.setItem('afficherCommentaires', profil.afficher_commentaires !== false);
+            } else {
+                // S'il y a un lag DB, on check le LocalStorage en Fallback
+                finalPseudo = localStorage.getItem('userPseudo') || finalPseudo;
+                finalAvatar = localStorage.getItem('userAvatar') || finalAvatar;
+                isAuteur = localStorage.getItem('modeAuteur') === 'true';
+            }
+
             // Gestion du Pseudo
-            const nomAAfficher = session.user.user_metadata?.pseudo || session.user.email.split('@')[0];
-            if(userNameDisplay) userNameDisplay.innerText = "Comte " + nomAAfficher;
+            if(userNameDisplay) userNameDisplay.innerText = "Comte " + finalPseudo;
             
             // Gestion de l'Avatar
-            const avatarUrl = session.user.user_metadata?.avatar_url || 'default-avatar.png';
-            if (headerAvatar) headerAvatar.src = avatarUrl;
-            
+            if (headerAvatar) headerAvatar.src = finalAvatar;
             const previewAvatar = document.getElementById('profile-avatar-preview');
-            if (previewAvatar) previewAvatar.src = avatarUrl;
+            if (previewAvatar) previewAvatar.src = finalAvatar;
+
+            // Gestion du Menu Auteur (La Forge)
+            if (btnForge) {
+                btnForge.style.display = isAuteur ? "block" : "none";
+            }
 
             // Identification de l'Admin
             if (session.user.email === "nitroapex@gmail.com") {
@@ -138,6 +169,9 @@ window._supabase.auth.onAuthStateChange((event, session) => {
             // Le Seigneur est un simple visiteur
             if(authContainer) authContainer.classList.remove('hidden');
             if(userContainer) userContainer.classList.add('hidden');
+            
+            // On cache la forge pour un simple citoyen
+            if (btnForge) btnForge.style.display = "none";
             
             window.estAdmin = false;
             if(typeof window.activerBouclier === 'function') window.activerBouclier();
