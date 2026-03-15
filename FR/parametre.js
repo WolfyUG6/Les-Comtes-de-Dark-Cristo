@@ -169,7 +169,8 @@ async function sauvegarderIdentite() {
 
             if (uploadErr) throw uploadErr;
 
-            finalAvatarUrl = window.SUPABASE_URL + '/storage/v1/object/public/avatars/' + nomFichier;
+            const { data: urlData } = window._supabase.storage.from('avatars').getPublicUrl(nomFichier);
+            finalAvatarUrl = urlData.publicUrl;
 
         } catch (err) {
             afficherFeedback(feedback, "Échec de l'absorption du Portrait : " + err.message, "text-error");
