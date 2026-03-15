@@ -103,7 +103,6 @@ document.addEventListener('DOMContentLoaded', () => {
 // SURVEILLANCE DE L'ÉTAT (Le Radar)
 // ==========================================
 window._supabase.auth.onAuthStateChange(async (event, session) => {
-    console.log("📡 RADAR 1 : Lancement du radar. Événement :", event);
     try {
         const authContainer = document.getElementById('auth-container');
         const userContainer = document.getElementById('user-container');
@@ -112,29 +111,25 @@ window._supabase.auth.onAuthStateChange(async (event, session) => {
         const btnForge = document.getElementById('btn-atelier-nav');
         
         if (session) {
-            console.log("📡 RADAR 2 : Session trouvée pour", session.user.email, "- Interrogation de la table noms_de_plume...");
-            
-            // --- VOICI LES LIGNES QUE J'AVAIS OUBLIÉES ---
+            // Le Seigneur est connecté
             if(authContainer) authContainer.classList.add('hidden');
             if(userContainer) userContainer.classList.remove('hidden');
-            // ---------------------------------------------
-
+            
             // 1. Récupérer les vraies données depuis Supabase
-            const { data: profil, error } = await window._supabase
+            const { data: profil } = await window._supabase
                 .from('noms_de_plume')
                 .select('*')
                 .eq('user_id', session.user.id)
                 .single();
-
-            console.log("📡 RADAR 3 : Réponse reçue ! Profil :", profil, "Erreur :", error);
 
             let finalPseudo = session.user.email.split('@')[0];
             let finalAvatar = 'default-avatar.png';
             let isAuteur = false;
 
             if (profil) {
-                if (profil.pseudo) finalPseudo = profil.pseudo;
-                if (profil.avatar_url) finalAvatar = profil.avatar_url;
+                // Ignore les valeurs NULL corrompues de Supabase
+                if (profil.pseudo && profil.pseudo !== "null") finalPseudo = profil.pseudo;
+                if (profil.avatar_url && profil.avatar_url !== "null") finalAvatar = profil.avatar_url;
                 isAuteur = profil.mode_auteur === true;
                 
                 // Mettre à jour le localStorage (Synchronisation)
@@ -143,6 +138,7 @@ window._supabase.auth.onAuthStateChange(async (event, session) => {
                 localStorage.setItem('modeAuteur', isAuteur);
                 localStorage.setItem('afficherCommentaires', profil.afficher_commentaires !== false);
             } else {
+                // S'il y a un lag DB ou un profil vierge, on check le LocalStorage proprement
                 let storedPseudo = localStorage.getItem('userPseudo');
                 if (storedPseudo && storedPseudo !== "undefined" && storedPseudo !== "null") finalPseudo = storedPseudo;
                 
@@ -152,28 +148,40 @@ window._supabase.auth.onAuthStateChange(async (event, session) => {
                 isAuteur = localStorage.getItem('modeAuteur') === 'true';
             }
 
+            // Gestion du Pseudo
             if(userNameDisplay) userNameDisplay.innerText = "Comte " + finalPseudo;
+            
+            // Gestion de l'Avatar
             if (headerAvatar) headerAvatar.src = finalAvatar;
             const previewAvatar = document.getElementById('profile-avatar-preview');
             if (previewAvatar) previewAvatar.src = finalAvatar;
 
-            if (btnForge) btnForge.style.display = isAuteur ? "block" : "none";
+            // Gestion du Menu Auteur (La Forge)
+            if (btnForge) {
+                btnForge.style.display = isAuteur ? "block" : "none";
+            }
 
-            if (session.user.email === "nitroapex@gmail.com") window.estAdmin = true;
-            else window.estAdmin = false;
+            // Identification de l'Admin
+            if (session.user.email === "nitroapex@gmail.com") {
+                window.estAdmin = true;
+            } else {
+                window.estAdmin = false;
+            }
             
             if(typeof window.activerBouclier === 'function') window.activerBouclier();
-            console.log("📡 RADAR 4 : Interface utilisateur mise à jour avec succès.");
 
         } else {
-            console.log("📡 RADAR 2 : Aucune session. Mode visiteur.");
+            // Le Seigneur est un simple visiteur
             if(authContainer) authContainer.classList.remove('hidden');
             if(userContainer) userContainer.classList.add('hidden');
+            
+            // On cache la forge pour un simple citoyen
             if (btnForge) btnForge.style.display = "none";
+            
             window.estAdmin = false;
             if(typeof window.activerBouclier === 'function') window.activerBouclier();
         }
     } catch (e) {
-        console.error("❌ ERREUR FATALE DANS LE RADAR :", e);
+        console.error("Le radar a trébuché :", e);
     }
 });
