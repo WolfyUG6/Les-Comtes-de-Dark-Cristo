@@ -573,8 +573,12 @@ button:hover, .genre-btn:hover {
 .btn-small { font-size: 0.75rem; margin-right: 10px; }
 .btn-small-last { font-size: 0.75rem; }
 
-/* -- Couleurs Classification -- */
-.age-tout-public { border-color: #28a745 !important; color: #28a745 !important; }
+.age-todo-public { border-color: #28a745 !important; color: #28a745 !important; }
 .age-r15 { border-color: #ffd700 !important; color: #ffd700 !important; }
 .age-r16 { border-color: #ff8c00 !important; color: #ff8c00 !important; }
 .age-r18 { border-color: var(--accent-red) !important; color: var(--accent-red) !important; }
+
+/* -- Histoire -- */
+.page-histoire { padding-top: 40px; padding-bottom: 80px; width: 75%; max-width: 1200px; margin: 0 auto; box-sizing: border-box; }
+.histoire-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.histoire-actions { display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 30px; align-items: center; }

@@ -78,7 +78,7 @@ window.chargerPageHistoire = async function() {
         const { data: { session } } = await window._supabase.auth.getSession();
         
         btnSuivre.innerText = "Soutenir l'œuvre";
-        btnSuivre.className = "genre-btn btn-primary w-100"; // Reset classes
+        btnSuivre.className = "genre-btn btn-primary shadow-active"; // Reset classes
         btnSuivre.disabled = false;
         
         // On détache les anciens event listeners (technique du clone)
@@ -95,7 +95,7 @@ window.chargerPageHistoire = async function() {
 
             if (aDejaSoutenu) {
                 nouveauBtn.innerText = "Œuvre soutenue 🩸";
-                nouveauBtn.className = "genre-btn btn-danger w-100 shadow-active";
+                nouveauBtn.className = "genre-btn btn-danger shadow-active";
             }
 
             nouveauBtn.addEventListener('click', async () => {
@@ -112,11 +112,11 @@ window.chargerPageHistoire = async function() {
                 if (exist) {
                     await window._supabase.from('favoris').delete().eq('id', exist.id);
                     nouveauBtn.innerText = "Soutenir l'œuvre";
-                    nouveauBtn.className = "genre-btn btn-primary w-100";
+                    nouveauBtn.className = "genre-btn btn-primary shadow-active";
                 } else {
                     await window._supabase.from('favoris').insert([{ user_id: session.user.id, histoire_id: idHistoire }]);
                     nouveauBtn.innerText = "Œuvre soutenue 🩸";
-                    nouveauBtn.className = "genre-btn btn-danger w-100 shadow-active";
+                    nouveauBtn.className = "genre-btn btn-danger shadow-active";
                 }
 
                 // Maj du compteur
