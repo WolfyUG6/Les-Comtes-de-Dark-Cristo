@@ -8,7 +8,8 @@ let vueComptee = false;
 let tempsLectureAtteint = false; 
 let aAtteintMoitie = false;
 let derniereZone = 0;
-let taillePlumeActuelle = 1.1;
+// On initialise la taille de plume avec la valeur sauvegardée ou 1.1 par défaut
+let taillePlumeActuelle = parseFloat(localStorage.getItem('lecteurTaille')) || 1.1;
 
 window.lireChapitre = async function(idParam = null) {
     window.scrollTo({ top: 0, behavior: 'auto' });
@@ -270,14 +271,17 @@ document.addEventListener('DOMContentLoaded', () => {
         // Thèmes de lecture
         if (e.target.id === 'btn-theme-sombre') {
             document.getElementById('lecture-contenu').setAttribute('data-theme-lecture', 'abysses');
+            localStorage.setItem('lecteurTheme', 'abysses');
             updateActiveThemeButton('btn-theme-sombre');
         }
         if (e.target.id === 'btn-theme-clair') {
             document.getElementById('lecture-contenu').setAttribute('data-theme-lecture', 'lumiere');
+            localStorage.setItem('lecteurTheme', 'lumiere');
             updateActiveThemeButton('btn-theme-clair');
         }
         if (e.target.id === 'btn-theme-sepia') {
             document.getElementById('lecture-contenu').setAttribute('data-theme-lecture', 'sepia');
+            localStorage.setItem('lecteurTheme', 'sepia');
             updateActiveThemeButton('btn-theme-sepia');
         }
 
@@ -286,20 +290,22 @@ document.addEventListener('DOMContentLoaded', () => {
             if (taillePlumeActuelle < 2.5) {
                 taillePlumeActuelle += 0.1;
                 document.getElementById('lecture-contenu').style.fontSize = taillePlumeActuelle + 'rem';
+                localStorage.setItem('lecteurTaille', taillePlumeActuelle);
             }
         }
         if (e.target.id === 'btn-text-minus') {
             if (taillePlumeActuelle > 0.8) {
                 taillePlumeActuelle -= 0.1;
                 document.getElementById('lecture-contenu').style.fontSize = taillePlumeActuelle + 'rem';
+                localStorage.setItem('lecteurTaille', taillePlumeActuelle);
             }
         }
         
-        // Scroll Rapide
-        if (e.target.id === 'btn-scroll-top') {
+        // Scroll Rapide (Global + Pupitre)
+        if (e.target.id === 'btn-scroll-top' || e.target.id === 'btn-pupitre-scroll-top') {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-        if (e.target.id === 'btn-scroll-bottom') {
+        if (e.target.id === 'btn-scroll-bottom' || e.target.id === 'btn-pupitre-scroll-bottom') {
             window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
         }
     });
@@ -309,6 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target.id === 'select-font') {
             const contenu = document.getElementById('lecture-contenu');
             if (contenu) contenu.style.fontFamily = e.target.value;
+            localStorage.setItem('lecteurPolice', e.target.value);
         }
     });
 });
@@ -332,16 +339,23 @@ function appliquerStylePupitre() {
     const contenu = document.getElementById('lecture-contenu');
     if (!contenu) return;
     
-    // Valeurs par défaut si non set
-    if (!contenu.getAttribute('data-theme-lecture')) {
-        contenu.setAttribute('data-theme-lecture', 'abysses');
-        updateActiveThemeButton('btn-theme-sombre');
-    }
+    // 1. Appliquer le thème sauvegardé
+    const themeSauvegarde = localStorage.getItem('lecteurTheme') || 'abysses';
+    contenu.setAttribute('data-theme-lecture', themeSauvegarde);
+    if (themeSauvegarde === 'abysses') updateActiveThemeButton('btn-theme-sombre');
+    else if (themeSauvegarde === 'lumiere') updateActiveThemeButton('btn-theme-clair');
+    else if (themeSauvegarde === 'sepia') updateActiveThemeButton('btn-theme-sepia');
     
+    // 2. Appliquer la taille sauvegardée
     contenu.style.fontSize = taillePlumeActuelle + 'rem';
     
+    // 3. Appliquer la police sauvegardée
     const selectFont = document.getElementById('select-font');
     if (selectFont) {
+        const policeSauvegardee = localStorage.getItem('lecteurPolice');
+        if (policeSauvegardee) {
+            selectFont.value = policeSauvegardee;
+        }
         contenu.style.fontFamily = selectFont.value;
     }
 }

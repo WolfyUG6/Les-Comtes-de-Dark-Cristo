@@ -41,7 +41,11 @@
             </div>
 
             <div class="pupitre-group mt-15">
-                <button id="btn-mode-zen" class="genre-btn btn-outline-blue w-100">👁️ Plein Écran</button>
+                <button id="btn-mode-zen" class="genre-btn btn-outline-blue w-100 mb-10">👁️ Plein Écran</button>
+                <div class="size-buttons">
+                    <button id="btn-pupitre-scroll-top" class="genre-btn w-100" style="font-size: 0.9rem;">⬆️ Sommet</button>
+                    <button id="btn-pupitre-scroll-bottom" class="genre-btn w-100" style="font-size: 0.9rem;">⬇️ Abysses</button>
+                </div>
             </div>
             
             <div class="pupitre-group mt-15">
@@ -50,15 +54,13 @@
         </div>
     </div>
 
-    <!-- EN-TÊTE DU CHAPITRE -->
-    <div class="lecteur-header text-center mb-15 mt-15">
-        <h1 id="lecture-titre" class="lecture-titre">Déchiffrement du parchemin...</h1>
-    </div>
-
-    <!-- NAVIGATION HAUT -->
-    <div class="lecteur-navigation nav-haut mb-15">
-        <button id="btn-chap-prec-haut" class="genre-btn btn-lecture-nav hidden">← Précédent</button>
-        <button id="btn-chap-suiv-haut" class="genre-btn btn-lecture-nav hidden">Suivant →</button>
+    <!-- BANDEAU STICKY (Remplace En-Tête et Nav Haut séparés) -->
+    <div id="lecture-header-fixe" class="lecture-header-fixe">
+        <h1 id="lecture-titre" class="lecture-titre-m0">Déchiffrement...</h1>
+        <div class="lecture-nav-fixe">
+            <button id="btn-chap-prec-haut" class="btn-lecture-nav-fixe hidden">← Précédent</button>
+            <button id="btn-chap-suiv-haut" class="btn-lecture-nav-fixe hidden">Suivant →</button>
+        </div>
     </div>
 
     <!-- LE CONTENU DU CHAPITRE -->
@@ -68,8 +70,8 @@
 
     <!-- NAVIGATION BAS -->
     <div class="lecteur-navigation nav-bas mt-15 mb-15">
-        <button id="btn-chap-prec-bas" class="genre-btn btn-lecture-nav hidden">← Précédent</button>
-        <button id="btn-chap-suiv-bas" class="genre-btn btn-lecture-nav hidden">Suivant →</button>
+        <button id="btn-chap-prec-bas" class="btn-lecture-nav-fixe hidden">← Précédent</button>
+        <button id="btn-chap-suiv-bas" class="btn-lecture-nav-fixe hidden">Suivant →</button>
     </div>
 
     <!-- BOUTONS DE DÉFILEMENT RAPIDE -->

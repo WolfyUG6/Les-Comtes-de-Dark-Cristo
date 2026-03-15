@@ -631,13 +631,22 @@ button:hover, .genre-btn:hover {
 .size-buttons { display: flex; gap: 10px; }
 .pupitre-select { background: #111; color: #e0d7c6; border-color: #333; }
 
-/* Navigation Précédent/Suivant */
-.lecteur-navigation { display: flex; justify-content: space-between; width: 100%; gap: 15px; }
-.btn-lecture-nav { flex: 1; padding: 15px; font-weight: bold; font-size: 1.1rem; border-color: var(--border-color); color: var(--text-main); }
-.btn-lecture-nav:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+/* --- Bandeau Fixe de Lecture (Sticky Nav) --- */
+.lecture-header-fixe { position: sticky; top: 70px; left: 0; width: 100%; z-index: 1400; background: rgba(10, 10, 10, 0.95); border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; padding: 10px 30px; box-sizing: border-box; backdrop-filter: blur(5px); }
+.lecture-titre-m0 { font-size: 1.5rem; color: #ff0055; margin: 0; text-transform: uppercase; letter-spacing: 2px; }
+
+/* Navigation Précédent/Suivant intégrée au bandeau */
+.lecture-nav-fixe { display: flex; gap: 15px; }
+.btn-lecture-nav-fixe { background: transparent; color: #c4a484; border: 1px solid #333; padding: 8px 20px; font-family: 'Cinzel', serif; font-weight: bold; font-size: 0.9rem; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; }
+.btn-lecture-nav-fixe:hover { border-color: #8b0000; color: #fff; background: rgba(139, 0, 0, 0.2); box-shadow: 0 0 10px rgba(139, 0, 0, 0.5); }
+
+/* Navigation Bas (Identique mais plus grand) */
+.nav-bas { justify-content: center; gap: 30px; }
+.nav-bas .btn-lecture-nav-fixe { padding: 15px 40px; font-size: 1.1rem; }
 
 /* --- Mode Zen (Plein écran de lecture) --- */
 body.mode-zen header, body.mode-zen footer, body.mode-zen .genre-menu { display: none !important; }
+body.mode-zen .lecture-header-fixe { top: 0; }
 body.mode-zen .page-lecteur { padding-top: 20px; }
 
 /* Boutons de scroll rapide */
