@@ -1,0 +1,36 @@
+<div class="page-accueil">
+    
+    <div class="accueil-header mb-15">
+        <h1 class="accueil-title-m0 text-center">Vos Lectures</h1>
+        <p class="text-muted-italic text-center">Retrouvez les parchemins avec lesquels vous avez scellé un pacte.</p>
+    </div>
+
+    <!-- BANDEAU DE NAVIGATION (Onglets) -->
+    <div class="favoris-nav mb-30" style="display: flex; justify-content: center; gap: 15px; border-bottom: 2px solid var(--border-color); padding-bottom: 15px;">
+        <button class="genre-btn btn-primary shadow-active btn-tab-favoris" data-tab="tab-pactes">Mes Pactes</button>
+        <button class="genre-btn btn-tab-favoris" data-tab="tab-lectures">Vos Lectures (WIP)</button>
+        <button class="genre-btn btn-tab-favoris" data-tab="tab-archives">Archives</button>
+    </div>
+
+    <!-- CONTENEURS DES ONGLETS -->
+    
+    <!-- 1. MES PACTES (Favoris) -->
+    <div id="tab-pactes" class="tab-content-favoris">
+        <div id="pactes-grid" class="stories-grid">
+            <!-- Les cartes des oeuvres soutenues s'afficheront ici -->
+        </div>
+    </div>
+
+    <!-- 2. VOS LECTURES (En cours) -->
+    <div id="tab-lectures" class="tab-content-favoris hidden">
+        <h2 class="text-center" style="font-family: 'Cinzel', serif; color: var(--text-title); margin-top: 50px;">Lectures en cours</h2>
+        <p class="text-center text-muted-italic">Cette section sera rattachée à vos marques-pages prochainement.</p>
+    </div>
+
+    <!-- 3. ARCHIVES -->
+    <div id="tab-archives" class="tab-content-favoris hidden">
+        <h2 class="text-center" style="font-family: 'Cinzel', serif; color: var(--text-title); margin-top: 50px;">Les Archives</h2>
+        <p class="text-center text-muted-italic">Les histoires que vous avez terminées reposent ici.</p>
+    </div>
+
+</div>

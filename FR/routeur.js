@@ -27,7 +27,7 @@ window.chargerPageInterne = async function(pageDemandee) {
         'oeuvre': 'Histoire.html',
         'lecture': 'Lecteur.html',
         'quartiers': 'Parametre.html',
-        'lectures': 'Lectures.html',
+        'lectures': 'Favoris.html',
         'studio': 'Forge.html',
         'gestion': 'Gestion.html',
         'editeur-chapitre': 'Editeur.html',
@@ -101,6 +101,10 @@ function initialiserScriptsDePage(page) {
     // ---> LECTURE ICI <---
     else if (page === 'lecture') {
         if (typeof window.lireChapitre === 'function') window.lireChapitre();
+    }
+    // ---> FAVORIS ICI <---
+    else if (page === 'lectures') {
+        if (typeof window.chargerFavoris === 'function') window.chargerFavoris();
     }
     // ---> AJOUTE CECI <---
     else if (page === 'gestion') {
