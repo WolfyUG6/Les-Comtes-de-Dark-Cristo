@@ -169,29 +169,27 @@ async function chargerListeChapitres(idHistoire) {
     chapitresListe.innerHTML = '';
     let totalMotsOeuvre = 0;
     const maintenant = new Date(); // L'heure magique !
+    
+    let prochainChapitre = null;
+    let chapitresPublies = 0;
 
     chapitres.forEach(chap => {
-        totalMotsOeuvre += chap.nombre_mots || 0;
-        
         const dateChap = chap.date_publication ? new Date(chap.date_publication) : new Date();
-        const div = document.createElement('div');
-        div.className = "chapter-item";
         
         if (dateChap > maintenant) {
-            // Chapitre programmé
-            const dateAffichee = dateChap.toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-            div.innerHTML = `
-                <div>
-                    <strong class="chapter-title text-muted">Chapitre ${chap.numero} : ${chap.titre}</strong>
-                    <span class="scheduled-date ml-10">(Programmé le ${dateAffichee})</span>
-                </div>
-                <div>
-                    <button class="genre-btn btn-ghost btn-small" disabled>Bientôt</button>
-                </div>
-            `;
+            // C'est un chapitre programmé (dans le futur)
+            // On cherche le plus proche de nous (celui avec la date la plus petite)
+            if (!prochainChapitre || dateChap < prochainChapitre.date) {
+                prochainChapitre = { date: dateChap, numero: chap.numero };
+            }
         } else {
-            // Chapitre publié
+            // C'est un chapitre publié
+            chapitresPublies++;
+            totalMotsOeuvre += chap.nombre_mots || 0;
             const dateAffichee = dateChap.toLocaleDateString('fr-FR');
+            
+            const div = document.createElement('div');
+            div.className = "chapter-item";
             div.innerHTML = `
                 <div>
                     <strong class="chapter-title">Chapitre ${chap.numero} : ${chap.titre}</strong>
@@ -201,10 +199,30 @@ async function chargerListeChapitres(idHistoire) {
                     <button class="genre-btn btn-outline-blue btn-small" onclick="alert('Lectorat en construction...')">Lire</button>
                 </div>
             `;
+            chapitresListe.appendChild(div);
         }
-        
-        chapitresListe.appendChild(div);
     });
+    
+    // Si aucun chapitre n'est publié, on affiche un message dans la liste
+    if (chapitresPublies === 0) {
+        chapitresListe.innerHTML = '<p class="text-muted-italic text-center mt-15">L\'œuvre n\'a pas encore de parchemin lisible.</p>';
+    }
+
+    // --- MISE À JOUR DE LA BOÎTE DE PROGRAMMATION ---
+    const boxProchain = document.getElementById('prochain-chapitre-box');
+    if (boxProchain) {
+        if (prochainChapitre) {
+            const dateAffichee = prochainChapitre.date.toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            boxProchain.innerHTML = `
+                <div style="font-family: 'Cinzel', serif; color: var(--text-title); margin-bottom: 5px;">Prochaine publication :</div>
+                <div style="color: #ffd700; font-weight: bold; letter-spacing: 1px;">Le ${dateAffichee}</div>
+            `;
+        } else {
+            boxProchain.innerHTML = `
+                <div style="color: var(--text-muted); font-style: italic;">Aucune publication programmée</div>
+            `;
+        }
+    }
 
     // Mise à jour du compteur de mots global
     const spanMots = document.getElementById('histoire-mots-count');

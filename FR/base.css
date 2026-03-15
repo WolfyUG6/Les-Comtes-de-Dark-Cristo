@@ -581,4 +581,6 @@ button:hover, .genre-btn:hover {
 /* -- Histoire -- */
 .page-histoire { padding-top: 40px; padding-bottom: 80px; width: 75%; max-width: 1200px; margin: 0 auto; box-sizing: border-box; }
 .histoire-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.histoire-actions { display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 30px; align-items: center; }
+.histoire-actions-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 25px; }
+.histoire-actions { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; width: 100%; }
+.prochain-chapitre { width: 100%; border-bottom: 1px dashed var(--border-color); padding-bottom: 15px; margin-bottom: 15px; }
