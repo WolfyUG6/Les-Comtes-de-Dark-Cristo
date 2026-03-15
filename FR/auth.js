@@ -122,7 +122,7 @@ window._supabase.auth.onAuthStateChange(async (event, session) => {
                     .from('noms_de_plume')
                     .select('*')
                     .eq('user_id', session.user.id)
-                    .single();
+                    .maybeSingle();
                 profil = res.data;
             } catch (err) {
                 console.warn("Impossible de récupérer le profil depuis la DB, utilisation du cache local.", err);
