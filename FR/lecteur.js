@@ -10,6 +10,15 @@ let aAtteintMoitie = false;
 let derniereZone = 0;
 // On initialise la taille de plume avec la valeur sauvegardée ou 1.1 par défaut
 let taillePlumeActuelle = parseFloat(localStorage.getItem('lecteurTaille')) || 1.1;
+let largeurParcheminActuelle = parseFloat(localStorage.getItem('lecteurLargeur')) || 75;
+
+// Met à jour l'état des boutons de largeur (grisés si min/max atteints)
+function updateWidthButtons() {
+    const btnMoins = document.getElementById('btn-width-minus');
+    const btnPlus = document.getElementById('btn-width-plus');
+    if (btnMoins) btnMoins.disabled = largeurParcheminActuelle <= 25;
+    if (btnPlus) btnPlus.disabled = largeurParcheminActuelle >= 75;
+}
 
 window.lireChapitre = async function(idParam = null) {
     window.scrollTo({ top: 0, behavior: 'auto' });
@@ -210,7 +219,7 @@ window.addEventListener('scroll', function() {
             }
         }
 
-        // Boutons de défilement rapide
+        // Boutons de défilement rapide (Apparaissant en bas à droite)
         const btnScrollTop = document.getElementById('btn-scroll-top');
         const btnScrollBottom = document.getElementById('btn-scroll-bottom');
 
@@ -227,6 +236,19 @@ window.addEventListener('scroll', function() {
             } else {
                 btnScrollBottom.classList.add('visible');
             }
+        }
+        
+        // --- BOUTONS INTELLIGENTS DU PUPITRE ---
+        const btnPupitreTop = document.getElementById('btn-pupitre-scroll-top');
+        const btnPupitreBottom = document.getElementById('btn-pupitre-scroll-bottom');
+        
+        if (btnPupitreTop && btnPupitreBottom) {
+            // Au sommet ?
+            btnPupitreTop.disabled = hauteurDefilee === 0;
+            
+            // Aux abysses ?
+            const positionActuelle = window.innerHeight + hauteurDefilee;
+            btnPupitreBottom.disabled = positionActuelle >= document.documentElement.scrollHeight - 10;
         }
     }
 });
@@ -271,16 +293,22 @@ document.addEventListener('DOMContentLoaded', () => {
         // Thèmes de lecture
         if (e.target.id === 'btn-theme-sombre') {
             document.getElementById('lecture-contenu').setAttribute('data-theme-lecture', 'abysses');
+            const bandeau = document.getElementById('lecture-header-fixe');
+            if (bandeau) bandeau.setAttribute('data-theme-lecture', 'abysses');
             localStorage.setItem('lecteurTheme', 'abysses');
             updateActiveThemeButton('btn-theme-sombre');
         }
         if (e.target.id === 'btn-theme-clair') {
             document.getElementById('lecture-contenu').setAttribute('data-theme-lecture', 'lumiere');
+            const bandeau = document.getElementById('lecture-header-fixe');
+            if (bandeau) bandeau.setAttribute('data-theme-lecture', 'lumiere');
             localStorage.setItem('lecteurTheme', 'lumiere');
             updateActiveThemeButton('btn-theme-clair');
         }
         if (e.target.id === 'btn-theme-sepia') {
             document.getElementById('lecture-contenu').setAttribute('data-theme-lecture', 'sepia');
+            const bandeau = document.getElementById('lecture-header-fixe');
+            if (bandeau) bandeau.setAttribute('data-theme-lecture', 'sepia');
             localStorage.setItem('lecteurTheme', 'sepia');
             updateActiveThemeButton('btn-theme-sepia');
         }
@@ -298,6 +326,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 taillePlumeActuelle -= 0.1;
                 document.getElementById('lecture-contenu').style.fontSize = taillePlumeActuelle + 'rem';
                 localStorage.setItem('lecteurTaille', taillePlumeActuelle);
+            }
+        }
+        
+        // Largeur du panneau
+        if (e.target.id === 'btn-width-plus') {
+            if (largeurParcheminActuelle < 75) {
+                largeurParcheminActuelle += 5;
+                const page = document.getElementById('page-lecteur-container');
+                if (page) page.style.width = largeurParcheminActuelle + '%';
+                localStorage.setItem('lecteurLargeur', largeurParcheminActuelle);
+                updateWidthButtons();
+            }
+        }
+        if (e.target.id === 'btn-width-minus') {
+            if (largeurParcheminActuelle > 25) {
+                largeurParcheminActuelle -= 5;
+                const page = document.getElementById('page-lecteur-container');
+                if (page) page.style.width = largeurParcheminActuelle + '%';
+                localStorage.setItem('lecteurLargeur', largeurParcheminActuelle);
+                updateWidthButtons();
             }
         }
         
@@ -342,6 +390,9 @@ function appliquerStylePupitre() {
     // 1. Appliquer le thème sauvegardé
     const themeSauvegarde = localStorage.getItem('lecteurTheme') || 'abysses';
     contenu.setAttribute('data-theme-lecture', themeSauvegarde);
+    const bandeau = document.getElementById('lecture-header-fixe');
+    if (bandeau) bandeau.setAttribute('data-theme-lecture', themeSauvegarde);
+    
     if (themeSauvegarde === 'abysses') updateActiveThemeButton('btn-theme-sombre');
     else if (themeSauvegarde === 'lumiere') updateActiveThemeButton('btn-theme-clair');
     else if (themeSauvegarde === 'sepia') updateActiveThemeButton('btn-theme-sepia');
@@ -358,4 +409,9 @@ function appliquerStylePupitre() {
         }
         contenu.style.fontFamily = selectFont.value;
     }
+    
+    // 4. Appliquer la largeur sauvegardée
+    const page = document.getElementById('page-lecteur-container');
+    if (page) page.style.width = largeurParcheminActuelle + '%';
+    updateWidthButtons();
 }
