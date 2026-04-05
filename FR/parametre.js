@@ -16,6 +16,9 @@ window.chargerQuartiers = async function() {
     
     // 4. Activer l'aperçu de l'avatar
     activerApercuAvatar();
+
+    // 5. Brancher les boutons Sécurité
+    brancherBoutonsSécurité();
 };
 
 function initialiserSidebarQuartiers() {
@@ -24,14 +27,9 @@ function initialiserSidebarQuartiers() {
 
     boutons.forEach(btn => {
         btn.addEventListener('click', () => {
-            // Retirer l'actif partout
             boutons.forEach(b => b.classList.remove('active'));
             sections.forEach(s => s.classList.remove('active'));
-
-            // Activer le bouton cliqué
             btn.classList.add('active');
-
-            // Activer la section cible
             const cibleId = btn.getAttribute('data-target');
             document.getElementById(cibleId).classList.add('active');
         });
@@ -57,6 +55,90 @@ function activerApercuAvatar() {
 }
 
 // =====================================
+// BRANCHEMENT DES BOUTONS SÉCURITÉ
+// =====================================
+
+function brancherBoutonsSécurité() {
+    const btnEmail = document.getElementById('btn-save-email');
+    const btnPassword = document.getElementById('btn-save-password');
+
+    if (btnEmail) {
+        btnEmail.addEventListener('click', changerEmail);
+    }
+    if (btnPassword) {
+        btnPassword.addEventListener('click', changerMotDePasse);
+    }
+}
+
+// --- CHANGEMENT D'EMAIL ---
+async function changerEmail() {
+    const feedback = document.getElementById('securite-feedback');
+    const nouvelEmail = document.getElementById('quartiers-email').value.trim();
+    const btn = document.getElementById('btn-save-email');
+
+    if (!nouvelEmail) {
+        afficherFeedback(feedback, "L'incantation est vide. Entrez un email.", "text-error");
+        return;
+    }
+
+    // Validation basique du format email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(nouvelEmail)) {
+        afficherFeedback(feedback, "Ce grimoire d'adresse est mal formé.", "text-error");
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerText = "Transmission...";
+    afficherFeedback(feedback, "Envoi du lien de confirmation...", "");
+
+    const { error } = await window._supabase.auth.updateUser({ email: nouvelEmail });
+
+    btn.disabled = false;
+    btn.innerText = "Changer l'Email";
+
+    if (error) {
+        afficherFeedback(feedback, "Refus du Sanctuaire : " + error.message, "text-error");
+    } else {
+        afficherFeedback(feedback, "✅ Un lien de confirmation a été envoyé à " + nouvelEmail + ". Vérifiez vos courriers.", "text-success");
+        document.getElementById('quartiers-email').value = '';
+    }
+}
+
+// --- CHANGEMENT DE MOT DE PASSE ---
+async function changerMotDePasse() {
+    const feedback = document.getElementById('securite-feedback');
+    const nouveauMdp = document.getElementById('quartiers-password').value;
+    const btn = document.getElementById('btn-save-password');
+
+    if (!nouveauMdp) {
+        afficherFeedback(feedback, "Le Sceau de Garde ne peut être vide.", "text-error");
+        return;
+    }
+
+    if (nouveauMdp.length < 6) {
+        afficherFeedback(feedback, "Le Sceau doit contenir au moins 6 caractères.", "text-error");
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerText = "Forgeage...";
+    afficherFeedback(feedback, "Gravure du nouveau Sceau...", "");
+
+    const { error } = await window._supabase.auth.updateUser({ password: nouveauMdp });
+
+    btn.disabled = false;
+    btn.innerText = "Forger le Sceau";
+
+    if (error) {
+        afficherFeedback(feedback, "Refus du Sanctuaire : " + error.message, "text-error");
+    } else {
+        afficherFeedback(feedback, "✅ Nouveau Sceau de Garde gravé avec succès.", "text-success");
+        document.getElementById('quartiers-password').value = '';
+    }
+}
+
+// =====================================
 // CHARGEMENT DES DONNÉES (Fetch Isolé)
 // =====================================
 
@@ -69,18 +151,22 @@ async function remplirDonneesProfil() {
         return;
     }
 
-    // On va chercher les vraies infos dans la base de données
     const { data: profil, error } = await window._supabase
         .from('noms_de_plume')
         .select('*')
         .eq('user_id', session.user.id)
         .single();
 
-    // On pré-remplit les zones (Si rien n'est trouvé, on laisse vide / defaut)
     const pseudoInput = document.getElementById('quartiers-pseudo');
     const avatarPreview = document.getElementById('quartiers-avatar-preview');
     const switchAuteur = document.getElementById('switch-auteur');
     const switchComs = document.getElementById('switch-coms');
+
+    // Pré-remplir l'email actuel dans le champ email
+    const emailInput = document.getElementById('quartiers-email');
+    if (emailInput && session.user.email) {
+        emailInput.placeholder = "Email actuel : " + session.user.email;
+    }
 
     if (profil) {
         if (pseudoInput && profil.pseudo && profil.pseudo !== "null") {
@@ -89,8 +175,6 @@ async function remplirDonneesProfil() {
         if (avatarPreview && profil.avatar_url && profil.avatar_url !== "null") {
             avatarPreview.src = profil.avatar_url;
         }
-        
-        // Coche les switchs selon la DB (ou True par défaut comme demandé)
         if (switchAuteur) {
             switchAuteur.checked = profil.mode_auteur === true;
             localStorage.setItem('modeAuteur', profil.mode_auteur === true);
@@ -102,7 +186,6 @@ async function remplirDonneesProfil() {
             localStorage.setItem('afficherCommentaires', profil.afficher_commentaires !== false);
         }
     } else {
-        // Profil vierge : Les booléens sont TRUE par défaut selon vos consignes
         if (switchAuteur) {
             switchAuteur.checked = true;
             localStorage.setItem('modeAuteur', 'true');
@@ -142,10 +225,8 @@ window.sauvegarderIdentite = async function() {
 
     let finalAvatarUrl = null;
 
-    // A. Étape d'Upload Avatar (Si présent)
     if (file) {
         try {
-            // Compression
             const options = {
                 maxSizeMB: 0.5,
                 maxWidthOrHeight: 800,
@@ -157,7 +238,6 @@ window.sauvegarderIdentite = async function() {
                 fichierUpload = await imageCompression(file, options);
             }
 
-            // Renommage unique
             const ext = file.name.split('.').pop();
             const nomFichier = `avatar_${userId}_${Date.now()}.${ext}`;
 
@@ -179,7 +259,6 @@ window.sauvegarderIdentite = async function() {
         }
     }
 
-    // B. Étape de mise à jour Profil dans la base de données
     let updatePayload = { pseudo: pseudo };
     if (finalAvatarUrl) {
         updatePayload.avatar_url = finalAvatarUrl;
@@ -195,11 +274,8 @@ window.sauvegarderIdentite = async function() {
         let metaDataPayload = { pseudo: pseudo };
         if (finalAvatarUrl) metaDataPayload.avatar_url = finalAvatarUrl;
         
-        await window._supabase.auth.updateUser({
-            data: metaDataPayload
-        });
+        await window._supabase.auth.updateUser({ data: metaDataPayload });
 
-        // Update purement visuel de l'en-tête (Pas de LocalStorage, pas de Auth.js)
         const headerName = document.getElementById('user-name');
         if (headerName) headerName.innerText = "Comte " + pseudo;
         
@@ -237,7 +313,6 @@ window.switcherPreference = async function(colonneSQL, valeurBool) {
     } else {
         afficherFeedback(feedback, "Loi décrétée dans la base de données.", "text-success", true);
         
-        // Appliquer visuellement la forge et stocker en LocalStorage (Sans interroger de Base de données sur les autres pages)
         if (colonneSQL === 'mode_auteur') {
             localStorage.setItem('modeAuteur', valeurBool);
             const btnForge = document.getElementById('btn-atelier-nav');
@@ -253,7 +328,6 @@ window.switcherPreference = async function(colonneSQL, valeurBool) {
 // BOÎTES À OUTILS
 // =====================================
 
-// Fonction outil (Message visuel)
 function afficherFeedback(element, message, className = "", clearAfter = false) {
     if (!element) return;
     element.className = 'text-small mt-10 ' + className;
@@ -264,9 +338,7 @@ function afficherFeedback(element, message, className = "", clearAfter = false) 
     }
 }
 
-// Sauvegarde Mince (Evite l'upsert destructeur)
 async function safePartialUpdate(userId, partialPayload) {
-    // 1. Vérifier si la ligne existe
     const { data: existing } = await window._supabase
         .from('noms_de_plume')
         .select('user_id')
@@ -274,7 +346,6 @@ async function safePartialUpdate(userId, partialPayload) {
         .single();
     
     if (existing) {
-        // UPDATE (ne supprime pas les autres colonnes)
         const res = await window._supabase
             .from('noms_de_plume')
             .update(partialPayload)
@@ -286,8 +357,6 @@ async function safePartialUpdate(userId, partialPayload) {
         }
         return res;
     } else {
-        // INSERT (crée la ligne vierge + les data fournies)
-        // Les boolean mode_auteur et afficher_commentaires gèrent leurs DEFAULT cote DB
         const insertPayload = { user_id: userId, ...partialPayload };
         const res = await window._supabase
             .from('noms_de_plume')
