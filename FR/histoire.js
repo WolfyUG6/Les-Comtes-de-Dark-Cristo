@@ -3,6 +3,434 @@
 // Présentation de l'œuvre et liste des chapitres
 // ==========================================
 
+const COMMENTAIRES_MIN = 500;
+const COMMENTAIRES_MAX = 5000;
+const COMMENTAIRES_TABLE = 'commentaires';
+
+window._commentairesInstances = window._commentairesInstances || {};
+
+function getCommentaireElements(section) {
+    return {
+        feedback: section.querySelector('[data-role="feedback"]'),
+        form: section.querySelector('[data-role="form"]'),
+        message: section.querySelector('[data-role="message"]'),
+        compteur: section.querySelector('[data-role="compteur"]'),
+        liste: section.querySelector('[data-role="liste"]'),
+        vide: section.querySelector('[data-role="vide"]'),
+        tri: section.querySelector('[data-role="tri"]')
+    };
+}
+
+function getCommentaireInstanceFromNode(node) {
+    const section = node?.closest?.('[data-commentaires-root]');
+    if (!section) return null;
+    return window._commentairesInstances[section.id] || null;
+}
+
+function setCommentaireFeedback(instance, message = '', className = '') {
+    if (!instance?.elements?.feedback) return;
+
+    instance.elements.feedback.innerText = message;
+    instance.elements.feedback.className = `commentaires-feedback text-small mt-15 ${className}`.trim();
+    instance.elements.feedback.classList.toggle('hidden', !message);
+}
+
+function escapeCommentaireHtml(value = '') {
+    return value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function formaterDateCommentaire(value) {
+    if (!value) return '';
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+
+    return date.toLocaleString('fr-FR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+function formaterMessageCommentaire(message = '') {
+    const escaped = escapeCommentaireHtml(message);
+    const avecMentions = escaped.replace(
+        /(^|[\s(])@([A-Za-z0-9_.-]{1,50})/g,
+        '$1<span class="comment-mention">@$2</span>'
+    );
+
+    return avecMentions.replace(/\r?\n/g, '<br>');
+}
+
+function mettreAJourCompteurCommentaire(textarea, compteur) {
+    if (!textarea || !compteur) return;
+    compteur.innerText = `${textarea.value.length} / ${COMMENTAIRES_MAX}`;
+}
+
+function validerMessageCommentaire(message) {
+    const texte = (message || '').trim();
+
+    if (!texte) {
+        return "Le message est obligatoire.";
+    }
+
+    if (texte.length < COMMENTAIRES_MIN) {
+        return `Le message doit contenir au moins ${COMMENTAIRES_MIN} caracteres.`;
+    }
+
+    if (texte.length > COMMENTAIRES_MAX) {
+        return `Le message ne peut pas depasser ${COMMENTAIRES_MAX} caracteres.`;
+    }
+
+    return '';
+}
+
+function estAuteurParent(histoire, session) {
+    if (!histoire || !session?.user) return false;
+
+    if (histoire.auteur_user_id && histoire.auteur_user_id === session.user.id) {
+        return true;
+    }
+
+    return Boolean(histoire.auteur && session.user.email && histoire.auteur === session.user.email);
+}
+
+function resetCommentaireForm(instance) {
+    if (!instance?.elements?.form || !instance.elements.message) return;
+
+    instance.elements.form.reset();
+    instance.commentaireEnEdition = null;
+    mettreAJourCompteurCommentaire(instance.elements.message, instance.elements.compteur);
+}
+
+function renderCommentaires(instance) {
+    const { liste, vide } = instance.elements;
+    if (!liste || !vide) return;
+
+    if (!instance.commentaires?.length) {
+        liste.innerHTML = '';
+        vide.classList.remove('hidden');
+        return;
+    }
+
+    vide.classList.add('hidden');
+    liste.innerHTML = instance.commentaires.map((commentaire) => {
+        const estAuteurCommentaire = instance.session?.user?.id === commentaire.user_id;
+        const peutModifier = estAuteurCommentaire;
+        const peutSupprimer = estAuteurCommentaire || instance.estAuteurHistoire;
+        const enEdition = String(instance.commentaireEnEdition) === String(commentaire.id);
+        const dateAffichee = formaterDateCommentaire(commentaire.created_at);
+        const pseudo = escapeCommentaireHtml(commentaire.pseudo_auteur || 'Comte inconnu');
+        const message = formaterMessageCommentaire(commentaire.contenu || '');
+        const texteEdition = escapeCommentaireHtml(commentaire.contenu || '');
+
+        return `
+            <article class="commentaire-item card" data-comment-id="${commentaire.id}">
+                <div class="commentaire-meta">
+                    <span class="commentaire-pseudo">${pseudo}</span>
+                    <span class="commentaire-date">${dateAffichee}</span>
+                </div>
+
+                ${
+                    enEdition
+                        ? `
+                            <div class="commentaire-edition mt-15">
+                                <textarea class="custom-input commentaires-textarea" data-role="edit-message" minlength="${COMMENTAIRES_MIN}" maxlength="${COMMENTAIRES_MAX}">${texteEdition}</textarea>
+                                <div class="commentaires-form-footer mt-15">
+                                    <span class="commentaires-limites text-small text-muted">${COMMENTAIRES_MIN} a ${COMMENTAIRES_MAX} caracteres</span>
+                                    <div class="commentaire-actions">
+                                        <button type="button" class="genre-btn btn-primary btn-small" data-action="save-edit">Enregistrer</button>
+                                        <button type="button" class="genre-btn btn-outline-blue btn-small-last" data-action="cancel-edit">Annuler</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `
+                        : `<div class="commentaire-message mt-15">${message}</div>`
+                }
+
+                ${
+                    !enEdition && (peutModifier || peutSupprimer)
+                        ? `
+                            <div class="commentaire-actions mt-15">
+                                ${peutModifier ? '<button type="button" class="genre-btn btn-outline-blue btn-small" data-action="edit">Modifier</button>' : ''}
+                                ${peutSupprimer ? '<button type="button" class="genre-btn btn-outline-red btn-small-last" data-action="delete">Supprimer</button>' : ''}
+                            </div>
+                        `
+                        : ''
+                }
+            </article>
+        `;
+    }).join('');
+}
+
+async function chargerCommentairesInstance(instance) {
+    if (!instance?.section) return;
+
+    const triAscendant = instance.elements.tri?.value === 'anciens';
+    instance.elements.liste.innerHTML = '<p class="loading-text">Chargement des commentaires...</p>';
+    setCommentaireFeedback(instance);
+
+    let requete = window._supabase
+        .from(COMMENTAIRES_TABLE)
+        .select('id, user_id, pseudo_auteur, histoire_id, chapitre_id, cible_type, contenu, created_at, updated_at')
+        .eq('histoire_id', instance.histoire.id)
+        .eq('cible_type', instance.cibleType)
+        .order('created_at', { ascending: triAscendant });
+
+    if (instance.cibleType === 'chapitre') {
+        requete = requete.eq('chapitre_id', instance.chapitreId);
+    } else {
+        requete = requete.is('chapitre_id', null);
+    }
+
+    const { data, error } = await requete;
+
+    if (error) {
+        instance.commentaires = [];
+        instance.elements.liste.innerHTML = '';
+        instance.elements.vide.classList.add('hidden');
+        setCommentaireFeedback(instance, `Impossible de charger les commentaires : ${error.message}`, 'text-error');
+        return;
+    }
+
+    instance.commentaires = data || [];
+    renderCommentaires(instance);
+}
+
+window.recupererContexteCommentaires = async function() {
+    const { data: authData } = await window._supabase.auth.getSession();
+    const session = authData?.session || null;
+
+    if (!session) {
+        return {
+            session: null,
+            pseudo: null,
+            peutAfficherCommentaires: false,
+            profil: null
+        };
+    }
+
+    const { data: profil, error } = await window._supabase
+        .from('noms_de_plume')
+        .select('pseudo, afficher_commentaires')
+        .eq('user_id', session.user.id)
+        .maybeSingle();
+
+    if (error) {
+        return {
+            session,
+            pseudo: session.user.user_metadata?.pseudo || localStorage.getItem('userPseudo') || session.user.email?.split('@')[0] || 'Comte',
+            peutAfficherCommentaires: false,
+            profil: null
+        };
+    }
+
+    return {
+        session,
+        profil: profil || null,
+        pseudo: profil?.pseudo || session.user.user_metadata?.pseudo || localStorage.getItem('userPseudo') || session.user.email?.split('@')[0] || 'Comte',
+        peutAfficherCommentaires: profil ? profil.afficher_commentaires !== false : true
+    };
+};
+
+window.initialiserBlocCommentaires = async function({ sectionId, cibleType, histoire, chapitreId = null }) {
+    const section = document.getElementById(sectionId);
+    if (!section || !histoire?.id) return;
+
+    const elements = getCommentaireElements(section);
+    const contexte = await window.recupererContexteCommentaires();
+
+    if (!contexte.session || !contexte.peutAfficherCommentaires) {
+        section.classList.add('hidden');
+        delete window._commentairesInstances[sectionId];
+        return;
+    }
+
+    const instance = {
+        sectionId,
+        section,
+        elements,
+        session: contexte.session,
+        pseudo: contexte.pseudo,
+        profil: contexte.profil,
+        histoire,
+        chapitreId,
+        cibleType,
+        estAuteurHistoire: estAuteurParent(histoire, contexte.session),
+        commentaires: [],
+        commentaireEnEdition: null
+    };
+
+    section.classList.remove('hidden');
+    window._commentairesInstances[sectionId] = instance;
+    resetCommentaireForm(instance);
+    await chargerCommentairesInstance(instance);
+};
+
+async function publierCommentaire(instance) {
+    const message = instance.elements.message?.value || '';
+    const erreurValidation = validerMessageCommentaire(message);
+
+    if (erreurValidation) {
+        setCommentaireFeedback(instance, erreurValidation, 'text-error');
+        return;
+    }
+
+    const bouton = instance.elements.form?.querySelector('button[type="submit"]');
+    if (bouton) {
+        bouton.disabled = true;
+        bouton.innerText = 'Publication...';
+    }
+
+    const payload = {
+        user_id: instance.session.user.id,
+        pseudo_auteur: instance.pseudo,
+        histoire_id: instance.histoire.id,
+        chapitre_id: instance.cibleType === 'chapitre' ? instance.chapitreId : null,
+        cible_type: instance.cibleType,
+        contenu: message.trim()
+    };
+
+    const { error } = await window._supabase.from(COMMENTAIRES_TABLE).insert([payload]);
+
+    if (bouton) {
+        bouton.disabled = false;
+        bouton.innerText = 'Publier';
+    }
+
+    if (error) {
+        setCommentaireFeedback(instance, `Impossible de publier ce commentaire : ${error.message}`, 'text-error');
+        return;
+    }
+
+    await chargerCommentairesInstance(instance);
+    resetCommentaireForm(instance);
+    setCommentaireFeedback(instance, 'Commentaire publie avec succes.', 'text-success');
+}
+
+async function enregistrerEditionCommentaire(instance, card) {
+    const commentaireId = card?.dataset?.commentId;
+    if (!commentaireId) return;
+
+    const textarea = card.querySelector('[data-role="edit-message"]');
+    const message = textarea?.value || '';
+    const erreurValidation = validerMessageCommentaire(message);
+
+    if (erreurValidation) {
+        setCommentaireFeedback(instance, erreurValidation, 'text-error');
+        return;
+    }
+
+    const { error } = await window._supabase
+        .from(COMMENTAIRES_TABLE)
+        .update({
+            contenu: message.trim(),
+            pseudo_auteur: instance.pseudo,
+            updated_at: new Date().toISOString()
+        })
+        .eq('id', commentaireId)
+        .eq('user_id', instance.session.user.id);
+
+    if (error) {
+        setCommentaireFeedback(instance, `Impossible de modifier ce commentaire : ${error.message}`, 'text-error');
+        return;
+    }
+
+    instance.commentaireEnEdition = null;
+    await chargerCommentairesInstance(instance);
+    setCommentaireFeedback(instance, 'Commentaire modifie avec succes.', 'text-success');
+}
+
+async function supprimerCommentaireInstance(instance, commentaireId) {
+    const { error } = await window._supabase
+        .from(COMMENTAIRES_TABLE)
+        .delete()
+        .eq('id', commentaireId);
+
+    if (error) {
+        setCommentaireFeedback(instance, `Impossible de supprimer ce commentaire : ${error.message}`, 'text-error');
+        return;
+    }
+
+    instance.commentaireEnEdition = null;
+    await chargerCommentairesInstance(instance);
+    setCommentaireFeedback(instance, 'Commentaire supprime.', 'text-success');
+}
+
+if (!window.commentairesEventsHooked) {
+    document.addEventListener('input', (event) => {
+        if (event.target?.matches?.('[data-role="message"]')) {
+            const instance = getCommentaireInstanceFromNode(event.target);
+            if (!instance) return;
+            mettreAJourCompteurCommentaire(event.target, instance.elements.compteur);
+        }
+    });
+
+    document.addEventListener('change', async (event) => {
+        if (event.target?.matches?.('[data-role="tri"]')) {
+            const instance = getCommentaireInstanceFromNode(event.target);
+            if (!instance) return;
+            await chargerCommentairesInstance(instance);
+        }
+    });
+
+    document.addEventListener('submit', async (event) => {
+        if (!event.target?.matches?.('[data-role="form"]')) return;
+        event.preventDefault();
+
+        const instance = getCommentaireInstanceFromNode(event.target);
+        if (!instance) return;
+
+        await publierCommentaire(instance);
+    });
+
+    document.addEventListener('click', async (event) => {
+        const action = event.target?.dataset?.action;
+        if (!action) return;
+
+        const instance = getCommentaireInstanceFromNode(event.target);
+        if (!instance) return;
+
+        const card = event.target.closest('[data-comment-id]');
+        const commentaireId = card?.dataset?.commentId;
+        if (!commentaireId) return;
+
+        if (action === 'edit') {
+            instance.commentaireEnEdition = commentaireId;
+            setCommentaireFeedback(instance);
+            renderCommentaires(instance);
+            return;
+        }
+
+        if (action === 'cancel-edit') {
+            instance.commentaireEnEdition = null;
+            setCommentaireFeedback(instance);
+            renderCommentaires(instance);
+            return;
+        }
+
+        if (action === 'save-edit') {
+            await enregistrerEditionCommentaire(instance, card);
+            return;
+        }
+
+        if (action === 'delete') {
+            const ok = window.confirm('Supprimer ce commentaire ? Cette action est irreversible.');
+            if (!ok) return;
+            await supprimerCommentaireInstance(instance, commentaireId);
+        }
+    });
+
+    window.commentairesEventsHooked = true;
+}
+
 window.chargerPageHistoire = async function() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     const idHistoire = localStorage.getItem('currentOeuvreId');
@@ -139,6 +567,13 @@ window.chargerPageHistoire = async function() {
 
     // 6. Chargement des chapitres
     chargerListeChapitres(idHistoire);
+
+    // 7. Chargement des commentaires globaux
+    await window.initialiserBlocCommentaires({
+        sectionId: 'commentaires-histoire-section',
+        cibleType: 'histoire',
+        histoire
+    });
 };
 
 async function chargerListeChapitres(idHistoire) {

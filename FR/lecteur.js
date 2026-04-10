@@ -93,12 +93,27 @@ window.lireChapitre = async function(idParam = null) {
     }
 
     lecteurContenu.innerHTML = htmlLecture;
+
+    const { data: histoireParente } = await window._supabase
+        .from('histoires')
+        .select('*')
+        .eq('id', chapitre.histoire_id)
+        .maybeSingle();
     
     // 3. Application des paramètres sauvegardés
     appliquerStylePupitre();
 
     // 4. Configuration de la navigation (Chapitre Précédent / Suivant)
     configurerNavigation(chapitre);
+
+    if (typeof window.initialiserBlocCommentaires === 'function') {
+        await window.initialiserBlocCommentaires({
+            sectionId: 'commentaires-chapitre-section',
+            cibleType: 'chapitre',
+            histoire: histoireParente || { id: chapitre.histoire_id, auteur: null },
+            chapitreId: chapitre.id
+        });
+    }
 };
 
 async function configurerNavigation(chapitreActuel) {

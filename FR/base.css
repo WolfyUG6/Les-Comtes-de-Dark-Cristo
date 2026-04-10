@@ -496,6 +496,7 @@ button:hover, .genre-btn:hover {
 
 /* Utilitaires de texte et d'espacement */
 .text-error { color: var(--accent-red); }
+.text-success { color: var(--accent-blue); }
 .text-muted { color: var(--text-muted); }
 .text-muted-italic { color: var(--text-muted); font-style: italic; }
 .text-center { text-align: center; }
@@ -584,6 +585,41 @@ button:hover, .genre-btn:hover {
 .histoire-actions-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 25px; }
 .histoire-actions { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; width: 100%; }
 .prochain-chapitre { width: 100%; border-bottom: 1px dashed var(--border-color); padding-bottom: 15px; margin-bottom: 15px; }
+
+/* -- Commentaires -- */
+.commentaires-section { overflow: hidden; }
+.commentaires-header { display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap; }
+.commentaires-tri-wrap { display: flex; align-items: center; gap: 10px; font-family: 'Segoe UI', sans-serif; }
+.commentaires-tri { min-width: 180px; }
+.commentaires-intro { margin-bottom: 0; }
+.commentaires-form { display: flex; flex-direction: column; gap: 15px; }
+.commentaires-textarea { min-height: 180px; resize: vertical; line-height: 1.6; }
+.commentaires-form-footer { display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap; }
+.commentaires-list { display: flex; flex-direction: column; gap: 15px; }
+.commentaire-item { display: flex; flex-direction: column; gap: 0; }
+.commentaire-meta { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); }
+.commentaire-pseudo { color: var(--text-title); font-family: 'Cinzel', serif; font-weight: bold; letter-spacing: 1px; }
+.commentaire-date { color: var(--text-muted); font-size: 0.85rem; font-style: italic; font-family: 'Segoe UI', sans-serif; }
+.commentaire-message { color: var(--text-main); line-height: 1.7; font-family: 'Segoe UI', sans-serif; white-space: normal; word-break: break-word; }
+.commentaire-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.commentaire-edition { display: flex; flex-direction: column; gap: 0; }
+.comment-mention { color: var(--accent-blue); font-weight: bold; }
+.commentaires-empty { margin-bottom: 0; }
+.commentaires-feedback { font-family: 'Segoe UI', sans-serif; }
+.commentaires-chapitre { margin-bottom: 30px; }
+
+@media (max-width: 768px) {
+    .commentaires-header,
+    .commentaires-form-footer,
+    .commentaire-meta {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .commentaires-tri {
+        width: 100%;
+    }
+}
 
 /* =========================================
    LA SALLE DE LECTURE (Lecteur)

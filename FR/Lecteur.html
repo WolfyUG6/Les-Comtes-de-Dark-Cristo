@@ -82,6 +82,41 @@
         <button id="btn-chap-suiv-bas" class="btn-lecture-nav-fixe hidden">Suivant →</button>
     </div>
 
+    <section id="commentaires-chapitre-section" class="commentaires-section commentaires-chapitre card hidden" data-commentaires-root>
+        <div class="commentaires-header">
+            <h2 class="title-m0">Commentaires du chapitre</h2>
+            <label class="commentaires-tri-wrap" for="commentaires-chapitre-tri">
+                <span class="text-small text-muted">Tri</span>
+                <select id="commentaires-chapitre-tri" class="custom-select commentaires-tri" data-role="tri">
+                    <option value="recents">Plus recents</option>
+                    <option value="anciens">Plus anciens</option>
+                </select>
+            </label>
+        </div>
+
+        <p class="text-small text-muted commentaires-intro mt-15">Commentaires lies a ce chapitre.</p>
+        <p class="commentaires-feedback text-small mt-15 hidden" data-role="feedback"></p>
+
+        <form class="commentaires-form mt-15" data-role="form">
+            <textarea
+                id="commentaires-chapitre-message"
+                class="custom-input commentaires-textarea"
+                data-role="message"
+                minlength="500"
+                maxlength="5000"
+                required
+                placeholder="Ecrivez votre commentaire en francais..."
+            ></textarea>
+            <div class="commentaires-form-footer">
+                <span class="commentaires-limites text-small text-muted" data-role="compteur">0 / 5000</span>
+                <button type="submit" class="genre-btn btn-primary">Publier</button>
+            </div>
+        </form>
+
+        <p class="commentaires-empty text-muted-italic text-center mt-15 hidden" data-role="vide">Aucun commentaire pour le moment.</p>
+        <div class="commentaires-list mt-15" data-role="liste"></div>
+    </section>
+
     <!-- BOUTONS DE DÉFILEMENT RAPIDE -->
     <button id="btn-scroll-top" class="btn-scroll btn-scroll-top" aria-label="Haut de page">▲</button>
     <button id="btn-scroll-bottom" class="btn-scroll btn-scroll-bottom" aria-label="Bas de page">▼</button>

@@ -27,9 +27,39 @@
         </div>
     </section>
 
-    <section class="commentaires-section mt-15 card">
-        <h2 class="title-m0">Commentaires</h2>
-        <p class="text-muted-italic text-center mt-15">Commentaires : Inactifs</p>
+    <section id="commentaires-histoire-section" class="commentaires-section mt-15 card hidden" data-commentaires-root>
+        <div class="commentaires-header">
+            <h2 class="title-m0">Commentaires</h2>
+            <label class="commentaires-tri-wrap" for="commentaires-histoire-tri">
+                <span class="text-small text-muted">Tri</span>
+                <select id="commentaires-histoire-tri" class="custom-select commentaires-tri" data-role="tri">
+                    <option value="recents">Plus recents</option>
+                    <option value="anciens">Plus anciens</option>
+                </select>
+            </label>
+        </div>
+
+        <p class="text-small text-muted commentaires-intro mt-15">Commentaires globaux de l'histoire.</p>
+        <p class="commentaires-feedback text-small mt-15 hidden" data-role="feedback"></p>
+
+        <form class="commentaires-form mt-15" data-role="form">
+            <textarea
+                id="commentaires-histoire-message"
+                class="custom-input commentaires-textarea"
+                data-role="message"
+                minlength="500"
+                maxlength="5000"
+                required
+                placeholder="Ecrivez votre commentaire en francais..."
+            ></textarea>
+            <div class="commentaires-form-footer">
+                <span class="commentaires-limites text-small text-muted" data-role="compteur">0 / 5000</span>
+                <button type="submit" class="genre-btn btn-primary">Publier</button>
+            </div>
+        </form>
+
+        <p class="commentaires-empty text-muted-italic text-center mt-15 hidden" data-role="vide">Aucun commentaire pour le moment.</p>
+        <div class="commentaires-list mt-15" data-role="liste"></div>
     </section>
 
 </div>
