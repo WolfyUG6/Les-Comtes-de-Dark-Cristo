@@ -6,6 +6,7 @@
 const COMMENTAIRES_MIN = 50;
 const COMMENTAIRES_MAX = 1000;
 const COMMENTAIRES_TABLE = 'commentaires';
+const ADMIN_EMAIL = 'nitroapex@gmail.com';
 
 window._commentairesInstances = window._commentairesInstances || {};
 
@@ -126,6 +127,51 @@ function validerMessageCommentaire(message) {
     }
 
     return '';
+}
+
+function estCompteAdminSession(session) {
+    return Boolean(session?.user?.email && session.user.email === ADMIN_EMAIL);
+}
+
+function initialiserBoutonRetirerHistoire(idHistoire, session) {
+    const bouton = document.getElementById('btn-retirer-histoire');
+    if (!bouton) return;
+
+    const clone = bouton.cloneNode(true);
+    bouton.parentNode.replaceChild(clone, bouton);
+
+    if (!estCompteAdminSession(session)) {
+        clone.classList.add('hidden');
+        return;
+    }
+
+    clone.classList.remove('hidden');
+    clone.addEventListener('click', async () => {
+        const confirmation = window.confirm(
+            "Confirmez-vous le retrait complet de cette histoire et de toutes ses dependances ? Cette action est irreversible."
+        );
+
+        if (!confirmation) return;
+
+        clone.disabled = true;
+        clone.innerText = "Retrait en cours...";
+
+        const { error } = await window._supabase.rpc('retirer_histoire_admin', {
+            p_histoire_id: idHistoire
+        });
+
+        if (error) {
+            alert("Le retrait de l'histoire a ete refuse : " + error.message);
+            clone.disabled = false;
+            clone.innerText = "Retirer l'histoire";
+            return;
+        }
+
+        localStorage.removeItem('currentOeuvreId');
+        localStorage.removeItem('currentChapitreId');
+        alert("L'histoire a ete retiree avec succes.");
+        window.changerDePage('accueil');
+    });
 }
 
 function estAuteurParent(histoire, session) {
@@ -779,6 +825,8 @@ window.chargerPageHistoire = async function() {
         ? `<img src="${histoire.image_couverture}" class="book-cover" alt="Couverture">` 
         : `<div class="book-cover-placeholder">Pas de couverture</div>`;
 
+    const { data: { session } } = await window._supabase.auth.getSession();
+
     // 3. Récupération des likes (pactes)
     const { count: totalLikes } = await window._supabase
         .from('favoris')
@@ -809,11 +857,11 @@ window.chargerPageHistoire = async function() {
         </div>
     `;
 
-    // 5. Gestion du bouton Suivre l'Histoire
+    // 5. Gestion du bouton admin et du bouton Suivre l'Histoire
+    initialiserBoutonRetirerHistoire(idHistoire, session);
+
     const btnSuivre = document.getElementById('btn-suivre-histoire');
     if (btnSuivre) {
-        const { data: { session } } = await window._supabase.auth.getSession();
-        
         btnSuivre.innerText = "Soutenir l'œuvre";
         btnSuivre.className = "genre-btn btn-primary shadow-active"; // Reset classes
         btnSuivre.disabled = false;
