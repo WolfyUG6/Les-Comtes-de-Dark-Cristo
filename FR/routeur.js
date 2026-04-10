@@ -7,6 +7,109 @@ window.changerDePage = function(pageDemandee) {
     window.location.hash = pageDemandee;
 };
 
+window._siteDialogState = null;
+
+function getSiteDialogRefs() {
+    return {
+        backdrop: document.getElementById('site-dialog-backdrop'),
+        modal: document.getElementById('site-dialog-modal'),
+        title: document.getElementById('site-dialog-title'),
+        message: document.getElementById('site-dialog-message'),
+        cancel: document.getElementById('site-dialog-cancel'),
+        confirm: document.getElementById('site-dialog-confirm')
+    };
+}
+
+function fermerDialogueSite(resultat) {
+    const state = window._siteDialogState;
+    if (!state || state.closed) return;
+    state.closed = true;
+
+    const { refs, resolve, onKeyDown } = state;
+    document.removeEventListener('keydown', onKeyDown);
+    refs.backdrop.classList.add('hidden');
+    document.body.classList.remove('modal-open');
+    refs.cancel.classList.add('hidden');
+    refs.confirm.classList.remove('btn-danger');
+    refs.confirm.classList.add('btn-primary');
+    refs.cancel.onclick = null;
+    refs.confirm.onclick = null;
+    refs.backdrop.onclick = null;
+
+    window._siteDialogState = null;
+    resolve(resultat);
+}
+
+window.ouvrirDialogueSite = function({
+    title = 'Message du Sanctuaire',
+    message = '',
+    confirmText = 'Valider',
+    cancelText = 'Annuler',
+    showCancel = false,
+    danger = false
+} = {}) {
+    const refs = getSiteDialogRefs();
+
+    if (!refs.backdrop || !refs.modal || !refs.title || !refs.message || !refs.cancel || !refs.confirm) {
+        return Promise.resolve(showCancel ? false : true);
+    }
+
+    if (window._siteDialogState) {
+        fermerDialogueSite(false);
+    }
+
+    refs.title.innerText = title;
+    refs.message.innerText = message;
+    refs.confirm.innerText = confirmText;
+    refs.cancel.innerText = cancelText;
+    refs.cancel.classList.toggle('hidden', !showCancel);
+    refs.confirm.classList.toggle('btn-danger', danger);
+    refs.confirm.classList.toggle('btn-primary', !danger);
+    refs.backdrop.classList.remove('hidden');
+    document.body.classList.add('modal-open');
+
+    return new Promise((resolve) => {
+        const onKeyDown = (event) => {
+            if (event.key === 'Escape') {
+                fermerDialogueSite(showCancel ? false : true);
+            }
+        };
+
+        window._siteDialogState = { refs, resolve, onKeyDown, closed: false };
+
+        refs.cancel.onclick = () => fermerDialogueSite(false);
+        refs.confirm.onclick = () => fermerDialogueSite(true);
+        refs.backdrop.onclick = (event) => {
+            if (event.target === refs.backdrop) {
+                fermerDialogueSite(showCancel ? false : true);
+            }
+        };
+
+        document.addEventListener('keydown', onKeyDown);
+        refs.confirm.focus();
+    });
+};
+
+window.siteAlert = function(message, options = {}) {
+    return window.ouvrirDialogueSite({
+        title: options.title || 'Message du Sanctuaire',
+        message,
+        confirmText: options.confirmText || 'Compris',
+        danger: options.danger === true
+    });
+};
+
+window.siteConfirm = function(message, options = {}) {
+    return window.ouvrirDialogueSite({
+        title: options.title || 'Confirmation',
+        message,
+        confirmText: options.confirmText || 'Confirmer',
+        cancelText: options.cancelText || 'Annuler',
+        showCancel: true,
+        danger: options.danger === true
+    });
+};
+
 // Le Détecteur de Mouvement (Écoute quand l'URL change, même via les flèches du navigateur)
 window.addEventListener('hashchange', () => {
     // On lit le mot après le '#' (s'il n'y a rien, on va dans le Hall)

@@ -450,6 +450,43 @@ button:hover, .genre-btn:hover {
     gap: 15px;
 }
 
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: var(--bg-body);
+    backdrop-filter: blur(8px);
+    z-index: 2990;
+}
+
+.site-dialog {
+    z-index: 3000;
+    border-color: var(--border-color);
+    background-color: var(--bg-box);
+    color: var(--text-main);
+}
+
+.site-dialog-title {
+    margin: 0 0 15px 0;
+    color: var(--text-title);
+}
+
+.site-dialog-message {
+    margin: 0;
+    color: var(--text-main);
+    line-height: 1.7;
+    font-family: 'Segoe UI', sans-serif;
+    white-space: pre-wrap;
+}
+
+.site-dialog-actions {
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+body.modal-open {
+    overflow: hidden;
+}
+
 /* --- LE MENU DÉROULANT DU PROFIL --- */
 .dropdown {
     position: relative;

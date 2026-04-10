@@ -7,7 +7,7 @@
 let quill, quillNoteDebut, quillNoteFin;
 window.compteMotsLive = 0;
 
-window.chargerEditeurChapitre = function() {
+window.chargerEditeurChapitre = async function() {
     // 0. Restauration des IDs après un F5
     if (!window.currentOeuvreId) window.currentOeuvreId = localStorage.getItem('currentOeuvreId');
     if (!window.currentChapitreId && localStorage.getItem('currentChapitreId')) {
@@ -16,7 +16,7 @@ window.chargerEditeurChapitre = function() {
 
     console.log("Chargement de l'éditeur pour l'œuvre ID:", window.currentOeuvreId, "Chapitre ID:", window.currentChapitreId);
     if (!window.currentOeuvreId) {
-        alert("Erreur: Aucune œuvre sélectionnée !");
+        await window.siteAlert("Erreur: Aucune œuvre sélectionnée !", { danger: true });
         window.changerDePage('studio');
         return;
     }
@@ -128,7 +128,7 @@ async function recupererDonneesChapitre(id) {
         .single();
 
     if (error) {
-        alert("Erreur de récupération : " + error.message);
+        await window.siteAlert("Erreur de récupération : " + error.message, { danger: true });
         window.changerDePage('gestion');
         return;
     }
@@ -178,7 +178,7 @@ if (!window.editeurEventHooked) {
             const datePublication = champDate ? new Date(champDate).toISOString() : new Date().toISOString();
 
             if (!numero || !titre || contenu === '<p><br></p>' || !contenu) {
-                alert("Les Ténèbres exigent un Numéro, un Titre et un Contenu pour ce chapitre !");
+                await window.siteAlert("Les Ténèbres exigent un Numéro, un Titre et un Contenu pour ce chapitre !", { danger: true });
                 return;
             }
 
@@ -224,10 +224,10 @@ if (!window.editeurEventHooked) {
             btnSubmit.disabled = false;
 
             if (erreurGravure) {
-                alert("Le parchemin a pris feu : " + erreurGravure.message);
+                await window.siteAlert("Le parchemin a pris feu : " + erreurGravure.message, { danger: true });
                 btnSubmit.innerText = window.currentChapitreId ? "Graver les modifications" : "Graver le Chapitre";
             } else {
-                alert(window.currentChapitreId ? "Modifications gravées !" : "Chapitre ajouté !");
+                await window.siteAlert(window.currentChapitreId ? "Modifications gravées !" : "Chapitre ajouté !");
                 window.changerDePage('gestion');
             }
         }

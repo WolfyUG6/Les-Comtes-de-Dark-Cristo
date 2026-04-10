@@ -147,8 +147,13 @@ function initialiserBoutonRetirerHistoire(idHistoire, session) {
 
     clone.classList.remove('hidden');
     clone.addEventListener('click', async () => {
-        const confirmation = window.confirm(
-            "Confirmez-vous le retrait complet de cette histoire et de toutes ses dependances ? Cette action est irreversible."
+        const confirmation = await window.siteConfirm(
+            "Confirmez-vous le retrait complet de cette histoire et de toutes ses dependances ? Cette action est irreversible.",
+            {
+                confirmText: "Retirer l'histoire",
+                cancelText: 'Annuler',
+                danger: true
+            }
         );
 
         if (!confirmation) return;
@@ -161,7 +166,7 @@ function initialiserBoutonRetirerHistoire(idHistoire, session) {
         });
 
         if (error) {
-            alert("Le retrait de l'histoire a ete refuse : " + error.message);
+            await window.siteAlert("Le retrait de l'histoire a ete refuse : " + error.message, { danger: true });
             clone.disabled = false;
             clone.innerText = "Retirer l'histoire";
             return;
@@ -169,7 +174,7 @@ function initialiserBoutonRetirerHistoire(idHistoire, session) {
 
         localStorage.removeItem('currentOeuvreId');
         localStorage.removeItem('currentChapitreId');
-        alert("L'histoire a ete retiree avec succes.");
+        await window.siteAlert("L'histoire a ete retiree avec succes.");
         window.changerDePage('accueil');
     });
 }
@@ -777,7 +782,11 @@ if (!window.commentairesEventsHooked) {
         }
 
         if (action === 'delete') {
-            const ok = window.confirm('Supprimer ce commentaire ? Cette action est irreversible.');
+            const ok = await window.siteConfirm('Supprimer ce commentaire ? Cette action est irreversible.', {
+                confirmText: 'Supprimer',
+                cancelText: 'Annuler',
+                danger: true
+            });
             if (!ok) return;
             await supprimerCommentaireInstance(instance, commentaireId);
         }
@@ -916,8 +925,8 @@ window.chargerPageHistoire = async function() {
                 nouveauBtn.disabled = false;
             });
         } else {
-            nouveauBtn.addEventListener('click', () => {
-                alert("Les ombres refusent votre requête : vous devez être connecté pour soutenir une œuvre.");
+            nouveauBtn.addEventListener('click', async () => {
+                await window.siteAlert("Les ombres refusent votre requête : vous devez être connecté pour soutenir une œuvre.", { danger: true });
             });
         }
     }

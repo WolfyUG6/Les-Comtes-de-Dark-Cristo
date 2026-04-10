@@ -110,12 +110,12 @@ if (!window.creationStoryEventHooked) {
             const { data: { session } } = await window._supabase.auth.getSession();
             
             if (!session) {
-                alert("Erreur critique : Tu as été déconnecté par le vide spatial. Reconnecte-toi.");
+                await window.siteAlert("Erreur critique : Tu as été déconnecté par le vide spatial. Reconnecte-toi.", { danger: true });
                 return;
             }
 
             if (!title || !synopsis || !genre || !classification) {
-                alert("Les fondations sont instables ! Remplissez tous les champs obligatoires (Titre, Synopsis, Genre, Classification).");
+                await window.siteAlert("Les fondations sont instables ! Remplissez tous les champs obligatoires (Titre, Synopsis, Genre, Classification).", { danger: true });
                 return;
             }
 
@@ -192,7 +192,7 @@ if (!window.creationStoryEventHooked) {
                     const { data } = window._supabase.storage.from('couvertures').getPublicUrl(fileName);
                     imageUrl = data.publicUrl;
                 } else {
-                    alert("L'image a été rejetée par le portail : " + upErr.message);
+                    await window.siteAlert("L'image a été rejetée par le portail : " + upErr.message, { danger: true });
                     btnSubmit.innerText = modeEdition ? "Sauvegarder les changements" : "Forger l'Histoire";
                     btnSubmit.disabled = false;
                     return; // On arrête là si l'image plante
@@ -244,11 +244,11 @@ if (!window.creationStoryEventHooked) {
             const { data: histoireSauvee, error } = requeteResult;
 
             if (error) {
-                alert("Le registre Supabase a refusé l'inscription : " + error.message);
+                await window.siteAlert("Le registre Supabase a refusé l'inscription : " + error.message, { danger: true });
                 btnSubmit.innerText = modeEdition ? "Sauvegarder les changements" : "Forger l'Histoire";
                 btnSubmit.disabled = false;
             } else {
-                alert(modeEdition ? "Les modifications ont été gravées dans la roche !" : "Un nouveau grimoire est apparu dans l'Atelier !");
+                await window.siteAlert(modeEdition ? "Les modifications ont été gravées dans la roche !" : "Un nouveau grimoire est apparu dans l'Atelier !");
                 
                 // Mémorisation pour le panneau Gestion
                 if (histoireSauvee && histoireSauvee.length > 0) {

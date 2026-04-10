@@ -108,25 +108,29 @@ window.ouvrirModificationHistoire = function(idHistoire) {
 
 // --- LE POUVOIR DE DESTRUCTION MASSIVE ---
 window.supprimerHistoire = async function(idHistoire) {
-    if(confirm("Êtes-vous sûr de vouloir effacer ce Grimoire et tous ses chapitres de la mémoire du monde ? Cette action est irréversible.")) {
-        
-        // 1. On détruit d'abord tous les chapitres liés (Sécurité Anti-Clé Étrangère)
-        const { error: errChapitres } = await window._supabase.from('chapitres').delete().eq('histoire_id', idHistoire);
-        
-        if (errChapitres) {
-            alert("Erreur lors de la purge des chapitres : " + errChapitres.message);
-            return;
-        }
+    const confirmation = await window.siteConfirm("Êtes-vous sûr de vouloir effacer ce Grimoire et tous ses chapitres de la mémoire du monde ? Cette action est irréversible.", {
+        confirmText: 'Annihiler',
+        cancelText: 'Annuler',
+        danger: true
+    });
+    if (!confirmation) return;
 
-        // 2. On détruit l'histoire principale
-        const { error: errHistoire } = await window._supabase.from('histoires').delete().eq('id', idHistoire);
-        
-        if(errHistoire) {
-            alert("Supabase a bloqué la destruction du grimoire ! Erreur : " + errHistoire.message);
-        } else {
-            // 3. Rafraîchissement total
-            window.chargerMesOeuvres(); 
-        }
+    // 1. On détruit d'abord tous les chapitres liés (Sécurité Anti-Clé Étrangère)
+    const { error: errChapitres } = await window._supabase.from('chapitres').delete().eq('histoire_id', idHistoire);
+    
+    if (errChapitres) {
+        await window.siteAlert("Erreur lors de la purge des chapitres : " + errChapitres.message, { danger: true });
+        return;
+    }
+
+    // 2. On détruit l'histoire principale
+    const { error: errHistoire } = await window._supabase.from('histoires').delete().eq('id', idHistoire);
+    
+    if(errHistoire) {
+        await window.siteAlert("Supabase a bloqué la destruction du grimoire ! Erreur : " + errHistoire.message, { danger: true });
+    } else {
+        // 3. Rafraîchissement total
+        window.chargerMesOeuvres(); 
     }
 };
 

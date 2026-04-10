@@ -127,11 +127,16 @@ window.chargerChapitresCategories = async function() {
 
 // --- LE POUVOIR DE DESTRUCTION ---
 window.supprimerChapitre = async function(id) {
-    if(confirm("Détruire ce parchemin à jamais ? Cette action est irréversible.")) {
-        const { error } = await window._supabase.from('chapitres').delete().eq('id', id);
-        if(error) alert("Supabase a bloqué la destruction : " + error.message);
-        else window.chargerChapitresCategories(); // On recharge la liste instantanément
-    }
+    const confirmation = await window.siteConfirm("Détruire ce parchemin à jamais ? Cette action est irréversible.", {
+        confirmText: 'Supprimer',
+        cancelText: 'Annuler',
+        danger: true
+    });
+    if (!confirmation) return;
+
+    const { error } = await window._supabase.from('chapitres').delete().eq('id', id);
+    if(error) await window.siteAlert("Supabase a bloqué la destruction : " + error.message, { danger: true });
+    else window.chargerChapitresCategories(); // On recharge la liste instantanément
 };
 
 // --- SAUTS VERS L'ÉDITEUR ---

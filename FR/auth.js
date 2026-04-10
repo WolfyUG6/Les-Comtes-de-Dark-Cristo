@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const password = passwordInput.value;
 
             if (!email || !password) {
-                alert("Les ténèbres exigent un mail et un mot de passe.");
+                await window.siteAlert("Les ténèbres exigent un mail et un mot de passe.");
                 return;
             }
 
@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (isSignUp) {
                     const { data, error } = await window._supabase.auth.signUp({ email, password });
                     if (error) throw error;
-                    alert("Compte créé ! Bienvenue dans le Sanctuaire.");
+                    await window.siteAlert("Compte créé ! Bienvenue dans le Sanctuaire.");
                     authModal.classList.add('hidden');
                     emailInput.value = '';
                 } else {
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     emailInput.value = '';
                 }
             } catch (erreur) {
-                alert("Refus du Sanctuaire : " + erreur.message);
+                await window.siteAlert("Refus du Sanctuaire : " + erreur.message, { danger: true });
             } finally {
                 submitAuth.innerText = isSignUp ? "Créer mon compte" : "Se connecter";
                 submitAuth.disabled = false;
@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnLogout.addEventListener('click', async () => {
             try {
                 await window._supabase.auth.signOut();
-                alert("Vous avez quitté le sanctuaire.");
+                await window.siteAlert("Vous avez quitté le sanctuaire.");
                 window.changerDePage('accueil');
             } catch (err) {
                 console.error("Erreur de déconnexion", err);
