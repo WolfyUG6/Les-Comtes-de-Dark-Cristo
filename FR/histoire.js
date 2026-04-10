@@ -3,8 +3,8 @@
 // Présentation de l'œuvre et liste des chapitres
 // ==========================================
 
-const COMMENTAIRES_MIN = 500;
-const COMMENTAIRES_MAX = 5000;
+const COMMENTAIRES_MIN = 50;
+const COMMENTAIRES_MAX = 1000;
 const COMMENTAIRES_TABLE = 'commentaires';
 
 window._commentairesInstances = window._commentairesInstances || {};
@@ -177,15 +177,22 @@ async function chargerCommentairesInstance(instance) {
     instance.elements.liste.innerHTML = '<p class="loading-text">Chargement des commentaires...</p>';
     setCommentaireFeedback(instance);
 
+    const histoireIdCible = instance.cibleType === 'chapitre'
+        ? instance.chapitreReference?.histoire_id
+        : instance.histoire.id;
+    const chapitreIdCible = instance.cibleType === 'chapitre'
+        ? instance.chapitreReference?.id
+        : null;
+
     let requete = window._supabase
         .from(COMMENTAIRES_TABLE)
         .select('id, user_id, pseudo_auteur, histoire_id, chapitre_id, cible_type, contenu, created_at, updated_at')
-        .eq('histoire_id', instance.histoire.id)
+        .eq('histoire_id', histoireIdCible)
         .eq('cible_type', instance.cibleType)
         .order('created_at', { ascending: triAscendant });
 
     if (instance.cibleType === 'chapitre') {
-        requete = requete.eq('chapitre_id', instance.chapitreId);
+        requete = requete.eq('chapitre_id', chapitreIdCible);
     } else {
         requete = requete.is('chapitre_id', null);
     }
@@ -240,6 +247,22 @@ window.recupererContexteCommentaires = async function() {
     };
 };
 
+async function recupererReferenceChapitre(chapitreId) {
+    if (!chapitreId) return null;
+
+    const { data, error } = await window._supabase
+        .from('chapitres')
+        .select('id, histoire_id')
+        .eq('id', chapitreId)
+        .single();
+
+    if (error || !data) {
+        return null;
+    }
+
+    return data;
+}
+
 window.initialiserBlocCommentaires = async function({ sectionId, cibleType, histoire, chapitreId = null }) {
     const section = document.getElementById(sectionId);
     if (!section || !histoire?.id) return;
@@ -262,11 +285,30 @@ window.initialiserBlocCommentaires = async function({ sectionId, cibleType, hist
         profil: contexte.profil,
         histoire,
         chapitreId,
+        chapitreReference: null,
         cibleType,
         estAuteurHistoire: estAuteurParent(histoire, contexte.session),
         commentaires: [],
         commentaireEnEdition: null
     };
+
+    if (cibleType === 'chapitre') {
+        instance.chapitreReference = await recupererReferenceChapitre(chapitreId);
+
+        if (!instance.chapitreReference) {
+            section.classList.remove('hidden');
+            window._commentairesInstances[sectionId] = instance;
+            instance.elements.liste.innerHTML = '';
+            instance.elements.vide.classList.add('hidden');
+            setCommentaireFeedback(instance, "Impossible de verifier le chapitre avant de charger les commentaires.", 'text-error');
+            return;
+        }
+
+        instance.histoire = {
+            ...histoire,
+            id: instance.chapitreReference.histoire_id
+        };
+    }
 
     section.classList.remove('hidden');
     window._commentairesInstances[sectionId] = instance;
@@ -313,6 +355,76 @@ async function publierCommentaire(instance) {
     await chargerCommentairesInstance(instance);
     resetCommentaireForm(instance);
     setCommentaireFeedback(instance, 'Commentaire publie avec succes.', 'text-success');
+}
+
+async function publierCommentaireChapitre(instance) {
+    const message = instance.elements.message?.value || '';
+    const erreurValidation = validerMessageCommentaire(message);
+
+    if (erreurValidation) {
+        setCommentaireFeedback(instance, erreurValidation, 'text-error');
+        return;
+    }
+
+    const referenceChapitre = await recupererReferenceChapitre(instance.chapitreId);
+    if (!referenceChapitre) {
+        setCommentaireFeedback(instance, "Impossible de verifier les informations du chapitre avant publication.", 'text-error');
+        return;
+    }
+
+    instance.chapitreReference = referenceChapitre;
+    instance.histoire = {
+        ...instance.histoire,
+        id: referenceChapitre.histoire_id
+    };
+
+    const payload = {
+        cible_type: 'chapitre',
+        histoire_id: referenceChapitre.histoire_id,
+        chapitre_id: referenceChapitre.id,
+        pseudo_auteur: instance.pseudo,
+        user_id: instance.session.user.id,
+        contenu: message.trim()
+    };
+
+    const bouton = instance.elements.form?.querySelector('button[type="submit"]');
+    if (bouton) {
+        bouton.disabled = true;
+        bouton.innerText = 'Publication...';
+    }
+
+    const { data, error } = await window._supabase
+        .from(COMMENTAIRES_TABLE)
+        .insert([payload])
+        .select('id, cible_type, histoire_id, chapitre_id, pseudo_auteur, user_id, contenu')
+        .single();
+
+    if (bouton) {
+        bouton.disabled = false;
+        bouton.innerText = 'Publier';
+    }
+
+    if (error) {
+        setCommentaireFeedback(instance, `Impossible de publier ce commentaire de chapitre : ${error.message}`, 'text-error');
+        return;
+    }
+
+    const insertionValide = data
+        && data.cible_type === 'chapitre'
+        && String(data.chapitre_id) === String(referenceChapitre.id)
+        && String(data.histoire_id) === String(referenceChapitre.histoire_id)
+        && String(data.user_id) === String(instance.session.user.id)
+        && data.pseudo_auteur === instance.pseudo
+        && data.contenu === payload.contenu;
+
+    if (!insertionValide) {
+        setCommentaireFeedback(instance, "Le commentaire n'a pas ete confirme par la base pour ce chapitre.", 'text-error');
+        return;
+    }
+
+    await chargerCommentairesInstance(instance);
+    resetCommentaireForm(instance);
+    setCommentaireFeedback(instance, 'Commentaire de chapitre publie avec succes.', 'text-success');
 }
 
 async function enregistrerEditionCommentaire(instance, card) {
@@ -388,7 +500,11 @@ if (!window.commentairesEventsHooked) {
         const instance = getCommentaireInstanceFromNode(event.target);
         if (!instance) return;
 
-        await publierCommentaire(instance);
+        if (instance.cibleType === 'chapitre') {
+            await publierCommentaireChapitre(instance);
+        } else {
+            await publierCommentaire(instance);
+        }
     });
 
     document.addEventListener('click', async (event) => {
