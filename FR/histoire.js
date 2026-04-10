@@ -17,7 +17,9 @@ function getCommentaireElements(section) {
         compteur: section.querySelector('[data-role="compteur"]'),
         liste: section.querySelector('[data-role="liste"]'),
         vide: section.querySelector('[data-role="vide"]'),
-        tri: section.querySelector('[data-role="tri"]')
+        tri: section.querySelector('[data-role="tri"]'),
+        replyState: section.querySelector('[data-role="reply-state"]'),
+        replyLabel: section.querySelector('[data-role="reply-label"]')
     };
 }
 
@@ -44,6 +46,10 @@ function escapeCommentaireHtml(value = '') {
         .replace(/'/g, '&#39;');
 }
 
+function normaliserPseudoCle(pseudo = '') {
+    return pseudo.trim().toLowerCase();
+}
+
 function formaterDateCommentaire(value) {
     if (!value) return '';
 
@@ -59,12 +65,42 @@ function formaterDateCommentaire(value) {
     });
 }
 
-function formaterMessageCommentaire(message = '') {
-    const escaped = escapeCommentaireHtml(message);
-    const avecMentions = escaped.replace(
-        /(^|[\s(])@([A-Za-z0-9_.-]{1,50})/g,
-        '$1<span class="comment-mention">@$2</span>'
-    );
+function retirerMentionPrefillee(message = '', pseudo = '') {
+    const texte = message || '';
+    const pseudoNettoye = pseudo.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    if (!pseudoNettoye) return texte;
+
+    const pattern = new RegExp(`^\\s*@${pseudoNettoye}(?=[\\s,:;.!?\\-]|$)\\s*`, 'i');
+    return texte.replace(pattern, '');
+}
+
+function getDiscussionPseudoMap(commentaires = [], pseudoCourant = '') {
+    const map = new Map();
+
+    commentaires.forEach((commentaire) => {
+        const pseudo = commentaire?.pseudo_auteur?.trim();
+        if (!pseudo) return;
+        map.set(normaliserPseudoCle(pseudo), pseudo);
+    });
+
+    if (pseudoCourant?.trim()) {
+        map.set(normaliserPseudoCle(pseudoCourant), pseudoCourant.trim());
+    }
+
+    return map;
+}
+
+function formaterMessageCommentaire(message = '', discussionPseudos = new Map(), pseudoReponse = '') {
+    const texteAffiche = pseudoReponse ? retirerMentionPrefillee(message, pseudoReponse) : message;
+    const escaped = escapeCommentaireHtml(texteAffiche);
+    const avecMentions = escaped.replace(/(^|[\s(])@([A-Za-z0-9_.-]{1,50})/g, (match, prefixe, pseudoBrut) => {
+        const pseudoCanonique = discussionPseudos.get(normaliserPseudoCle(pseudoBrut));
+        if (!pseudoCanonique) {
+            return `${prefixe}@${pseudoBrut}`;
+        }
+
+        return `${prefixe}<span class="comment-mention">${escapeCommentaireHtml(pseudoCanonique)}</span>`;
+    });
 
     return avecMentions.replace(/\r?\n/g, '<br>');
 }
@@ -107,7 +143,70 @@ function resetCommentaireForm(instance) {
 
     instance.elements.form.reset();
     instance.commentaireEnEdition = null;
+    instance.replyTargetId = null;
+    instance.replyTargetPseudo = '';
+    if (instance.elements.replyState) instance.elements.replyState.classList.add('hidden');
+    if (instance.elements.replyLabel) instance.elements.replyLabel.innerText = '';
     mettreAJourCompteurCommentaire(instance.elements.message, instance.elements.compteur);
+}
+
+function trouverCommentaireParId(instance, commentaireId) {
+    if (!instance?.commentaires?.length || !commentaireId) return null;
+    return instance.commentaires.find((commentaire) => String(commentaire.id) === String(commentaireId)) || null;
+}
+
+function definirReponseActive(instance, commentaireId = null) {
+    if (!instance?.elements?.message) return;
+
+    const commentaireCible = commentaireId ? trouverCommentaireParId(instance, commentaireId) : null;
+    const ancienPseudo = instance.replyTargetPseudo || '';
+    const messageActuel = instance.elements.message.value || '';
+    const corpsSansAncienneMention = ancienPseudo
+        ? retirerMentionPrefillee(messageActuel, ancienPseudo)
+        : messageActuel;
+
+    if (!commentaireCible) {
+        instance.replyTargetId = null;
+        instance.replyTargetPseudo = '';
+        instance.elements.message.value = corpsSansAncienneMention.trimStart();
+        if (instance.elements.replyState) instance.elements.replyState.classList.add('hidden');
+        if (instance.elements.replyLabel) instance.elements.replyLabel.innerText = '';
+        mettreAJourCompteurCommentaire(instance.elements.message, instance.elements.compteur);
+        return;
+    }
+
+    instance.replyTargetId = commentaireCible.id;
+    instance.replyTargetPseudo = commentaireCible.pseudo_auteur || '';
+    instance.elements.message.value = `@${instance.replyTargetPseudo} ${corpsSansAncienneMention.trimStart()}`.trimEnd();
+
+    if (instance.elements.replyState) instance.elements.replyState.classList.remove('hidden');
+    if (instance.elements.replyLabel) {
+        instance.elements.replyLabel.innerText = `Reponse liee a ${instance.replyTargetPseudo}`;
+    }
+
+    mettreAJourCompteurCommentaire(instance.elements.message, instance.elements.compteur);
+    instance.elements.message.focus();
+    instance.elements.message.setSelectionRange(instance.elements.message.value.length, instance.elements.message.value.length);
+}
+
+function getReplyTargetValide(instance) {
+    if (!instance?.replyTargetId) return null;
+
+    const commentaireCible = trouverCommentaireParId(instance, instance.replyTargetId);
+    if (!commentaireCible) return null;
+
+    if (instance.cibleType !== commentaireCible.cible_type) return null;
+    if (String(commentaireCible.histoire_id) !== String(instance.histoire.id)) return null;
+
+    if (instance.cibleType === 'chapitre') {
+        if (String(commentaireCible.chapitre_id) !== String(instance.chapitreReference?.id || instance.chapitreId)) {
+            return null;
+        }
+    } else if (commentaireCible.chapitre_id !== null) {
+        return null;
+    }
+
+    return commentaireCible;
 }
 
 function renderCommentaires(instance) {
@@ -121,22 +220,61 @@ function renderCommentaires(instance) {
     }
 
     vide.classList.add('hidden');
-    liste.innerHTML = instance.commentaires.map((commentaire) => {
+    const commentairesParId = new Map(
+        instance.commentaires.map((commentaire) => [String(commentaire.id), commentaire])
+    );
+    const discussionPseudos = getDiscussionPseudoMap(instance.commentaires, instance.pseudo);
+    const commentairesRacine = [];
+    const reponsesParRacine = new Map();
+
+    instance.commentaires.forEach((commentaire) => {
+        const parentId = commentaire.parent_commentaire_id;
+        const parent = parentId ? commentairesParId.get(String(parentId)) : null;
+
+        if (!parent) {
+            commentairesRacine.push(commentaire);
+            return;
+        }
+
+        let racine = parent;
+        while (racine?.parent_commentaire_id) {
+            const suivant = commentairesParId.get(String(racine.parent_commentaire_id));
+            if (!suivant) break;
+            racine = suivant;
+        }
+
+        const racineId = String(racine.id);
+        if (!reponsesParRacine.has(racineId)) {
+            reponsesParRacine.set(racineId, []);
+        }
+        reponsesParRacine.get(racineId).push(commentaire);
+    });
+
+    const renderBlocCommentaire = (commentaire, estReponse = false) => {
         const estAuteurCommentaire = instance.session?.user?.id === commentaire.user_id;
         const peutModifier = estAuteurCommentaire;
         const peutSupprimer = estAuteurCommentaire || instance.estAuteurHistoire;
         const enEdition = String(instance.commentaireEnEdition) === String(commentaire.id);
         const dateAffichee = formaterDateCommentaire(commentaire.created_at);
         const pseudo = escapeCommentaireHtml(commentaire.pseudo_auteur || 'Comte inconnu');
-        const message = formaterMessageCommentaire(commentaire.contenu || '');
+        const parent = commentaire.parent_commentaire_id
+            ? commentairesParId.get(String(commentaire.parent_commentaire_id))
+            : null;
+        const pseudoReponse = parent?.pseudo_auteur || '';
+        const message = formaterMessageCommentaire(commentaire.contenu || '', discussionPseudos, pseudoReponse);
         const texteEdition = escapeCommentaireHtml(commentaire.contenu || '');
+        const etiquetteReponse = parent?.pseudo_auteur
+            ? `<div class="commentaire-lien-parent">En reponse a <span class="comment-mention">${escapeCommentaireHtml(parent.pseudo_auteur)}</span></div>`
+            : '';
 
         return `
-            <article class="commentaire-item card" data-comment-id="${commentaire.id}">
+            <article class="commentaire-item card${estReponse ? ' commentaire-reponse' : ''}" data-comment-id="${commentaire.id}">
                 <div class="commentaire-meta">
                     <span class="commentaire-pseudo">${pseudo}</span>
                     <span class="commentaire-date">${dateAffichee}</span>
                 </div>
+
+                ${!enEdition && etiquetteReponse ? `<div class="mt-15">${etiquetteReponse}</div>` : ''}
 
                 ${
                     enEdition
@@ -156,9 +294,10 @@ function renderCommentaires(instance) {
                 }
 
                 ${
-                    !enEdition && (peutModifier || peutSupprimer)
+                    !enEdition
                         ? `
                             <div class="commentaire-actions mt-15">
+                                <button type="button" class="genre-btn btn-outline-blue btn-small" data-action="reply">Repondre</button>
                                 ${peutModifier ? '<button type="button" class="genre-btn btn-outline-blue btn-small" data-action="edit">Modifier</button>' : ''}
                                 ${peutSupprimer ? '<button type="button" class="genre-btn btn-outline-red btn-small-last" data-action="delete">Supprimer</button>' : ''}
                             </div>
@@ -166,6 +305,25 @@ function renderCommentaires(instance) {
                         : ''
                 }
             </article>
+        `;
+    };
+
+    liste.innerHTML = commentairesRacine.map((commentaire) => {
+        const reponses = reponsesParRacine.get(String(commentaire.id)) || [];
+
+        return `
+            <div class="commentaire-thread">
+                ${renderBlocCommentaire(commentaire)}
+                ${
+                    reponses.length
+                        ? `
+                            <div class="commentaire-reponses">
+                                ${reponses.map((reponse) => renderBlocCommentaire(reponse, true)).join('')}
+                            </div>
+                        `
+                        : ''
+                }
+            </div>
         `;
     }).join('');
 }
@@ -186,7 +344,7 @@ async function chargerCommentairesInstance(instance) {
 
     let requete = window._supabase
         .from(COMMENTAIRES_TABLE)
-        .select('id, user_id, pseudo_auteur, histoire_id, chapitre_id, cible_type, contenu, created_at, updated_at')
+        .select('id, user_id, pseudo_auteur, histoire_id, chapitre_id, parent_commentaire_id, cible_type, contenu, created_at, updated_at')
         .eq('histoire_id', histoireIdCible)
         .eq('cible_type', instance.cibleType)
         .order('created_at', { ascending: triAscendant });
@@ -208,6 +366,9 @@ async function chargerCommentairesInstance(instance) {
     }
 
     instance.commentaires = data || [];
+    if (instance.replyTargetId && !getReplyTargetValide(instance)) {
+        definirReponseActive(instance, null);
+    }
     renderCommentaires(instance);
 }
 
@@ -289,7 +450,9 @@ window.initialiserBlocCommentaires = async function({ sectionId, cibleType, hist
         cibleType,
         estAuteurHistoire: estAuteurParent(histoire, contexte.session),
         commentaires: [],
-        commentaireEnEdition: null
+        commentaireEnEdition: null,
+        replyTargetId: null,
+        replyTargetPseudo: ''
     };
 
     if (cibleType === 'chapitre') {
@@ -325,6 +488,13 @@ async function publierCommentaire(instance) {
         return;
     }
 
+    const replyTarget = getReplyTargetValide(instance);
+    if (instance.replyTargetId && !replyTarget) {
+        setCommentaireFeedback(instance, "La reponse ciblee n'est plus disponible dans cette discussion.", 'text-error');
+        definirReponseActive(instance, null);
+        return;
+    }
+
     const bouton = instance.elements.form?.querySelector('button[type="submit"]');
     if (bouton) {
         bouton.disabled = true;
@@ -336,6 +506,7 @@ async function publierCommentaire(instance) {
         pseudo_auteur: instance.pseudo,
         histoire_id: instance.histoire.id,
         chapitre_id: instance.cibleType === 'chapitre' ? instance.chapitreId : null,
+        parent_commentaire_id: replyTarget ? replyTarget.id : null,
         cible_type: instance.cibleType,
         contenu: message.trim()
     };
@@ -378,10 +549,18 @@ async function publierCommentaireChapitre(instance) {
         id: referenceChapitre.histoire_id
     };
 
+    const replyTarget = getReplyTargetValide(instance);
+    if (instance.replyTargetId && !replyTarget) {
+        setCommentaireFeedback(instance, "La reponse ciblee n'est plus disponible pour ce chapitre.", 'text-error');
+        definirReponseActive(instance, null);
+        return;
+    }
+
     const payload = {
         cible_type: 'chapitre',
         histoire_id: referenceChapitre.histoire_id,
         chapitre_id: referenceChapitre.id,
+        parent_commentaire_id: replyTarget ? replyTarget.id : null,
         pseudo_auteur: instance.pseudo,
         user_id: instance.session.user.id,
         contenu: message.trim()
@@ -396,7 +575,7 @@ async function publierCommentaireChapitre(instance) {
     const { data, error } = await window._supabase
         .from(COMMENTAIRES_TABLE)
         .insert([payload])
-        .select('id, cible_type, histoire_id, chapitre_id, pseudo_auteur, user_id, contenu')
+        .select('id, cible_type, histoire_id, chapitre_id, parent_commentaire_id, pseudo_auteur, user_id, contenu')
         .single();
 
     if (bouton) {
@@ -413,6 +592,7 @@ async function publierCommentaireChapitre(instance) {
         && data.cible_type === 'chapitre'
         && String(data.chapitre_id) === String(referenceChapitre.id)
         && String(data.histoire_id) === String(referenceChapitre.histoire_id)
+        && String(data.parent_commentaire_id || '') === String(replyTarget?.id || '')
         && String(data.user_id) === String(instance.session.user.id)
         && data.pseudo_auteur === instance.pseudo
         && data.contenu === payload.contenu;
@@ -514,9 +694,22 @@ if (!window.commentairesEventsHooked) {
         const instance = getCommentaireInstanceFromNode(event.target);
         if (!instance) return;
 
+        if (action === 'cancel-reply') {
+            definirReponseActive(instance, null);
+            setCommentaireFeedback(instance);
+            return;
+        }
+
         const card = event.target.closest('[data-comment-id]');
         const commentaireId = card?.dataset?.commentId;
         if (!commentaireId) return;
+
+        if (action === 'reply') {
+            const memeCible = String(instance.replyTargetId || '') === String(commentaireId);
+            definirReponseActive(instance, memeCible ? null : commentaireId);
+            setCommentaireFeedback(instance);
+            return;
+        }
 
         if (action === 'edit') {
             instance.commentaireEnEdition = commentaireId;

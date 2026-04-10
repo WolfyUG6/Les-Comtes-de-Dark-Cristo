@@ -592,10 +592,12 @@ button:hover, .genre-btn:hover {
 .commentaires-tri-wrap { display: flex; align-items: center; gap: 10px; font-family: 'Segoe UI', sans-serif; }
 .commentaires-tri { min-width: 180px; }
 .commentaires-intro { margin-bottom: 0; }
+.commentaires-reponse-info { display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap; padding: 10px 15px; border: 1px dashed var(--border-color); color: var(--text-muted); font-family: 'Segoe UI', sans-serif; }
 .commentaires-form { display: flex; flex-direction: column; gap: 15px; }
 .commentaires-textarea { min-height: 180px; resize: vertical; line-height: 1.6; }
 .commentaires-form-footer { display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap; }
 .commentaires-list { display: flex; flex-direction: column; gap: 15px; }
+.commentaire-thread { display: flex; flex-direction: column; gap: 12px; }
 .commentaire-item { display: flex; flex-direction: column; gap: 0; }
 .commentaire-meta { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); }
 .commentaire-pseudo { color: var(--text-title); font-family: 'Cinzel', serif; font-weight: bold; letter-spacing: 1px; }
@@ -603,7 +605,9 @@ button:hover, .genre-btn:hover {
 .commentaire-message { color: var(--text-main); line-height: 1.7; font-family: 'Segoe UI', sans-serif; white-space: normal; word-break: break-word; }
 .commentaire-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 .commentaire-edition { display: flex; flex-direction: column; gap: 0; }
-.comment-mention { color: var(--accent-blue); font-weight: bold; }
+.commentaire-reponses { margin-left: 30px; padding-left: 15px; border-left: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 12px; }
+.commentaire-lien-parent { color: var(--text-muted); font-size: 0.85rem; font-family: 'Segoe UI', sans-serif; }
+.comment-mention { color: var(--accent-blue); font-weight: bold; border-bottom: 1px dashed currentColor; }
 .commentaires-empty { margin-bottom: 0; }
 .commentaires-feedback { font-family: 'Segoe UI', sans-serif; }
 .commentaires-chapitre { margin-bottom: 30px; }
@@ -611,13 +615,19 @@ button:hover, .genre-btn:hover {
 @media (max-width: 768px) {
     .commentaires-header,
     .commentaires-form-footer,
-    .commentaire-meta {
+    .commentaire-meta,
+    .commentaires-reponse-info {
         align-items: flex-start;
         flex-direction: column;
     }
 
     .commentaires-tri {
         width: 100%;
+    }
+
+    .commentaire-reponses {
+        margin-left: 15px;
+        padding-left: 12px;
     }
 }
 

@@ -96,6 +96,10 @@
 
         <p class="text-small text-muted commentaires-intro mt-15">Commentaires lies a ce chapitre.</p>
         <p class="commentaires-feedback text-small mt-15 hidden" data-role="feedback"></p>
+        <div class="commentaires-reponse-info text-small hidden" data-role="reply-state">
+            <span data-role="reply-label"></span>
+            <button type="button" class="genre-btn btn-outline-blue btn-small-last" data-action="cancel-reply">Annuler la reponse</button>
+        </div>
 
         <form class="commentaires-form mt-15" data-role="form">
             <textarea
@@ -108,7 +112,7 @@
                 placeholder="Ecrivez votre commentaire en francais..."
             ></textarea>
             <div class="commentaires-form-footer">
-                <span class="commentaires-limites text-small text-muted" data-role="compteur">0 / 5000</span>
+                <span class="commentaires-limites text-small text-muted" data-role="compteur">0 / 1000</span>
                 <button type="submit" class="genre-btn btn-primary">Publier</button>
             </div>
         </form>
