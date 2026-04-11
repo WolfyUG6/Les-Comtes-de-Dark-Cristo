@@ -162,9 +162,8 @@ async function chargerMesPactes() {
         else if (h.classification === 'R16') classeAge += ' age-r16';
         else if (h.classification === 'R18') classeAge += ' age-r18';
 
-        const imgPlaceholder = `<div class="story-cover-placeholder">Livre Perdu</div>`;
-        const imgValide = `<img src="${h.image_couverture}" alt="Couverture" class="story-cover-image">`;
-        const htmlImage = h.image_couverture ? imgValide : imgPlaceholder;
+        const imageCouverture = window.getStoryCoverUrl(h.image_couverture);
+        const htmlImage = `<img src="${imageCouverture}" alt="Couverture" class="story-cover-image">`;
 
         const tagSensible = h.contenu_sensible 
             ? `<span class="tag tag-sensible">⚠️ Sensible</span>` 

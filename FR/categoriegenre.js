@@ -62,11 +62,10 @@ window.chargerGenre = async function() {
         else if (histoire.classification === 'R16') classeAge += ' age-r16';
         else if (histoire.classification === 'R18') classeAge += ' age-r18';
 
+        const imageCouverture = window.getStoryCoverUrl(histoire.image_couverture);
+
         carte.innerHTML = `
-            ${histoire.image_couverture 
-                ? `<img src="${histoire.image_couverture}" alt="${histoire.titre}">` 
-                : `<div class="no-cover">Sans Visage</div>`
-            }
+            <img src="${imageCouverture}" alt="${histoire.titre}">
             <h3>${histoire.titre}</h3>
             
             <div class="story-tags">

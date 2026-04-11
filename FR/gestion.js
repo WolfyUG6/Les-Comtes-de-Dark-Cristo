@@ -28,9 +28,8 @@ window.chargerGestionOeuvre = async function() {
     }
 
     // 2. Affichage des infos avec le style de base.css
-    const imgHtml = histoire.image_couverture 
-        ? `<img src="${histoire.image_couverture}" class="book-cover">` 
-        : `<div class="book-cover-placeholder">Pas de couverture</div>`;
+    const imageCouverture = window.getStoryCoverUrl(histoire.image_couverture);
+    const imgHtml = `<img src="${imageCouverture}" class="book-cover">`;
 
     infoPanel.innerHTML = `
         ${imgHtml}

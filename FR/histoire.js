@@ -836,9 +836,8 @@ window.chargerPageHistoire = async function() {
         ? `<span class="tag tag-sensible">⚠️ Sensible</span>` 
         : `<span class="tag tag-sensible-off">Sensible</span>`;
 
-    const imgHtml = histoire.image_couverture 
-        ? `<img src="${histoire.image_couverture}" class="book-cover" alt="Couverture">` 
-        : `<div class="book-cover-placeholder">Pas de couverture</div>`;
+    const imageCouverture = window.getStoryCoverUrl(histoire.image_couverture);
+    const imgHtml = `<img src="${imageCouverture}" class="book-cover" alt="Couverture">`;
 
     const { data: { session } } = await window._supabase.auth.getSession();
 

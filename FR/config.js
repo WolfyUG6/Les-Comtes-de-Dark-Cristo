@@ -11,6 +11,14 @@ const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
 // On rend la connexion accessible aux autres fichiers
 window._supabase = _supabase;
+window.DEFAULT_STORY_COVER = '../CoverBase.png';
+window.getStoryCoverUrl = function(url) {
+    const valeur = typeof url === 'string' ? url.trim() : '';
+    return valeur || window.DEFAULT_STORY_COVER;
+};
+window.estCouvertureParDefaut = function(url) {
+    return window.getStoryCoverUrl(url) === window.DEFAULT_STORY_COVER;
+};
 
 // ==========================================
 // LE GARDIEN DES PARCHEMINS (Anti-Copie)

@@ -54,7 +54,7 @@ window.chargerCreationStory = function() {
                     
                     // On ne peut pas pré-remplir un <input type="file"> pour des raisons de sécurité navigateur.
                     const deleteBox = document.getElementById('delete-cover-container');
-                    if (histoire.image_couverture && deleteBox) {
+                    if (histoire.image_couverture && deleteBox && !window.estCouvertureParDefaut(histoire.image_couverture)) {
                         deleteBox.classList.remove('hidden');
                     }
                     
@@ -132,11 +132,15 @@ if (!window.creationStoryEventHooked) {
 
             let imageUrl = null;
             let oldImageUrl = null;
+            let currentImageUrl = null;
 
             if (modeEdition && idHistoire) {
                 const { data: currentStory } = await window._supabase.from('histoires').select('image_couverture').eq('id', idHistoire).single();
                 if (currentStory && currentStory.image_couverture) {
-                    oldImageUrl = currentStory.image_couverture;
+                    currentImageUrl = currentStory.image_couverture;
+                    if (!window.estCouvertureParDefaut(currentImageUrl)) {
+                        oldImageUrl = currentImageUrl;
+                    }
                 }
             }
 
@@ -203,7 +207,7 @@ if (!window.creationStoryEventHooked) {
             } else if (isDeleteCover && oldImageUrl) {
                 // L'utilisateur n'a pas mis de nouveau fichier mais veut effacer l'ancien
                 await purgerAncienneImage(oldImageUrl);
-                imageUrl = "DELETE";
+                imageUrl = window.DEFAULT_STORY_COVER;
             }
 
             btnSubmit.innerText = "Écriture dans le registre...";
@@ -223,10 +227,10 @@ if (!window.creationStoryEventHooked) {
                 commentaires_actifs: commentairesActifs
             };
             
-            if (imageUrl === "DELETE") {
-                payload.image_couverture = null;
-            } else if (imageUrl) {
+            if (imageUrl) {
                 payload.image_couverture = imageUrl; // On n'écrase pas l'image si on n'en fournit pas de nouvelle
+            } else if (!modeEdition || !currentImageUrl) {
+                payload.image_couverture = window.DEFAULT_STORY_COVER;
             }
 
             if (modeEdition && idHistoire) {

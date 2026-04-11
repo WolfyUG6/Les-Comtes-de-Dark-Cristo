@@ -44,9 +44,8 @@ window.chargerVitrine = async function(genreFilter = null) {
         else if (histoire.classification === "R18") couleurAge = "#ff0000";
 
         // Préparation de l'image
-        const imgHtml = histoire.image_couverture 
-            ? `<img src="${histoire.image_couverture}" alt="${histoire.titre}">` 
-            : `<div class="no-cover">Pas de couverture</div>`;
+        const imageCouverture = window.getStoryCoverUrl(histoire.image_couverture);
+        const imgHtml = `<img src="${imageCouverture}" alt="${histoire.titre}">`;
 
         const pseudo = histoire.pseudo_auteur || histoire.auteur.split('@')[0];
 
