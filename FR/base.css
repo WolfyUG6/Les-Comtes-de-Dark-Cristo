@@ -80,6 +80,10 @@ button:hover, .genre-btn:hover {
     background-color: var(--bg-box);
     border-bottom: 1px solid var(--border-color);
     padding: 15px 0;
+    position: sticky;
+    top: 70px;
+    z-index: 980;
+    box-sizing: border-box;
 }
 
 .genre-menu ul {
