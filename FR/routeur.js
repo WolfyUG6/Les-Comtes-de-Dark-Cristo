@@ -110,6 +110,57 @@ window.siteConfirm = function(message, options = {}) {
     });
 };
 
+window._pageCourante = window._pageCourante || null;
+window._siteScrollUpdateFrame = null;
+
+function getSiteScrollRefs() {
+    return {
+        top: document.getElementById('site-scroll-top'),
+        bottom: document.getElementById('site-scroll-bottom')
+    };
+}
+
+function masquerScrollRapideSite() {
+    const { top, bottom } = getSiteScrollRefs();
+    if (top) top.classList.remove('is-visible');
+    if (bottom) bottom.classList.remove('is-visible');
+}
+
+function pageUtiliseScrollRapideSite() {
+    return window._pageCourante !== 'lecture';
+}
+
+window.mettreAJourScrollRapideSite = function() {
+    const { top, bottom } = getSiteScrollRefs();
+    if (!top || !bottom) return;
+
+    if (!pageUtiliseScrollRapideSite()) {
+        masquerScrollRapideSite();
+        return;
+    }
+
+    const hauteurScrollable = document.documentElement.scrollHeight - window.innerHeight;
+    if (hauteurScrollable <= 40) {
+        masquerScrollRapideSite();
+        return;
+    }
+
+    const positionActuelle = window.scrollY || window.pageYOffset || 0;
+    top.classList.toggle('is-visible', positionActuelle > 140);
+    bottom.classList.toggle('is-visible', positionActuelle < hauteurScrollable - 120);
+};
+
+window.programmerMiseAJourScrollRapideSite = function() {
+    if (window._siteScrollUpdateFrame) {
+        cancelAnimationFrame(window._siteScrollUpdateFrame);
+    }
+
+    window._siteScrollUpdateFrame = requestAnimationFrame(() => {
+        window.mettreAJourScrollRapideSite();
+        window._siteScrollUpdateFrame = null;
+    });
+};
+
 // Le Détecteur de Mouvement (Écoute quand l'URL change, même via les flèches du navigateur)
 window.addEventListener('hashchange', () => {
     // On lit le mot après le '#' (s'il n'y a rien, on va dans le Hall)
@@ -120,6 +171,7 @@ window.addEventListener('hashchange', () => {
 // L'Ouvrier (Va chercher le fichier HTML et l'injecte)
 window.chargerPageInterne = async function(pageDemandee) {
     const root = document.getElementById('sanctuaire-root');
+    window._pageCourante = pageDemandee;
     
     // Petit texte d'attente pendant que le fichier voyage
     root.innerHTML = '<p class="text-center text-muted-italic p-50">Ouverture du parchemin...</p>';
@@ -184,9 +236,12 @@ window.chargerPageInterne = async function(pageDemandee) {
 
         // On remonte tout en haut de la page proprement
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.programmerMiseAJourScrollRapideSite();
+        setTimeout(() => window.programmerMiseAJourScrollRapideSite(), 250);
 
     } catch (erreur) {
         root.innerHTML = `<p class="text-error text-center">Erreur du Sanctuaire : ${erreur.message}</p>`;
+        window.programmerMiseAJourScrollRapideSite();
     }
 };
 
@@ -262,6 +317,31 @@ window.changerTheme = function(state) {
 // --- DÉMARRAGE AUTOMATIQUE ---
 // Quand le Maître a fini de charger, on lui dit d'ouvrir le Hall direct
 document.addEventListener('DOMContentLoaded', () => {
+    const btnScrollTop = document.getElementById('site-scroll-top');
+    const btnScrollBottom = document.getElementById('site-scroll-bottom');
+    const root = document.getElementById('sanctuaire-root');
+
+    if (btnScrollTop) {
+        btnScrollTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+
+    if (btnScrollBottom) {
+        btnScrollBottom.addEventListener('click', () => {
+            window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+        });
+    }
+
+    window.addEventListener('scroll', window.programmerMiseAJourScrollRapideSite, { passive: true });
+    window.addEventListener('resize', window.programmerMiseAJourScrollRapideSite);
+
+    if (root) {
+        const observer = new MutationObserver(() => {
+            window.programmerMiseAJourScrollRapideSite();
+        });
+        observer.observe(root, { childList: true, subtree: true });
+    }
     
     // --- LECTURE DE LA MÉMOIRE (Thèmes) AVANT TOUTE CHOSE ---
     const themeSauvegarde = localStorage.getItem('themePrefere');
