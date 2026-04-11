@@ -16,6 +16,7 @@ window.chargerCreationStory = function() {
 
     document.getElementById('story-status').value = '✍️ En cours'; 
     document.getElementById('story-sensible').checked = false;
+    document.getElementById('story-comments-enabled').checked = true;
     document.getElementById('story-cover-file').value = '';
 
     const deleteBox = document.getElementById('delete-cover-container');
@@ -49,6 +50,7 @@ window.chargerCreationStory = function() {
                     
                     document.getElementById('story-status').value = histoire.statut || '✍️ En cours';
                     document.getElementById('story-sensible').checked = histoire.contenu_sensible || false;
+                    document.getElementById('story-comments-enabled').checked = histoire.commentaires_actifs !== false;
                     
                     // On ne peut pas pré-remplir un <input type="file"> pour des raisons de sécurité navigateur.
                     const deleteBox = document.getElementById('delete-cover-container');
@@ -106,6 +108,7 @@ if (!window.creationStoryEventHooked) {
             const statut = document.getElementById('story-status').value;
             const file = document.getElementById('story-cover-file').files[0];
             const isSensible = document.getElementById('story-sensible').checked;
+            const commentairesActifs = document.getElementById('story-comments-enabled').checked;
 
             const { data: { session } } = await window._supabase.auth.getSession();
             
@@ -216,7 +219,8 @@ if (!window.creationStoryEventHooked) {
                 genre: genre, 
                 classification: classification, 
                 statut: statut,
-                contenu_sensible: isSensible 
+                contenu_sensible: isSensible,
+                commentaires_actifs: commentairesActifs
             };
             
             if (imageUrl === "DELETE") {

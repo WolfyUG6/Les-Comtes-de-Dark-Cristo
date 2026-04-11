@@ -106,11 +106,20 @@ window.lireChapitre = async function(idParam = null) {
     // 4. Configuration de la navigation (Chapitre Précédent / Suivant)
     configurerNavigation(chapitre);
 
-    if (typeof window.initialiserBlocCommentaires === 'function') {
+    const sectionCommentairesChapitre = document.getElementById('commentaires-chapitre-section');
+    const histoireCommentairesActive = histoireParente?.commentaires_actifs !== false;
+
+    if (!histoireCommentairesActive) {
+        if (sectionCommentairesChapitre) sectionCommentairesChapitre.classList.add('hidden');
+        if (window._commentairesInstances) {
+            delete window._commentairesInstances['commentaires-chapitre-section'];
+        }
+    } else if (typeof window.initialiserBlocCommentaires === 'function') {
+        if (sectionCommentairesChapitre) sectionCommentairesChapitre.classList.remove('hidden');
         await window.initialiserBlocCommentaires({
             sectionId: 'commentaires-chapitre-section',
             cibleType: 'chapitre',
-            histoire: histoireParente || { id: chapitre.histoire_id, auteur: null },
+            histoire: histoireParente || { id: chapitre.histoire_id, auteur: null, commentaires_actifs: true },
             chapitreId: chapitre.id
         });
     }

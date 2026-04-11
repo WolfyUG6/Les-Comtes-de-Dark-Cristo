@@ -479,6 +479,12 @@ window.initialiserBlocCommentaires = async function({ sectionId, cibleType, hist
     const section = document.getElementById(sectionId);
     if (!section || !histoire?.id) return;
 
+    if (histoire.commentaires_actifs === false) {
+        section.classList.add('hidden');
+        delete window._commentairesInstances[sectionId];
+        return;
+    }
+
     const elements = getCommentaireElements(section);
     const contexte = await window.recupererContexteCommentaires();
 
@@ -935,11 +941,18 @@ window.chargerPageHistoire = async function() {
     chargerListeChapitres(idHistoire);
 
     // 7. Chargement des commentaires globaux
-    await window.initialiserBlocCommentaires({
-        sectionId: 'commentaires-histoire-section',
-        cibleType: 'histoire',
-        histoire
-    });
+    const sectionCommentairesHistoire = document.getElementById('commentaires-histoire-section');
+    if (histoire.commentaires_actifs === false) {
+        if (sectionCommentairesHistoire) sectionCommentairesHistoire.classList.add('hidden');
+        delete window._commentairesInstances['commentaires-histoire-section'];
+    } else {
+        if (sectionCommentairesHistoire) sectionCommentairesHistoire.classList.remove('hidden');
+        await window.initialiserBlocCommentaires({
+            sectionId: 'commentaires-histoire-section',
+            cibleType: 'histoire',
+            histoire
+        });
+    }
 };
 
 async function chargerListeChapitres(idHistoire) {
