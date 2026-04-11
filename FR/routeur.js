@@ -127,7 +127,7 @@ function masquerScrollRapideSite() {
 }
 
 function pageUtiliseScrollRapideSite() {
-    return window._pageCourante !== 'lecture';
+    return window._pageCourante !== 'lecture' && window._pageCourante !== 'conditions-utilisation';
 }
 
 window.mettreAJourScrollRapideSite = function() {
@@ -181,6 +181,7 @@ window.chargerPageInterne = async function(pageDemandee) {
         'accueil': 'Accueil.html',
         'oeuvre': 'Histoire.html',
         'lecture': 'Lecteur.html',
+        'conditions-utilisation': 'ConditionsUtilisation.html',
         'quartiers': 'Parametre.html',
         'lectures': 'Favoris.html',
         'studio': 'Forge.html',
@@ -282,6 +283,9 @@ function initialiserScriptsDePage(page) {
     // ---> AJOUTE LE RAYONNNAGE ICI <---
     else if (page === 'categorie-genre') {
         if (typeof window.chargerGenre === 'function') window.chargerGenre();
+    }
+    else if (page === 'conditions-utilisation') {
+        if (typeof window.chargerConditionsUtilisation === 'function') window.chargerConditionsUtilisation();
     }
 }
 

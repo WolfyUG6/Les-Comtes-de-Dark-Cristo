@@ -713,6 +713,278 @@ body.modal-open {
 }
 
 /* =========================================
+   CONDITIONS D'UTILISATION
+   ========================================= */
+
+.page-conditions {
+    --conditions-bg: #eef1f4;
+    --conditions-surface: #ffffff;
+    --conditions-surface-soft: #f6f8fb;
+    --conditions-text: #1f2937;
+    --conditions-muted: #526173;
+    --conditions-title: #1f4c73;
+    --conditions-accent: #315f86;
+    --conditions-border: #d3dce6;
+    --conditions-shadow: 0 22px 60px rgba(28, 39, 53, 0.12);
+    width: 100%;
+    min-height: calc(100vh - 70px);
+    box-sizing: border-box;
+    background: var(--conditions-bg);
+    color: var(--conditions-text);
+    padding: 48px 20px 120px;
+}
+
+.conditions-layout {
+    max-width: 980px;
+    margin: 0 auto;
+}
+
+.conditions-card {
+    background: var(--conditions-surface);
+    border: 1px solid var(--conditions-border);
+    box-shadow: var(--conditions-shadow);
+    padding: 36px 42px;
+    box-sizing: border-box;
+}
+
+.conditions-header {
+    text-align: center;
+    border-bottom: 1px solid var(--conditions-border);
+    padding-bottom: 28px;
+    margin-bottom: 28px;
+}
+
+.conditions-eyebrow {
+    margin: 0 0 12px 0;
+    color: var(--conditions-accent);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.8rem;
+    font-family: 'Segoe UI', sans-serif;
+    font-weight: 700;
+}
+
+.conditions-title {
+    margin: 0;
+    color: var(--conditions-title);
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    letter-spacing: 0.04em;
+}
+
+.conditions-intro {
+    margin: 18px auto 0;
+    max-width: 700px;
+    color: var(--conditions-muted);
+    line-height: 1.7;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.conditions-summary,
+.conditions-subsummary {
+    background: var(--conditions-surface-soft);
+    border: 1px solid var(--conditions-border);
+    padding: 24px;
+    margin-bottom: 28px;
+}
+
+.conditions-summary-title {
+    margin: 0 0 16px 0;
+    color: var(--conditions-title);
+    font-size: 1.1rem;
+    letter-spacing: 0.04em;
+}
+
+.conditions-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 12px;
+}
+
+.conditions-summary-link {
+    width: 100%;
+    text-align: left;
+    background: var(--conditions-surface);
+    color: var(--conditions-accent);
+    border: 1px solid var(--conditions-border);
+    padding: 12px 14px;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.conditions-summary-link:hover {
+    background: var(--conditions-accent);
+    color: #ffffff;
+    border-color: var(--conditions-accent);
+    box-shadow: 0 10px 26px rgba(49, 95, 134, 0.16);
+}
+
+.conditions-section,
+.conditions-subsection {
+    scroll-margin-top: 110px;
+}
+
+.conditions-section + .conditions-section {
+    margin-top: 34px;
+    padding-top: 34px;
+    border-top: 1px solid var(--conditions-border);
+}
+
+.conditions-section-title,
+.conditions-subsection-title {
+    margin: 0 0 16px 0;
+    color: var(--conditions-title);
+}
+
+.conditions-section-title {
+    font-size: 1.55rem;
+}
+
+.conditions-subsection {
+    margin-top: 28px;
+    background: var(--conditions-surface-soft);
+    border: 1px solid var(--conditions-border);
+    border-left: 4px solid var(--conditions-accent);
+    padding: 24px;
+}
+
+.conditions-subsection-title {
+    font-size: 1.2rem;
+}
+
+.conditions-section p,
+.conditions-subsection p,
+.conditions-list,
+.conditions-links-list {
+    margin: 0 0 16px 0;
+    color: var(--conditions-text);
+    font-family: 'Segoe UI', sans-serif;
+    line-height: 1.8;
+    font-size: 1rem;
+}
+
+.conditions-list,
+.conditions-links-list {
+    padding-left: 22px;
+}
+
+.conditions-list li,
+.conditions-links-list li {
+    margin-bottom: 8px;
+}
+
+.conditions-links-list a {
+    color: var(--conditions-accent);
+    word-break: break-word;
+}
+
+.conditions-inline-label {
+    color: var(--conditions-muted);
+    font-weight: 700;
+}
+
+.conditions-quote {
+    margin: 16px 0;
+    padding: 18px 22px;
+    background: #edf3f8;
+    border-left: 4px solid var(--conditions-accent);
+    color: var(--conditions-text);
+    font-family: 'Segoe UI', sans-serif;
+    line-height: 1.7;
+}
+
+.conditions-floating-controls {
+    position: fixed;
+    right: 24px;
+    top: 150px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 1250;
+}
+
+.conditions-floating-btn {
+    border: none;
+    background: var(--conditions-title);
+    color: #ffffff;
+    box-shadow: 0 18px 36px rgba(31, 76, 115, 0.22);
+    font-family: 'Segoe UI', sans-serif;
+    font-weight: 700;
+}
+
+.conditions-floating-btn:hover {
+    background: var(--conditions-accent);
+    color: #ffffff;
+    border-color: transparent;
+}
+
+.conditions-return-btn {
+    min-width: 138px;
+    padding-inline: 16px;
+}
+
+.conditions-scroll-btn {
+    width: 52px;
+    height: 52px;
+    padding: 0;
+    font-size: 1.2rem;
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.conditions-scroll-btn.is-visible {
+    opacity: 0.92;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+@media (max-width: 1024px) {
+    .page-conditions {
+        padding-inline: 16px;
+    }
+
+    .conditions-card {
+        padding: 28px 24px;
+    }
+
+    .conditions-floating-controls {
+        right: 16px;
+        top: auto;
+        bottom: 16px;
+    }
+}
+
+@media (max-width: 768px) {
+    .conditions-summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .conditions-card {
+        padding: 24px 18px;
+    }
+
+    .conditions-section-title {
+        font-size: 1.35rem;
+    }
+
+    .conditions-floating-controls {
+        left: 16px;
+        right: 16px;
+        flex-direction: row;
+        justify-content: flex-end;
+        align-items: flex-end;
+    }
+
+    .conditions-return-btn {
+        min-width: 0;
+        flex: 1;
+    }
+}
+
+/* =========================================
    LA SALLE DE LECTURE (Lecteur)
    ========================================= */
 
