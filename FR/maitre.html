@@ -111,9 +111,19 @@
     </footer>
 
     <div id="auth-modal" class="modal hidden">
-        <h2>Entrez dans le Sanctuaire</h2>
-        <input type="email" id="email-input" placeholder="Votre Email">
-        <input type="password" id="password-input" placeholder="Votre Mot de Passe">
+        <h2 id="auth-modal-title">Entrez dans le Sanctuaire</h2>
+
+        <div id="auth-standard-panel" class="auth-panel">
+            <input type="email" id="email-input" placeholder="Votre Email">
+            <input type="password" id="password-input" placeholder="Votre Mot de Passe">
+            <button id="forgot-password-link" class="genre-btn btn-ghost auth-link-btn" type="button">Mot de passe oublié ?</button>
+        </div>
+
+        <div id="auth-recovery-panel" class="auth-panel hidden">
+            <p class="auth-helper-text">Entrez un nouveau mot de passe pour finaliser la récupération de votre compte.</p>
+            <input type="password" id="reset-password-input" placeholder="Nouveau mot de passe">
+            <input type="password" id="reset-password-confirm" placeholder="Confirmez le nouveau mot de passe">
+        </div>
         
         <div class="modal-actions">
             <button id="submit-auth" class="genre-btn">Valider</button>

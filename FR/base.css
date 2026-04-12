@@ -447,6 +447,36 @@ button:hover, .genre-btn:hover {
     font-family: 'Segoe UI', sans-serif;
 }
 
+.auth-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.auth-link-btn {
+    align-self: flex-end;
+    padding: 0;
+    margin-top: -4px;
+    border: none;
+    box-shadow: none;
+    font-size: 0.85rem;
+    text-decoration: underline;
+}
+
+.auth-link-btn:hover {
+    background: transparent;
+    color: var(--text-title);
+    border: none;
+    box-shadow: none;
+}
+
+.auth-helper-text {
+    margin: 0 0 12px 0;
+    color: var(--text-muted);
+    line-height: 1.6;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 0.9rem;
+}
+
 .modal-actions {
     margin-top: 25px;
     display: flex;

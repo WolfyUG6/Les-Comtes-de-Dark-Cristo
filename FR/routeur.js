@@ -7,6 +7,28 @@ window.changerDePage = function(pageDemandee) {
     window.location.hash = pageDemandee;
 };
 
+function estHashAuthSupabase(hashValue = window.location.hash) {
+    const hashNettoye = (hashValue || '').replace(/^#/, '');
+    if (!hashNettoye) return false;
+
+    return [
+        'access_token=',
+        'refresh_token=',
+        'type=recovery',
+        'type=invite',
+        'error_description='
+    ].some((fragment) => hashNettoye.includes(fragment));
+}
+
+function extrairePageDemandeeDepuisHash(hashValue = window.location.hash) {
+    const hashNettoye = (hashValue || '').replace(/^#/, '');
+    if (!hashNettoye || estHashAuthSupabase(hashValue)) {
+        return 'accueil';
+    }
+
+    return hashNettoye;
+}
+
 window._siteDialogState = null;
 
 function getSiteDialogRefs() {
@@ -164,7 +186,7 @@ window.programmerMiseAJourScrollRapideSite = function() {
 // Le Détecteur de Mouvement (Écoute quand l'URL change, même via les flèches du navigateur)
 window.addEventListener('hashchange', () => {
     // On lit le mot après le '#' (s'il n'y a rien, on va dans le Hall)
-    const pageDemandee = window.location.hash.replace('#', '') || 'accueil';
+    const pageDemandee = extrairePageDemandeeDepuisHash();
     window.chargerPageInterne(pageDemandee);
 });
 
@@ -386,6 +408,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Lancer la page demandée dans l'URL (ou l'accueil par défaut)
-    const pageInitiale = window.location.hash.replace('#', '') || 'accueil';
+    const pageInitiale = extrairePageDemandeeDepuisHash();
     window.chargerPageInterne(pageInitiale);
 });
