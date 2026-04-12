@@ -151,7 +151,8 @@ function masquerScrollRapideSite() {
 function pageUtiliseScrollRapideSite() {
     return window._pageCourante !== 'lecture'
         && window._pageCourante !== 'conditions-utilisation'
-        && window._pageCourante !== 'mentions-legales';
+        && window._pageCourante !== 'mentions-legales'
+        && window._pageCourante !== 'politique-confidentialite';
 }
 
 window.mettreAJourScrollRapideSite = function() {
@@ -207,6 +208,7 @@ window.chargerPageInterne = async function(pageDemandee) {
         'lecture': 'Lecteur.html',
         'conditions-utilisation': 'ConditionsUtilisation.html',
         'mentions-legales': 'MentionsLegales.html',
+        'politique-confidentialite': 'PolitiqueConfidentialite.html',
         'quartiers': 'Parametre.html',
         'lectures': 'Favoris.html',
         'studio': 'Forge.html',
@@ -309,7 +311,11 @@ function initialiserScriptsDePage(page) {
     else if (page === 'categorie-genre') {
         if (typeof window.chargerGenre === 'function') window.chargerGenre();
     }
-    else if (page === 'conditions-utilisation' || page === 'mentions-legales') {
+    else if (
+        page === 'conditions-utilisation'
+        || page === 'mentions-legales'
+        || page === 'politique-confidentialite'
+    ) {
         if (typeof window.chargerPageJuridique === 'function') window.chargerPageJuridique();
     }
 }

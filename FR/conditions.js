@@ -13,7 +13,8 @@ function getConditionsRefs() {
 
 function estPageJuridiqueActive() {
     return window._pageCourante === 'conditions-utilisation'
-        || window._pageCourante === 'mentions-legales';
+        || window._pageCourante === 'mentions-legales'
+        || window._pageCourante === 'politique-confidentialite';
 }
 
 function mettreAJourBoutonsConditions() {
@@ -54,6 +55,7 @@ window.chargerPageJuridique = function() {
 
 window.chargerConditionsUtilisation = window.chargerPageJuridique;
 window.chargerMentionsLegales = window.chargerPageJuridique;
+window.chargerPolitiqueConfidentialite = window.chargerPageJuridique;
 
 if (!window.conditionsEventsHooked) {
     document.addEventListener('click', (event) => {
