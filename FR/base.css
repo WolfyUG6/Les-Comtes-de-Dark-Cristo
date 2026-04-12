@@ -361,6 +361,29 @@ button:hover, .genre-btn:hover {
     z-index: 1000;
 }
 
+#user-name,
+#mini-logo span {
+    color: #f3ecdd;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+#auth-container .genre-btn,
+#user-container > .genre-btn,
+#user-container > .dropdown > .genre-btn {
+    color: #f3ecdd;
+    border-color: rgba(243, 236, 221, 0.35);
+}
+
+#auth-container .genre-btn:hover,
+#user-container > .genre-btn:hover,
+#user-container > .dropdown > .genre-btn:hover {
+    border-color: var(--border-hover);
+}
+
+#user-container > .btn-danger {
+    color: #ffb0b0;
+}
+
 /* =========================================
    AVATARS DE PROFIL (Le Sceau du Seigneur)
    ========================================= */
