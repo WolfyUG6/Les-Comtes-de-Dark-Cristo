@@ -909,6 +909,16 @@ body.modal-open {
     word-break: break-word;
 }
 
+.conditions-section a,
+.conditions-subsection a {
+    color: var(--conditions-accent);
+}
+
+.conditions-section a:hover,
+.conditions-subsection a:hover {
+    color: var(--conditions-title);
+}
+
 .conditions-inline-label {
     color: var(--conditions-muted);
     font-weight: 700;

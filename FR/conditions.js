@@ -11,9 +11,14 @@ function getConditionsRefs() {
     };
 }
 
+function estPageJuridiqueActive() {
+    return window._pageCourante === 'conditions-utilisation'
+        || window._pageCourante === 'mentions-legales';
+}
+
 function mettreAJourBoutonsConditions() {
     const { page, scrollTop, scrollBottom } = getConditionsRefs();
-    if (!page || window._pageCourante !== 'conditions-utilisation') return;
+    if (!page || !estPageJuridiqueActive()) return;
 
     const hauteurScrollable = document.documentElement.scrollHeight - window.innerHeight;
     const peutScroller = hauteurScrollable > 40;
@@ -40,35 +45,38 @@ function faireDefilerVersSection(targetId) {
     });
 }
 
-window.chargerConditionsUtilisation = function() {
+window.chargerPageJuridique = function() {
     window.scrollTo({ top: 0, behavior: 'auto' });
     requestAnimationFrame(() => {
         mettreAJourBoutonsConditions();
     });
 };
 
+window.chargerConditionsUtilisation = window.chargerPageJuridique;
+window.chargerMentionsLegales = window.chargerPageJuridique;
+
 if (!window.conditionsEventsHooked) {
     document.addEventListener('click', (event) => {
         const cibleSommaire = event.target.closest('[data-conditions-target]');
-        if (cibleSommaire && window._pageCourante === 'conditions-utilisation') {
+        if (cibleSommaire && estPageJuridiqueActive()) {
             event.preventDefault();
             faireDefilerVersSection(cibleSommaire.getAttribute('data-conditions-target'));
             return;
         }
 
-        if (event.target.id === 'conditions-return-site' && window._pageCourante === 'conditions-utilisation') {
+        if (event.target.id === 'conditions-return-site' && estPageJuridiqueActive()) {
             event.preventDefault();
             window.changerDePage('accueil');
             return;
         }
 
-        if (event.target.id === 'conditions-scroll-top' && window._pageCourante === 'conditions-utilisation') {
+        if (event.target.id === 'conditions-scroll-top' && estPageJuridiqueActive()) {
             event.preventDefault();
             window.scrollTo({ top: 0, behavior: 'smooth' });
             return;
         }
 
-        if (event.target.id === 'conditions-scroll-bottom' && window._pageCourante === 'conditions-utilisation') {
+        if (event.target.id === 'conditions-scroll-bottom' && estPageJuridiqueActive()) {
             event.preventDefault();
             window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
         }
