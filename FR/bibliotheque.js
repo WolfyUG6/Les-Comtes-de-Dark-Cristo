@@ -61,16 +61,9 @@ function creerCarteHistoire(histoire, options = {}) {
             <span class="tag tag-statut">${histoire.statut || '✍️ En cours'}</span>
             <span class="${ageClass}">${histoire.classification || 'Tout public'}</span>
             ${tagSensible}
-            ${miseEnAvant && score !== null ? `<span class="tag tag-highlight-score">Score ${score}</span>` : ''}
         </div>
         <h3>${histoire.titre}</h3>
         <span class="text-small text-muted">Par Comte ${pseudo}</span>
-        ${miseEnAvant ? `
-            <div class="story-highlight-stats">
-                <span>👁️ ${vues || 0} vues</span>
-                <span>❤️ ${followersCount || 0} pactes</span>
-            </div>
-        ` : ''}
         <p>${getStorySynopsis(histoire)}</p>
         <button class="genre-btn w-100 mt-15" type="button">${miseEnAvant ? "Découvrir l'œuvre" : "Lire l'œuvre"}</button>
     `;
@@ -106,7 +99,7 @@ async function chargerMisesEnAvantHebdomadairesAccueil() {
     const section = document.getElementById('weekly-highlights-section');
     const container = document.getElementById('weekly-highlights-container');
 
-    if (!section || !container) return;
+    if (!section || !container) return [];
 
     section.classList.remove('hidden');
     container.innerHTML = '<p class="loading-text">Lecture des mises en avant hebdomadaires...</p>';
@@ -116,12 +109,12 @@ async function chargerMisesEnAvantHebdomadairesAccueil() {
     if (error) {
         console.error('Erreur de mise en avant hebdomadaire :', error);
         container.innerHTML = '<p class="loading-text">Les mises en avant hebdomadaires ne sont pas encore disponibles.</p>';
-        return;
+        return [];
     }
 
     if (!data || data.length === 0) {
         container.innerHTML = '<p class="loading-text">Aucune mise en avant hebdomadaire n’a encore été calculée.</p>';
-        return;
+        return [];
     }
 
     container.innerHTML = '';
@@ -147,6 +140,8 @@ async function chargerMisesEnAvantHebdomadairesAccueil() {
             vues: selection.vues
         }));
     });
+
+    return data.map((selection) => Number(selection.histoire_id));
 }
 
 window.chargerVitrine = async function(genreFilter = null) {
@@ -157,7 +152,7 @@ window.chargerVitrine = async function(genreFilter = null) {
 
     storiesContainer.innerHTML = '<p class="loading-text">Ouverture des grimoires...</p>';
 
-    let chargementMiseEnAvant = Promise.resolve();
+    let chargementMiseEnAvant = Promise.resolve([]);
 
     if (!genreFilter || genreFilter === 'accueil') {
         chargementMiseEnAvant = chargerMisesEnAvantHebdomadairesAccueil();
@@ -173,11 +168,11 @@ window.chargerVitrine = async function(genreFilter = null) {
     if (genreFilter && genreFilter !== 'accueil') {
         query = query.eq('genre', genreFilter);
     } else {
-        query = query.limit(5);
+        query = query.limit(12);
     }
 
     const { data: histoires, error } = await query;
-    await chargementMiseEnAvant;
+    const highlightedIds = await chargementMiseEnAvant;
 
     if (error) {
         storiesContainer.innerHTML = `<p class="text-error">Erreur de lecture : ${error.message}</p>`;
@@ -186,12 +181,19 @@ window.chargerVitrine = async function(genreFilter = null) {
 
     storiesContainer.innerHTML = '';
 
-    if (!histoires || histoires.length === 0) {
-        storiesContainer.innerHTML = '<p class="loading-text">Aucune œuvre trouvée dans ces ténèbres pour le moment...</p>';
+    const idsMisEnAvant = new Set((highlightedIds || []).map((id) => Number(id)));
+    const histoiresAffichees = (!genreFilter || genreFilter === 'accueil')
+        ? (histoires || []).filter((histoire) => !idsMisEnAvant.has(Number(histoire.id))).slice(0, 5)
+        : (histoires || []);
+
+    if (!histoiresAffichees || histoiresAffichees.length === 0) {
+        storiesContainer.innerHTML = (!genreFilter || genreFilter === 'accueil')
+            ? '<p class="loading-text">Aucune autre œuvre n’est visible pour le moment.</p>'
+            : '<p class="loading-text">Aucune œuvre trouvée dans ces ténèbres pour le moment...</p>';
         return;
     }
 
-    histoires.forEach((histoire) => {
+    histoiresAffichees.forEach((histoire) => {
         storiesContainer.appendChild(creerCarteHistoire(histoire));
     });
 };
