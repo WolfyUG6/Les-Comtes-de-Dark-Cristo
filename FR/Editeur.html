@@ -44,7 +44,14 @@
             
             <div class="form-group title-m0">
                 <label for="chapitre-date-pub">Programmer la publication (Optionnel) :</label>
-                <input type="text" id="chapitre-date-pub" class="custom-input" placeholder="Sélectionnez une date (laissez vide pour publier immédiatement)">
+                <p class="publish-help-text">Cliquez sur le bouton ci-dessous pour ouvrir le calendrier et choisir précisément la date et l’heure de publication.</p>
+                <div class="chapitre-date-picker">
+                    <input type="text" id="chapitre-date-pub" class="custom-input" placeholder="Aucune programmation définie">
+                    <div class="chapitre-date-actions">
+                        <button type="button" id="chapitre-date-trigger" class="genre-btn btn-primary">Ouvrir le calendrier</button>
+                        <button type="button" id="chapitre-date-clear" class="genre-btn btn-ghost">Effacer la programmation</button>
+                    </div>
+                </div>
             </div>
         </div>
 

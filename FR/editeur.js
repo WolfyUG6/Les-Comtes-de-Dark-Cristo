@@ -7,6 +7,46 @@
 let quill, quillNoteDebut, quillNoteFin;
 window.compteMotsLive = 0;
 
+function initialiserCalendrierChapitre() {
+    const champDate = document.getElementById('chapitre-date-pub');
+    const boutonOuvrir = document.getElementById('chapitre-date-trigger');
+    const boutonEffacer = document.getElementById('chapitre-date-clear');
+
+    if (!champDate || typeof flatpickr !== 'function') return;
+
+    if (window.horlogeChapitre && typeof window.horlogeChapitre.destroy === 'function') {
+        window.horlogeChapitre.destroy();
+    }
+
+    window.horlogeChapitre = flatpickr(champDate, {
+        enableTime: true,
+        time_24hr: true,
+        minuteIncrement: 1,
+        dateFormat: "Z",
+        altInput: true,
+        altInputClass: "custom-input chapitre-date-visible",
+        altFormat: "j F Y à H:i",
+        locale: window.flatpickr?.l10ns?.fr || "fr",
+        minDate: "today",
+        allowInput: false,
+        clickOpens: true
+    });
+
+    if (boutonOuvrir) {
+        boutonOuvrir.onclick = () => {
+            if (!window.horlogeChapitre) return;
+            window.horlogeChapitre.open();
+        };
+    }
+
+    if (boutonEffacer) {
+        boutonEffacer.onclick = () => {
+            if (!window.horlogeChapitre) return;
+            window.horlogeChapitre.clear();
+        };
+    }
+}
+
 window.chargerEditeurChapitre = async function() {
     // 0. Restauration des IDs après un F5
     if (!window.currentOeuvreId) window.currentOeuvreId = localStorage.getItem('currentOeuvreId');
@@ -39,26 +79,13 @@ window.chargerEditeurChapitre = async function() {
     const btnSubmit = document.getElementById('submit-chapitre');
     btnSubmit.innerText = window.currentChapitreId ? "Graver les modifications" : "Graver le Chapitre";
 
-    // 3. Si on MODIFIE un chapitre existant, on va le chercher
+    // 3. Réattacher le calendrier à chaque recréation du DOM
+    initialiserCalendrierChapitre();
+
+    // 4. Si on MODIFIE un chapitre existant, on va le chercher
     if (window.currentChapitreId) {
         document.getElementById('chapitre-titre').value = "Recherche dans les archives...";
         recupererDonneesChapitre(window.currentChapitreId);
-    }
-    
-    // 4. Initialiser Flatpickr pour la date (si pas déjà fait)
-    if (!window.horlogeChapitre) {
-        window.horlogeChapitre = flatpickr("#chapitre-date-pub", {
-            enableTime: true,
-            time_24hr: true,
-            minuteIncrement: 1,
-            dateFormat: "Z", 
-            altInput: true,
-            altFormat: "j F Y à H:i", 
-            locale: "fr",
-            minDate: "today" 
-        });
-    } else {
-        window.horlogeChapitre.clear();
     }
 };
 
