@@ -181,12 +181,7 @@ function initialiserBoutonRetirerHistoire(idHistoire, session) {
 
 function estAuteurParent(histoire, session) {
     if (!histoire || !session?.user) return false;
-
-    if (histoire.auteur_user_id && histoire.auteur_user_id === session.user.id) {
-        return true;
-    }
-
-    return Boolean(histoire.auteur && session.user.email && histoire.auteur === session.user.email);
+    return Boolean(histoire.auteur_user_id && histoire.auteur_user_id === session.user.id);
 }
 
 function resetCommentaireForm(instance) {

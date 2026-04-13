@@ -6,56 +6,6 @@
 // La mémoire de l'Inquisiteur (pour trier sans recharger Supabase)
 window.mesHistoiresEnCache = [];
 
-function dedoublonnerHistoires(histoires = []) {
-    const map = new Map();
-
-    histoires.forEach((histoire) => {
-        if (!histoire || histoire.id == null) return;
-        map.set(String(histoire.id), histoire);
-    });
-
-    return Array.from(map.values());
-}
-
-async function recupererHistoiresAuteur(session) {
-    const histoiresTrouvees = [];
-    let erreurBloquante = null;
-
-    const { data: histoiresParUid, error: erreurUid } = await window._supabase
-        .from('histoires')
-        .select('*')
-        .eq('auteur_user_id', session.user.id);
-
-    if (erreurUid) {
-        const message = erreurUid.message || '';
-        const colonneManquante = message.includes('auteur_user_id');
-        if (!colonneManquante) {
-            erreurBloquante = erreurUid;
-        }
-    } else if (Array.isArray(histoiresParUid)) {
-        histoiresTrouvees.push(...histoiresParUid);
-    }
-
-    const { data: histoiresParEmail, error: erreurEmail } = await window._supabase
-        .from('histoires')
-        .select('*')
-        .eq('auteur', session.user.email);
-
-    if (erreurEmail) {
-        if (!erreurBloquante && histoiresTrouvees.length === 0) {
-            erreurBloquante = erreurEmail;
-        }
-    } else if (Array.isArray(histoiresParEmail)) {
-        histoiresTrouvees.push(...histoiresParEmail);
-    }
-
-    if (erreurBloquante) {
-        return { data: null, error: erreurBloquante };
-    }
-
-    return { data: dedoublonnerHistoires(histoiresTrouvees), error: null };
-}
-
 window.chargerMesOeuvres = async function() {
     const conteneur = document.getElementById('mes-oeuvres-liste');
     if (!conteneur) return; 
@@ -70,7 +20,10 @@ window.chargerMesOeuvres = async function() {
     }
 
     // On fouille l'étagère UNE SEULE FOIS
-    const { data: mesHistoires, error } = await recupererHistoiresAuteur(session);
+    const { data: mesHistoires, error } = await window._supabase
+        .from('histoires')
+        .select('*')
+        .eq('auteur_user_id', session.user.id);
 
     if (error) {
         conteneur.innerHTML = `<p class="text-error">Erreur : ${error.message}</p>`;

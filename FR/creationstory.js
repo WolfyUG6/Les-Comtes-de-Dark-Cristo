@@ -82,31 +82,6 @@ window.appliquerCouleurAge = function(selectElement) {
     else if (val === 'R18') selectElement.classList.add('age-r18');
 };
 
-async function sauvegarderHistoireAvecCompatibilite({ payload, modeEdition, idHistoire }) {
-    const executerRequete = (payloadFinal) => {
-        if (modeEdition && idHistoire) {
-            return window._supabase.from('histoires')
-                .update(payloadFinal)
-                .eq('id', idHistoire)
-                .select();
-        }
-
-        return window._supabase.from('histoires')
-            .insert([payloadFinal])
-            .select();
-    };
-
-    let resultat = await executerRequete(payload);
-
-    if (resultat.error && (resultat.error.message || '').includes('auteur_user_id')) {
-        const payloadCompat = { ...payload };
-        delete payloadCompat.auteur_user_id;
-        resultat = await executerRequete(payloadCompat);
-    }
-
-    return resultat;
-}
-
 // --- GESTION DES CLICS (Délégation d'événements) ---
 if (!window.creationStoryEventHooked) {
     document.addEventListener('change', (e) => {
@@ -262,22 +237,19 @@ if (!window.creationStoryEventHooked) {
 
             if (modeEdition && idHistoire) {
                 // --- UPDATE ---
-                requeteResult = await sauvegarderHistoireAvecCompatibilite({
-                    payload,
-                    modeEdition,
-                    idHistoire
-                });
+                requeteResult = await window._supabase.from('histoires')
+                    .update(payload)
+                    .eq('id', idHistoire)
+                    .select();
             } else {
                 // --- INSERT ---
-                payload.auteur = session.user.email; // Compatibilite des verifications historiques
+                payload.auteur = session.user.email;
                 payload.auteur_user_id = session.user.id;
                 payload.pseudo_auteur = monPseudo;
                 
-                requeteResult = await sauvegarderHistoireAvecCompatibilite({
-                    payload,
-                    modeEdition,
-                    idHistoire
-                });
+                requeteResult = await window._supabase.from('histoires')
+                    .insert([payload])
+                    .select();
             }
 
             const { data: histoireSauvee, error } = requeteResult;
