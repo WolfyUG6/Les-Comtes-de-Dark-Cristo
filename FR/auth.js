@@ -12,10 +12,24 @@ function getAuthRefs() {
     return window._authRefs;
 }
 
-window.getAuthRecoveryRedirectUrl = function() {
+window.getAuthCanonicalAppUrl = function() {
     const url = new URL(window.location.href);
     url.hash = '';
     url.search = '';
+
+    if (url.hostname === 'wolfyug6.github.io') {
+        url.pathname = '/Les-Comtes-de-Dark-Cristo/FR/maitre.html';
+    }
+
+    return url.toString();
+};
+
+window.getAuthSignupRedirectUrl = function() {
+    return window.getAuthCanonicalAppUrl();
+};
+
+window.getAuthRecoveryRedirectUrl = function() {
+    const url = new URL(window.getAuthCanonicalAppUrl());
     url.searchParams.set('auth', 'recovery');
     return url.toString();
 };
@@ -262,9 +276,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             try {
                 if (estInscription) {
-                    const { error } = await window._supabase.auth.signUp({ email, password });
+                    const { data, error } = await window._supabase.auth.signUp({
+                        email,
+                        password,
+                        options: {
+                            emailRedirectTo: window.getAuthSignupRedirectUrl()
+                        }
+                    });
                     if (error) throw error;
-                    await window.siteAlert("Compte créé ! Bienvenue dans le Sanctuaire.");
+
+                    if (data?.session) {
+                        await window.siteAlert("Compte créé et accès ouvert. Bienvenue dans le Sanctuaire.");
+                    } else {
+                        await window.siteAlert("Un e-mail de confirmation vient d'être envoyé. Ouvrez ce message et confirmez votre compte avant de pouvoir l'utiliser pleinement.");
+                    }
+
                     refs.authModal.classList.add('hidden');
                     refs.emailInput.value = '';
                 } else {
