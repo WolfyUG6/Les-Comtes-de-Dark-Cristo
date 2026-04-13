@@ -82,6 +82,31 @@ window.appliquerCouleurAge = function(selectElement) {
     else if (val === 'R18') selectElement.classList.add('age-r18');
 };
 
+async function sauvegarderHistoireAvecCompatibilite({ payload, modeEdition, idHistoire }) {
+    const executerRequete = (payloadFinal) => {
+        if (modeEdition && idHistoire) {
+            return window._supabase.from('histoires')
+                .update(payloadFinal)
+                .eq('id', idHistoire)
+                .select();
+        }
+
+        return window._supabase.from('histoires')
+            .insert([payloadFinal])
+            .select();
+    };
+
+    let resultat = await executerRequete(payload);
+
+    if (resultat.error && (resultat.error.message || '').includes('auteur_user_id')) {
+        const payloadCompat = { ...payload };
+        delete payloadCompat.auteur_user_id;
+        resultat = await executerRequete(payloadCompat);
+    }
+
+    return resultat;
+}
+
 // --- GESTION DES CLICS (Délégation d'événements) ---
 if (!window.creationStoryEventHooked) {
     document.addEventListener('change', (e) => {
@@ -224,7 +249,9 @@ if (!window.creationStoryEventHooked) {
                 classification: classification, 
                 statut: statut,
                 contenu_sensible: isSensible,
-                commentaires_actifs: commentairesActifs
+                commentaires_actifs: commentairesActifs,
+                auteur: session.user.email,
+                auteur_user_id: session.user.id
             };
             
             if (imageUrl) {
@@ -235,18 +262,22 @@ if (!window.creationStoryEventHooked) {
 
             if (modeEdition && idHistoire) {
                 // --- UPDATE ---
-                requeteResult = await window._supabase.from('histoires')
-                    .update(payload)
-                    .eq('id', idHistoire)
-                    .select();
+                requeteResult = await sauvegarderHistoireAvecCompatibilite({
+                    payload,
+                    modeEdition,
+                    idHistoire
+                });
             } else {
                 // --- INSERT ---
-                payload.auteur = session.user.email; // Security init RLS
+                payload.auteur = session.user.email; // Compatibilite des verifications historiques
+                payload.auteur_user_id = session.user.id;
                 payload.pseudo_auteur = monPseudo;
                 
-                requeteResult = await window._supabase.from('histoires')
-                    .insert([payload])
-                    .select();
+                requeteResult = await sauvegarderHistoireAvecCompatibilite({
+                    payload,
+                    modeEdition,
+                    idHistoire
+                });
             }
 
             const { data: histoireSauvee, error } = requeteResult;

@@ -61,12 +61,16 @@ function activerApercuAvatar() {
 function brancherBoutonsSécurité() {
     const btnEmail = document.getElementById('btn-save-email');
     const btnPassword = document.getElementById('btn-save-password');
+    const btnDeleteAccount = document.getElementById('btn-delete-account');
 
     if (btnEmail) {
         btnEmail.addEventListener('click', changerEmail);
     }
     if (btnPassword) {
         btnPassword.addEventListener('click', changerMotDePasse);
+    }
+    if (btnDeleteAccount) {
+        btnDeleteAccount.addEventListener('click', supprimerMonCompte);
     }
 }
 
@@ -100,7 +104,7 @@ async function changerEmail() {
     if (error) {
         afficherFeedback(feedback, "Refus du Sanctuaire : " + error.message, "text-error");
     } else {
-        afficherFeedback(feedback, "✅ Un lien de confirmation a été envoyé à " + nouvelEmail + ". Vérifiez vos courriers.", "text-success");
+        afficherFeedback(feedback, "✅ Un lien de confirmation a été envoyé à " + nouvelEmail + ". Vérifiez vos courriers. Après validation, les histoires liées à votre compte seront resynchronisées automatiquement.", "text-success");
         document.getElementById('quartiers-email').value = '';
     }
 }
@@ -136,6 +140,109 @@ async function changerMotDePasse() {
         afficherFeedback(feedback, "✅ Nouveau Sceau de Garde gravé avec succès.", "text-success");
         document.getElementById('quartiers-password').value = '';
     }
+}
+
+function decouperEnLots(tableau, tailleLot = 1000) {
+    const lots = [];
+
+    for (let index = 0; index < tableau.length; index += tailleLot) {
+        lots.push(tableau.slice(index, index + tailleLot));
+    }
+
+    return lots;
+}
+
+async function supprimerObjetsStorageDuCompte() {
+    const { data, error } = await window._supabase.rpc('get_mes_objets_storage_a_supprimer');
+    if (error) throw error;
+
+    const objets = Array.isArray(data) ? data.filter((item) => item?.bucket_id && item?.name) : [];
+    if (objets.length === 0) return 0;
+
+    const objetsParBucket = new Map();
+
+    objets.forEach((objet) => {
+        if (!objetsParBucket.has(objet.bucket_id)) {
+            objetsParBucket.set(objet.bucket_id, []);
+        }
+
+        objetsParBucket.get(objet.bucket_id).push(objet.name);
+    });
+
+    for (const [bucketId, chemins] of objetsParBucket.entries()) {
+        const lots = decouperEnLots(chemins, 1000);
+
+        for (const lot of lots) {
+            const { error: removeError } = await window._supabase.storage
+                .from(bucketId)
+                .remove(lot);
+
+            if (removeError) {
+                throw removeError;
+            }
+        }
+    }
+
+    return objets.length;
+}
+
+function nettoyerEtatLocalApresSuppressionCompte() {
+    [
+        'userPseudo',
+        'userAvatar',
+        'modeAuteur',
+        'afficherCommentaires',
+        'currentOeuvreId',
+        'currentChapitreId',
+        'modeEditionHistoire'
+    ].forEach((cle) => localStorage.removeItem(cle));
+}
+
+async function supprimerMonCompte() {
+    const feedback = document.getElementById('securite-feedback');
+    const btn = document.getElementById('btn-delete-account');
+
+    const confirmation = await window.siteConfirm(
+        "Confirmez-vous la suppression définitive de votre compte et de toutes vos données ? Cette action effacera votre profil, vos histoires, vos chapitres, vos commentaires, vos favoris et vos fichiers liés. Elle est irréversible.",
+        {
+            confirmText: 'Supprimer définitivement',
+            cancelText: 'Annuler',
+            danger: true
+        }
+    );
+
+    if (!confirmation || !btn) return;
+
+    btn.disabled = true;
+    btn.innerText = "Anéantissement...";
+    afficherFeedback(feedback, "Purge des archives personnelles en cours...", "");
+
+    try {
+        await supprimerObjetsStorageDuCompte();
+
+        afficherFeedback(feedback, "Suppression du compte dans le Sanctuaire...", "");
+
+        const { error } = await window._supabase.rpc('supprimer_mon_compte_complet');
+        if (error) throw error;
+
+        try {
+            await window._supabase.auth.signOut();
+        } catch (_) {
+            // Le compte peut déjà avoir disparu côté Auth avant le signOut local.
+        }
+
+        nettoyerEtatLocalApresSuppressionCompte();
+        await window.siteAlert("Votre compte et toutes les données qui lui étaient liées ont été supprimés.");
+        window.changerDePage('accueil');
+    } catch (erreur) {
+        afficherFeedback(feedback, "Échec de l'anéantissement : " + erreur.message, "text-error");
+        btn.disabled = false;
+        btn.innerText = "Pulvériser mon existence";
+        return;
+    }
+
+    btn.disabled = false;
+    btn.innerText = "Pulvériser mon existence";
 }
 
 // =====================================
