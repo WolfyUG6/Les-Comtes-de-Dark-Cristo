@@ -137,8 +137,7 @@ window.supprimerHistoire = async function(idHistoire) {
 // Écoute des clics globaux
 document.addEventListener('click', (e) => {
     if (e.target && e.target.id === 'btn-publish') {
-        localStorage.removeItem('modeEditionHistoire'); // C'est une création pur souche
-        window.changerDePage('creation-story'); 
+        window.tenterAccesCreationHistoire();
     }
     if (e.target && e.target.id === 'btn-retour-studio') {
         window.changerDePage('accueil');

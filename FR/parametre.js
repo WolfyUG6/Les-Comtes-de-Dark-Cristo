@@ -421,6 +421,11 @@ window.switcherPreference = async function(colonneSQL, valeurBool) {
         afficherFeedback(feedback, "Loi décrétée dans la base de données.", "text-success", true);
         
         if (colonneSQL === 'mode_auteur') {
+            await window._supabase.auth.updateUser({
+                data: {
+                    mode_auteur: valeurBool
+                }
+            });
             localStorage.setItem('modeAuteur', valeurBool);
             const btnForge = document.getElementById('btn-atelier-nav');
             if (btnForge) btnForge.style.display = valeurBool ? "block" : "none";

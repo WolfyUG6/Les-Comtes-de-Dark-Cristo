@@ -44,7 +44,7 @@ window.chargerGenre = async function() {
             <div class="welcome-content w-100 text-center" style="border:none; margin-top: 40px;">
                 <h3 class="title-m0 text-muted">Le silence règne ici...</h3>
                 <p class="text-muted-italic mt-15">Aucun grimoire n'a encore été gravé dans le rayon <strong>${genreChoisi}</strong>. Serez-vous le premier ?</p>
-                <button class="genre-btn btn-primary shadow-active mt-15" onclick="localStorage.removeItem('modeEditionHistoire'); window.changerDePage('creation-story');">Forger le premier récit</button>
+                <button class="genre-btn btn-primary shadow-active mt-15" onclick="window.tenterAccesCreationHistoire();">Forger le premier récit</button>
             </div>
         `;
         return;

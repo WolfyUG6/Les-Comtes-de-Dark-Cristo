@@ -12,6 +12,61 @@ function getAuthRefs() {
     return window._authRefs;
 }
 
+window.getForgeDisabledMessage = function() {
+    return "Vous n’avez pas activé votre carrière d’auteur, veuillez activer la Forge dans vos paramètres.";
+};
+
+window.recupererEtatForgeUtilisateur = async function(sessionParam = null) {
+    let session = sessionParam;
+
+    if (!session) {
+        const { data } = await window._supabase.auth.getSession();
+        session = data?.session || null;
+    }
+
+    if (!session) {
+        return { session: null, active: false };
+    }
+
+    const { data: profil } = await window._supabase
+        .from('noms_de_plume')
+        .select('mode_auteur')
+        .eq('user_id', session.user.id)
+        .maybeSingle();
+
+    if (profil && typeof profil.mode_auteur === 'boolean') {
+        localStorage.setItem('modeAuteur', profil.mode_auteur);
+        return { session, active: profil.mode_auteur };
+    }
+
+    const modeAuteurMeta = session.user?.user_metadata?.mode_auteur;
+    if (typeof modeAuteurMeta === 'boolean') {
+        localStorage.setItem('modeAuteur', modeAuteurMeta);
+        return { session, active: modeAuteurMeta };
+    }
+
+    const stockageLocal = localStorage.getItem('modeAuteur');
+    if (stockageLocal === 'true' || stockageLocal === 'false') {
+        return { session, active: stockageLocal === 'true' };
+    }
+
+    localStorage.setItem('modeAuteur', 'true');
+    return { session, active: true };
+};
+
+window.tenterAccesCreationHistoire = async function() {
+    const { session, active } = await window.recupererEtatForgeUtilisateur();
+
+    if (session && !active) {
+        await window.siteAlert(window.getForgeDisabledMessage(), { danger: true });
+        return false;
+    }
+
+    localStorage.removeItem('modeEditionHistoire');
+    window.changerDePage('creation-story');
+    return true;
+};
+
 window.getAuthCanonicalAppUrl = function() {
     const url = new URL(window.location.href);
     url.hash = '';
@@ -280,7 +335,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                         email,
                         password,
                         options: {
-                            emailRedirectTo: window.getAuthSignupRedirectUrl()
+                            emailRedirectTo: window.getAuthSignupRedirectUrl(),
+                            data: {
+                                mode_auteur: true
+                            }
                         }
                     });
                     if (error) throw error;
@@ -353,7 +411,8 @@ window._supabase.auth.onAuthStateChange((event, session) => {
 
             let finalPseudo = session.user.user_metadata?.pseudo || null;
             let finalAvatar = session.user.user_metadata?.avatar_url || null;
-            let isAuteur = session.user.user_metadata?.mode_auteur === true;
+            const modeAuteurMeta = session.user.user_metadata?.mode_auteur;
+            let isAuteur = typeof modeAuteurMeta === 'boolean' ? modeAuteurMeta : null;
 
             if (!finalPseudo) {
                 const stored = localStorage.getItem('userPseudo');
@@ -363,9 +422,15 @@ window._supabase.auth.onAuthStateChange((event, session) => {
                 const stored = localStorage.getItem('userAvatar');
                 if (stored && stored !== "undefined" && stored !== "null") finalAvatar = stored;
             }
-            if (!isAuteur) {
-                isAuteur = localStorage.getItem('modeAuteur') === 'true';
+
+            if (isAuteur === null) {
+                const storedModeAuteur = localStorage.getItem('modeAuteur');
+                if (storedModeAuteur === 'true' || storedModeAuteur === 'false') {
+                    isAuteur = storedModeAuteur === 'true';
+                }
             }
+
+            if (isAuteur === null) isAuteur = true;
 
             if (!finalPseudo) finalPseudo = session.user.email.split('@')[0];
             if (!finalAvatar) finalAvatar = 'default-avatar.png';
@@ -380,28 +445,40 @@ window._supabase.auth.onAuthStateChange((event, session) => {
                 btnForge.style.display = isAuteur ? "block" : "none";
             }
 
-            if (!session.user.user_metadata?.pseudo) {
+            if (!session.user.user_metadata?.pseudo || typeof modeAuteurMeta !== 'boolean') {
                 window._supabase
                     .from('noms_de_plume')
                     .select('pseudo, avatar_url, mode_auteur')
                     .eq('user_id', session.user.id)
                     .maybeSingle()
                     .then(({ data: profil }) => {
-                        if (profil && profil.pseudo) {
+                        if (profil) {
+                            const modeAuteurProfil = profil.mode_auteur !== false;
+                            const metadataPayload = {
+                                mode_auteur: modeAuteurProfil
+                            };
+
+                            if (profil.pseudo) metadataPayload.pseudo = profil.pseudo;
+                            if (profil.avatar_url) metadataPayload.avatar_url = profil.avatar_url;
+
+                            if (profil.pseudo && userNameDisplay) userNameDisplay.innerText = "Comte " + profil.pseudo;
+                            if (headerAvatar && profil.avatar_url) headerAvatar.src = profil.avatar_url;
+                            if (btnForge) btnForge.style.display = modeAuteurProfil ? "block" : "none";
+                            if (profil.pseudo) localStorage.setItem('userPseudo', profil.pseudo);
+                            if (profil.avatar_url) localStorage.setItem('userAvatar', profil.avatar_url);
+                            localStorage.setItem('modeAuteur', modeAuteurProfil);
+
+                            window._supabase.auth.updateUser({
+                                data: metadataPayload
+                            }).catch(() => {});
+                        } else if (typeof modeAuteurMeta !== 'boolean') {
+                            if (btnForge) btnForge.style.display = "block";
+                            localStorage.setItem('modeAuteur', 'true');
                             window._supabase.auth.updateUser({
                                 data: {
-                                    pseudo: profil.pseudo,
-                                    avatar_url: profil.avatar_url || undefined,
-                                    mode_auteur: profil.mode_auteur === true
+                                    mode_auteur: true
                                 }
-                            }).then(() => {
-                                if (userNameDisplay) userNameDisplay.innerText = "Comte " + profil.pseudo;
-                                if (headerAvatar && profil.avatar_url) headerAvatar.src = profil.avatar_url;
-                                if (btnForge) btnForge.style.display = profil.mode_auteur === true ? "block" : "none";
-                                localStorage.setItem('userPseudo', profil.pseudo);
-                                if (profil.avatar_url) localStorage.setItem('userAvatar', profil.avatar_url);
-                                localStorage.setItem('modeAuteur', profil.mode_auteur === true);
-                            });
+                            }).catch(() => {});
                         }
                     })
                     .catch(() => {});
