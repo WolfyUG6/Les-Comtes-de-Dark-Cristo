@@ -95,11 +95,26 @@ function trierMisesEnAvantParGenre(histoires = []) {
     });
 }
 
+function dedoublonnerMisesEnAvantParGenre(selections = []) {
+    const genresVus = new Set();
+
+    return trierMisesEnAvantParGenre(selections).filter((selection) => {
+        const genre = (selection?.genre || '').trim().toLowerCase();
+
+        if (!genre || genresVus.has(genre)) {
+            return false;
+        }
+
+        genresVus.add(genre);
+        return true;
+    });
+}
+
 async function chargerMisesEnAvantHebdomadairesAccueil() {
     const section = document.getElementById('weekly-highlights-section');
     const container = document.getElementById('weekly-highlights-container');
 
-    if (!section || !container) return [];
+    if (!section || !container) return { ids: [], genres: [] };
 
     section.classList.remove('hidden');
     container.innerHTML = '<p class="loading-text">Lecture des mises en avant hebdomadaires...</p>';
@@ -109,17 +124,18 @@ async function chargerMisesEnAvantHebdomadairesAccueil() {
     if (error) {
         console.error('Erreur de mise en avant hebdomadaire :', error);
         container.innerHTML = '<p class="loading-text">Les mises en avant hebdomadaires ne sont pas encore disponibles.</p>';
-        return [];
+        return { ids: [], genres: [] };
     }
 
     if (!data || data.length === 0) {
         container.innerHTML = '<p class="loading-text">Aucune mise en avant hebdomadaire n’a encore été calculée.</p>';
-        return [];
+        return { ids: [], genres: [] };
     }
 
     container.innerHTML = '';
+    const selectionsUniques = dedoublonnerMisesEnAvantParGenre(data);
 
-    trierMisesEnAvantParGenre(data).forEach((selection) => {
+    selectionsUniques.forEach((selection) => {
         const histoire = {
             id: selection.histoire_id,
             titre: selection.titre,
@@ -141,7 +157,12 @@ async function chargerMisesEnAvantHebdomadairesAccueil() {
         }));
     });
 
-    return data.map((selection) => Number(selection.histoire_id));
+    return {
+        ids: selectionsUniques.map((selection) => Number(selection.histoire_id)),
+        genres: selectionsUniques
+            .map((selection) => (selection.genre || '').trim().toLowerCase())
+            .filter(Boolean)
+    };
 }
 
 window.chargerVitrine = async function(genreFilter = null) {
@@ -152,7 +173,7 @@ window.chargerVitrine = async function(genreFilter = null) {
 
     storiesContainer.innerHTML = '<p class="loading-text">Ouverture des grimoires...</p>';
 
-    let chargementMiseEnAvant = Promise.resolve([]);
+    let chargementMiseEnAvant = Promise.resolve({ ids: [], genres: [] });
 
     if (!genreFilter || genreFilter === 'accueil') {
         chargementMiseEnAvant = chargerMisesEnAvantHebdomadairesAccueil();
@@ -172,7 +193,7 @@ window.chargerVitrine = async function(genreFilter = null) {
     }
 
     const { data: histoires, error } = await query;
-    const highlightedIds = await chargementMiseEnAvant;
+    const misesEnAvant = await chargementMiseEnAvant;
 
     if (error) {
         storiesContainer.innerHTML = `<p class="text-error">Erreur de lecture : ${error.message}</p>`;
@@ -181,9 +202,15 @@ window.chargerVitrine = async function(genreFilter = null) {
 
     storiesContainer.innerHTML = '';
 
-    const idsMisEnAvant = new Set((highlightedIds || []).map((id) => Number(id)));
+    const idsMisEnAvant = new Set((misesEnAvant?.ids || []).map((id) => Number(id)));
+    const genresMisEnAvant = new Set((misesEnAvant?.genres || []).map((genre) => genre.toLowerCase()));
     const histoiresAffichees = (!genreFilter || genreFilter === 'accueil')
-        ? (histoires || []).filter((histoire) => !idsMisEnAvant.has(Number(histoire.id))).slice(0, 5)
+        ? (histoires || [])
+            .filter((histoire) => {
+                const genre = (histoire?.genre || '').trim().toLowerCase();
+                return !idsMisEnAvant.has(Number(histoire.id)) && !genresMisEnAvant.has(genre);
+            })
+            .slice(0, 5)
         : (histoires || []);
 
     if (!histoiresAffichees || histoiresAffichees.length === 0) {
