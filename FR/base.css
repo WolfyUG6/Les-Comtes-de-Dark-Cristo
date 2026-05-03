@@ -220,6 +220,18 @@ button:hover, .genre-btn:hover {
     justify-content: center;
 }
 
+.weekly-highlights-section #weekly-highlights-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    align-items: start;
+}
+
+.weekly-highlights-section #weekly-highlights-container .story-card {
+    width: min(100%, 280px);
+    justify-self: center;
+}
+
 .loading-text {
     color: var(--text-title);
     font-style: italic;
