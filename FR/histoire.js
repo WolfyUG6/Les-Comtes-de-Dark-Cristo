@@ -835,7 +835,7 @@ window.chargerPageHistoire = async function() {
     const imgHtml = `<img src="${imageCouverture}" class="book-cover" alt="Couverture">`;
     const synopsisBrut = typeof histoire.synopsis === 'string' ? histoire.synopsis : '';
     const synopsisHtml = synopsisBrut.trim()
-        ? escapeCommentaireHtml(synopsisBrut).replace(/\r?\n/g, '<br>')
+        ? escapeCommentaireHtml(synopsisBrut)
         : "Cette oeuvre est nimbee de mysteres, son intrigue demeure cachee.";
 
     const { data: { session } } = await window._supabase.auth.getSession();
