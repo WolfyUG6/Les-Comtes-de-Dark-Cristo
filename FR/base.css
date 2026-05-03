@@ -797,7 +797,10 @@ body.modal-open {
 .book-cover { width: 160px; height: 230px; object-fit: cover; border: 1px solid var(--border-color); border-radius: 5px; }
 .book-cover-placeholder { width: 160px; height: 230px; background: #000; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; color: var(--text-muted); text-align: center; }
 .book-info-content { flex: 1; }
-.book-synopsis { color: var(--text-muted); line-height: 1.6; font-size: 0.95rem; }
+.book-synopsis { color: var(--text-muted); line-height: 1.7; font-size: 0.98rem; font-family: 'Segoe UI', sans-serif; word-break: break-word; }
+.page-histoire .info-panel { gap: 35px; }
+.page-histoire .book-cover { width: 240px; height: 360px; flex-shrink: 0; box-shadow: var(--shadow-box); }
+.story-synopsis-detail { white-space: normal; }
 .chapters-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; }
 .chapter-section { margin-bottom: 40px; }
 .chapter-section-title-brouillon { color: var(--text-muted); border-bottom: 1px dashed var(--border-color); padding-bottom: 5px; }
@@ -853,6 +856,25 @@ body.modal-open {
 .commentaires-chapitre { margin-bottom: 30px; }
 
 @media (max-width: 768px) {
+    .page-histoire {
+        width: 92%;
+    }
+
+    .page-histoire .info-panel {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .page-histoire .book-cover {
+        width: min(100%, 280px);
+        height: auto;
+    }
+
+    .page-histoire .book-info-content {
+        width: 100%;
+    }
+
     .commentaires-header,
     .commentaires-form-footer,
     .commentaire-meta,

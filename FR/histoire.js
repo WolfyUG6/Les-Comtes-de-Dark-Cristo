@@ -833,6 +833,10 @@ window.chargerPageHistoire = async function() {
 
     const imageCouverture = window.getStoryCoverUrl(histoire.image_couverture);
     const imgHtml = `<img src="${imageCouverture}" class="book-cover" alt="Couverture">`;
+    const synopsisBrut = typeof histoire.synopsis === 'string' ? histoire.synopsis : '';
+    const synopsisHtml = synopsisBrut.trim()
+        ? escapeCommentaireHtml(synopsisBrut).replace(/\r?\n/g, '<br>')
+        : "Cette oeuvre est nimbee de mysteres, son intrigue demeure cachee.";
 
     const { data: { session } } = await window._supabase.auth.getSession();
 
@@ -862,7 +866,7 @@ window.chargerPageHistoire = async function() {
             
             <span class="text-small text-muted-italic mb-15">Auteur : Comte ${histoire.pseudo_auteur || histoire.auteur.split('@')[0]}</span>
             
-            <p class="book-synopsis mt-15">${histoire.synopsis}</p>
+            <div class="book-synopsis story-synopsis-detail mt-15">${synopsisHtml}</div>
         </div>
     `;
 
