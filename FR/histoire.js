@@ -184,6 +184,36 @@ function estAuteurParent(histoire, session) {
     return Boolean(histoire.auteur_user_id && histoire.auteur_user_id === session.user.id);
 }
 
+function getLienPartageHistoire(idHistoire) {
+    const url = new URL(window.location.href);
+    url.hash = `oeuvre?id=${encodeURIComponent(idHistoire)}`;
+    return url.toString();
+}
+
+function synchroniserLienHistoireDansUrl(idHistoire) {
+    if (window.getRouteParam?.('id')) return;
+    window.history.replaceState({}, document.title, getLienPartageHistoire(idHistoire));
+}
+
+function initialiserBoutonPartageHistoire(idHistoire) {
+    const bouton = document.getElementById('btn-partager-histoire');
+    if (!bouton) return;
+
+    const nouveauBouton = bouton.cloneNode(true);
+    bouton.parentNode.replaceChild(nouveauBouton, bouton);
+
+    nouveauBouton.addEventListener('click', async () => {
+        const lien = getLienPartageHistoire(idHistoire);
+
+        try {
+            await navigator.clipboard.writeText(lien);
+            await window.siteAlert("Lien de l'histoire copié. Il ouvrira directement cette fiche.");
+        } catch (erreur) {
+            await window.siteAlert(`Impossible de copier automatiquement. Voici le lien à partager :\n${lien}`, { danger: true });
+        }
+    });
+}
+
 function resetCommentaireForm(instance) {
     if (!instance?.elements?.form || !instance.elements.message) return;
 
@@ -798,13 +828,17 @@ if (!window.commentairesEventsHooked) {
 
 window.chargerPageHistoire = async function() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    const idHistoire = localStorage.getItem('currentOeuvreId');
+    const idHistoire = window.getRouteParam?.('id') || localStorage.getItem('currentOeuvreId');
     const infoPanel = document.getElementById('histoire-presentation-panel');
     
     if (!idHistoire || !infoPanel) {
         window.changerDePage('accueil');
         return;
     }
+
+    window.currentOeuvreId = idHistoire;
+    localStorage.setItem('currentOeuvreId', idHistoire);
+    synchroniserLienHistoireDansUrl(idHistoire);
 
     infoPanel.innerHTML = '<p class="loading-text">Déchiffrage des runes en cours...</p>';
 
@@ -872,6 +906,7 @@ window.chargerPageHistoire = async function() {
 
     // 5. Gestion du bouton admin et du bouton Suivre l'Histoire
     initialiserBoutonRetirerHistoire(idHistoire, session);
+    initialiserBoutonPartageHistoire(idHistoire);
 
     const btnSuivre = document.getElementById('btn-suivre-histoire');
     if (btnSuivre) {
@@ -1008,7 +1043,7 @@ async function chargerListeChapitres(idHistoire) {
                     <span class="published-date ml-10">(Publié le ${dateAffichee})</span>
                 </div>
                 <div>
-                    <button class="genre-btn btn-outline-blue btn-small" onclick="localStorage.setItem('currentChapitreId', ${chap.id}); window.changerDePage('lecture');">Lire</button>
+                    <button class="genre-btn btn-outline-blue btn-small" onclick="localStorage.setItem('currentChapitreId', ${chap.id}); window.changerDePage('lecture', { id: ${chap.id} });">Lire</button>
                 </div>
             `;
             chapitresListe.appendChild(div);

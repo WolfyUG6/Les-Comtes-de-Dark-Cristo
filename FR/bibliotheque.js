@@ -121,7 +121,7 @@ function ajouterStatsAuxHistoires(histoires = [], statsParHistoire = new Map()) 
 
 function ouvrirHistoireDepuisCarte(histoireId) {
     localStorage.setItem('currentOeuvreId', histoireId);
-    window.changerDePage('oeuvre');
+    window.changerDePage('oeuvre', { id: histoireId });
 }
 
 function creerCarteHistoire(histoire, options = {}) {

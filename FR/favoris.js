@@ -190,11 +190,11 @@ async function chargerMesPactes() {
         const dateAjout = h.date_pacte.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
 
         card.innerHTML = `
-            <div class="story-cover" onclick="localStorage.setItem('currentOeuvreId', ${h.id}); window.changerDePage('oeuvre');" style="cursor:pointer;">
+            <div class="story-cover" onclick="localStorage.setItem('currentOeuvreId', ${h.id}); window.changerDePage('oeuvre', { id: ${h.id} });" style="cursor:pointer;">
                 ${htmlImage}
             </div>
             <div class="story-info">
-                <h3 class="story-title" onclick="localStorage.setItem('currentOeuvreId', ${h.id}); window.changerDePage('oeuvre');" style="cursor:pointer;">${h.titre}</h3>
+                <h3 class="story-title" onclick="localStorage.setItem('currentOeuvreId', ${h.id}); window.changerDePage('oeuvre', { id: ${h.id} });" style="cursor:pointer;">${h.titre}</h3>
                 <span class="story-author">Par ${h.pseudo_auteur || h.auteur.split('@')[0]}</span>
                 
                 <div class="story-tags">
@@ -216,7 +216,7 @@ async function chargerMesPactes() {
                 </div>
 
                 <div style="display: flex; justify-content: center;">
-                    <button class="genre-btn btn-primary shadow-active btn-lire-oeuvre" onclick="localStorage.setItem('currentOeuvreId', ${h.id}); window.changerDePage('oeuvre');">Reprendre la Lecture</button>
+                    <button class="genre-btn btn-primary shadow-active btn-lire-oeuvre" onclick="localStorage.setItem('currentOeuvreId', ${h.id}); window.changerDePage('oeuvre', { id: ${h.id} });">Reprendre la Lecture</button>
                 </div>
             </div>
         `;

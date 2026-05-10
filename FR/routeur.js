@@ -3,8 +3,25 @@
 // --- LE CHEF D'ORCHESTRE (routeur.js) ---
 
 // L'Aiguilleur (Modifie l'URL sans recharger la page)
-window.changerDePage = function(pageDemandee) {
-    window.location.hash = pageDemandee;
+window.changerDePage = function(pageDemandee, params = {}) {
+    const recherche = new URLSearchParams();
+
+    Object.entries(params || {}).forEach(([cle, valeur]) => {
+        if (valeur !== null && valeur !== undefined && valeur !== '') {
+            recherche.set(cle, valeur);
+        }
+    });
+
+    const hash = `${pageDemandee}${recherche.toString() ? `?${recherche.toString()}` : ''}`;
+
+    if (window.location.hash === `#${hash}`) {
+        const route = extraireRouteDepuisHash();
+        appliquerParamsRoute(route);
+        window.chargerPageInterne(route.page);
+        return;
+    }
+
+    window.location.hash = hash;
 };
 
 function estHashAuthSupabase(hashValue = window.location.hash) {
@@ -21,12 +38,52 @@ function estHashAuthSupabase(hashValue = window.location.hash) {
 }
 
 function extrairePageDemandeeDepuisHash(hashValue = window.location.hash) {
+    return extraireRouteDepuisHash(hashValue).page;
+}
+
+function extraireRouteDepuisHash(hashValue = window.location.hash) {
     const hashNettoye = (hashValue || '').replace(/^#/, '');
     if (!hashNettoye || estHashAuthSupabase(hashValue)) {
-        return 'accueil';
+        return { page: 'accueil', params: new URLSearchParams() };
     }
 
-    return hashNettoye;
+    const [pageBrute, queryString = ''] = hashNettoye.split('?');
+
+    return {
+        page: pageBrute || 'accueil',
+        params: new URLSearchParams(queryString)
+    };
+}
+
+function appliquerParamsRoute(route) {
+    window._routeParams = route.params;
+
+    if (route.page === 'oeuvre') {
+        const idHistoire = route.params.get('id');
+        if (idHistoire) {
+            window.currentOeuvreId = idHistoire;
+            localStorage.setItem('currentOeuvreId', idHistoire);
+        }
+    }
+
+    if (route.page === 'lecture') {
+        const idChapitre = route.params.get('id') || route.params.get('chapitre');
+        if (idChapitre) {
+            window.currentChapitreId = idChapitre;
+            localStorage.setItem('currentChapitreId', idChapitre);
+        }
+    }
+
+    if (route.page === 'categorie-genre') {
+        const genre = route.params.get('genre');
+        if (genre) {
+            localStorage.setItem('currentGenre', genre);
+        }
+    }
+}
+
+window.getRouteParam = function(nom) {
+    return window._routeParams?.get(nom) || null;
 }
 
 window._siteDialogState = null;
@@ -188,9 +245,9 @@ window.programmerMiseAJourScrollRapideSite = function() {
 
 // Le Détecteur de Mouvement (Écoute quand l'URL change, même via les flèches du navigateur)
 window.addEventListener('hashchange', () => {
-    // On lit le mot après le '#' (s'il n'y a rien, on va dans le Hall)
-    const pageDemandee = extrairePageDemandeeDepuisHash();
-    window.chargerPageInterne(pageDemandee);
+    const route = extraireRouteDepuisHash();
+    appliquerParamsRoute(route);
+    window.chargerPageInterne(route.page);
 });
 
 // L'Ouvrier (Va chercher le fichier HTML et l'injecte)
@@ -403,20 +460,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 // On mémorise le genre choisi pour le script CategorieGenre
                 localStorage.setItem('currentGenre', genre);
                 
-                // Si on est déjà sur la page des genres, le hash de l'URL ne va pas changer
-                // Il faut donc appeler manuellement le rechargement de la page interne
-                if (window.location.hash === '#categorie-genre') {
-                    if (typeof window.chargerGenre === 'function') {
-                        window.chargerGenre();
-                    }
-                } else {
-                    window.changerDePage('categorie-genre');
-                }
+                window.changerDePage('categorie-genre', { genre });
             }
         });
     });
 
     // Lancer la page demandée dans l'URL (ou l'accueil par défaut)
-    const pageInitiale = extrairePageDemandeeDepuisHash();
-    window.chargerPageInterne(pageInitiale);
+    const routeInitiale = extraireRouteDepuisHash();
+    appliquerParamsRoute(routeInitiale);
+    window.chargerPageInterne(routeInitiale.page);
 });

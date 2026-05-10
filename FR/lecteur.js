@@ -24,7 +24,7 @@ window.lireChapitre = async function(idParam = null) {
     window.scrollTo({ top: 0, behavior: 'auto' });
     
     // On prend l'ID en paramètre (via btn 'Suivant') ou dans le storage (via btn 'Lire' de la page Histoire)
-    const idChapitre = idParam || localStorage.getItem('currentChapitreId');
+    const idChapitre = idParam || window.getRouteParam?.('id') || localStorage.getItem('currentChapitreId');
     const lecteurContenu = document.getElementById('lecture-contenu');
     const titreHeader = document.getElementById('lecture-titre');
     
@@ -181,7 +181,7 @@ async function configurerNavigation(chapitreActuel) {
 
 function lireNouveauChapitre(id) {
     localStorage.setItem('currentChapitreId', id);
-    window.lireChapitre(id);
+    window.changerDePage('lecture', { id });
 }
 
 // ==========================================
@@ -299,7 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.classList.remove('mode-zen');
             if (window.currentOeuvreId) {
                 localStorage.setItem('currentOeuvreId', window.currentOeuvreId);
-                window.changerDePage('oeuvre');
+                window.changerDePage('oeuvre', { id: window.currentOeuvreId });
             } else {
                 window.changerDePage('accueil');
             }
