@@ -317,6 +317,20 @@ function rendreNotificationLue(chapitreId) {
     setNotificationsCount(nonLues);
 }
 
+function retirerNotificationAffichee(chapitreId) {
+    const item = document.querySelector(`[data-notification-chapitre-id="${chapitreId}"]`);
+    if (item) item.remove();
+
+    const notificationsRestantes = document.querySelectorAll('.notification-item');
+    if (notificationsRestantes.length === 0) {
+        setNotificationsEmpty();
+        return;
+    }
+
+    const nonLues = document.querySelectorAll('.notification-item:not(.is-read)').length;
+    setNotificationsCount(nonLues);
+}
+
 function creerLienNotification({ texte, href, chapitreId, destination }) {
     const lien = document.createElement('a');
     lien.href = href;
@@ -339,6 +353,24 @@ function creerLienNotification({ texte, href, chapitreId, destination }) {
     });
 
     return lien;
+}
+
+function creerBoutonSuppressionNotification(chapitreId) {
+    const bouton = document.createElement('button');
+    bouton.type = 'button';
+    bouton.className = 'notification-delete';
+    bouton.dataset.tooltip = 'Supprimer';
+    bouton.setAttribute('aria-label', 'Supprimer la notification');
+    bouton.textContent = '×';
+
+    bouton.addEventListener('click', async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        await marquerNotificationLue(chapitreId);
+        retirerNotificationAffichee(chapitreId);
+    });
+
+    return bouton;
 }
 
 function afficherNotificationsChapitres(notifications = []) {
@@ -389,6 +421,7 @@ function afficherNotificationsChapitres(notifications = []) {
             lienIci,
             document.createTextNode(' pour le lire.')
         );
+        item.appendChild(creerBoutonSuppressionNotification(notification.chapitreId));
 
         liste.appendChild(item);
     });
