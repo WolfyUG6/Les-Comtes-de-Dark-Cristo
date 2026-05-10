@@ -41,7 +41,10 @@
             <span id="user-name"></span>
 
             <div class="notifications-menu">
-                <button id="btn-notifications" class="genre-btn notifications-btn" type="button" aria-label="Notifications" aria-expanded="false">🔔</button>
+                <button id="btn-notifications" class="genre-btn notifications-btn" type="button" aria-label="Notifications" aria-expanded="false">
+                    <span aria-hidden="true">🔔</span>
+                    <span id="notifications-count" class="notifications-count hidden">0</span>
+                </button>
                 <div id="notifications-panel" class="notifications-panel hidden" role="status" aria-live="polite">
                     <p class="notifications-empty">Aucun parchemin ne vous est destinée</p>
                 </div>

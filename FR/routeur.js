@@ -251,6 +251,237 @@ function fermerPanneauNotifications() {
     if (bouton) bouton.setAttribute('aria-expanded', 'false');
 }
 
+function setNotificationsCount(nombreNonLues = 0) {
+    const compteur = document.getElementById('notifications-count');
+    if (!compteur) return;
+
+    compteur.innerText = nombreNonLues > 9 ? '9+' : String(nombreNonLues);
+    compteur.classList.toggle('hidden', nombreNonLues <= 0);
+}
+
+function setNotificationsEmpty(message = 'Aucun parchemin ne vous est destinée') {
+    const panneau = document.getElementById('notifications-panel');
+    if (!panneau) return;
+
+    panneau.innerHTML = `<p class="notifications-empty">${message}</p>`;
+    setNotificationsCount(0);
+}
+
+function getDatePacteParHistoire(pactes = []) {
+    const dates = new Map();
+
+    pactes.forEach((pacte) => {
+        const histoireId = Number(pacte.histoire_id);
+        if (!histoireId) return;
+
+        const datePacte = pacte.created_at ? new Date(pacte.created_at) : new Date(0);
+        dates.set(histoireId, datePacte);
+    });
+
+    return dates;
+}
+
+function normaliserTitreNotification(valeur, fallback) {
+    return typeof valeur === 'string' && valeur.trim() ? valeur.trim() : fallback;
+}
+
+async function marquerNotificationLue(chapitreId) {
+    const idChapitre = Number(chapitreId);
+    if (!idChapitre) return;
+
+    const { data: { session } } = await window._supabase.auth.getSession();
+    if (!session) return;
+
+    const { error } = await window._supabase
+        .from('notifications_lues')
+        .insert([{
+            user_id: session.user.id,
+            chapitre_id: idChapitre
+        }]);
+
+    if (error && error.code !== '23505') {
+        console.error('Impossible de marquer la notification comme lue :', error);
+    }
+}
+
+function rendreNotificationLue(chapitreId) {
+    const item = document.querySelector(`[data-notification-chapitre-id="${chapitreId}"]`);
+    if (item) item.classList.add('is-read');
+
+    const nonLues = document.querySelectorAll('.notification-item:not(.is-read)').length;
+    setNotificationsCount(nonLues);
+}
+
+function creerLienNotification({ texte, href, chapitreId, destination }) {
+    const lien = document.createElement('a');
+    lien.href = href;
+    lien.className = 'notification-link';
+    lien.textContent = texte;
+
+    lien.addEventListener('click', async (event) => {
+        event.preventDefault();
+        await marquerNotificationLue(chapitreId);
+        rendreNotificationLue(chapitreId);
+        fermerPanneauNotifications();
+
+        if (destination.type === 'histoire') {
+            localStorage.setItem('currentOeuvreId', destination.id);
+            window.changerDePage('oeuvre', { id: destination.id });
+        } else if (destination.type === 'chapitre') {
+            localStorage.setItem('currentChapitreId', destination.id);
+            window.changerDePage('lecture', { id: destination.id });
+        }
+    });
+
+    return lien;
+}
+
+function afficherNotificationsChapitres(notifications = []) {
+    const panneau = document.getElementById('notifications-panel');
+    if (!panneau) return;
+
+    if (notifications.length === 0) {
+        setNotificationsEmpty();
+        return;
+    }
+
+    panneau.innerHTML = '';
+    const liste = document.createElement('div');
+    liste.className = 'notifications-list';
+    panneau.appendChild(liste);
+
+    notifications.forEach((notification) => {
+        const item = document.createElement('article');
+        item.className = `notification-item${notification.lue ? ' is-read' : ''}`;
+        item.dataset.notificationChapitreId = notification.chapitreId;
+
+        const lienHistoire = creerLienNotification({
+            texte: notification.titreHistoire,
+            href: `#oeuvre?id=${encodeURIComponent(notification.histoireId)}`,
+            chapitreId: notification.chapitreId,
+            destination: { type: 'histoire', id: notification.histoireId }
+        });
+
+        const lienChapitre = creerLienNotification({
+            texte: notification.titreChapitre,
+            href: `#lecture?id=${encodeURIComponent(notification.chapitreId)}`,
+            chapitreId: notification.chapitreId,
+            destination: { type: 'chapitre', id: notification.chapitreId }
+        });
+
+        const lienIci = creerLienNotification({
+            texte: 'ici',
+            href: `#lecture?id=${encodeURIComponent(notification.chapitreId)}`,
+            chapitreId: notification.chapitreId,
+            destination: { type: 'chapitre', id: notification.chapitreId }
+        });
+
+        item.append(
+            lienHistoire,
+            document.createTextNode(' a ajouté un nouveau chapitre : '),
+            lienChapitre,
+            document.createTextNode(". N'hésite pas à cliquer "),
+            lienIci,
+            document.createTextNode(' pour le lire.')
+        );
+
+        liste.appendChild(item);
+    });
+
+    setNotificationsCount(notifications.filter((notification) => !notification.lue).length);
+}
+
+window.actualiserNotificationsHeader = async function() {
+    const panneau = document.getElementById('notifications-panel');
+    if (!panneau || !window._supabase) return;
+
+    const { data: { session } } = await window._supabase.auth.getSession();
+    if (!session) {
+        setNotificationsEmpty();
+        return;
+    }
+
+    panneau.innerHTML = '<p class="notifications-empty">Lecture des parchemins...</p>';
+
+    const { data: pactes, error: erreurPactes } = await window._supabase
+        .from('favoris')
+        .select('histoire_id, created_at')
+        .eq('user_id', session.user.id);
+
+    if (erreurPactes) {
+        console.error('Erreur de récupération des pactes pour les notifications :', erreurPactes);
+        setNotificationsEmpty();
+        return;
+    }
+
+    if (!pactes || pactes.length === 0) {
+        setNotificationsEmpty();
+        return;
+    }
+
+    const datePacteParHistoire = getDatePacteParHistoire(pactes);
+    const idsHistoires = [...datePacteParHistoire.keys()];
+    const maintenantIso = new Date().toISOString();
+
+    const { data: chapitres, error: erreurChapitres } = await window._supabase
+        .from('chapitres')
+        .select('id, histoire_id, titre, date_publication')
+        .in('histoire_id', idsHistoires)
+        .eq('est_publie', true)
+        .lte('date_publication', maintenantIso)
+        .order('date_publication', { ascending: false })
+        .limit(30);
+
+    if (erreurChapitres) {
+        console.error('Erreur de récupération des chapitres pour les notifications :', erreurChapitres);
+        setNotificationsEmpty();
+        return;
+    }
+
+    const chapitresNotifiables = (chapitres || []).filter((chapitre) => {
+        const datePacte = datePacteParHistoire.get(Number(chapitre.histoire_id));
+        const datePublication = chapitre.date_publication ? new Date(chapitre.date_publication) : null;
+
+        return datePacte && datePublication && datePublication >= datePacte;
+    });
+
+    if (chapitresNotifiables.length === 0) {
+        setNotificationsEmpty();
+        return;
+    }
+
+    const idsChapitres = chapitresNotifiables.map((chapitre) => Number(chapitre.id)).filter(Boolean);
+    const idsHistoiresAvecChapitre = [...new Set(chapitresNotifiables.map((chapitre) => Number(chapitre.histoire_id)).filter(Boolean))];
+
+    const [{ data: histoires }, { data: notificationsLues }] = await Promise.all([
+        window._supabase
+            .from('histoires')
+            .select('id, titre')
+            .in('id', idsHistoiresAvecChapitre),
+        window._supabase
+            .from('notifications_lues')
+            .select('chapitre_id')
+            .eq('user_id', session.user.id)
+            .in('chapitre_id', idsChapitres)
+    ]);
+
+    const titresHistoires = new Map((histoires || []).map((histoire) => [
+        Number(histoire.id),
+        normaliserTitreNotification(histoire.titre, 'Cette histoire')
+    ]));
+    const chapitresLus = new Set((notificationsLues || []).map((notification) => Number(notification.chapitre_id)));
+
+    const notifications = chapitresNotifiables.map((chapitre) => ({
+        chapitreId: Number(chapitre.id),
+        histoireId: Number(chapitre.histoire_id),
+        titreHistoire: titresHistoires.get(Number(chapitre.histoire_id)) || 'Cette histoire',
+        titreChapitre: normaliserTitreNotification(chapitre.titre, 'Nouveau chapitre'),
+        lue: chapitresLus.has(Number(chapitre.id))
+    }));
+
+    afficherNotificationsChapitres(notifications);
+};
+
 function initialiserNotificationsHeader() {
     const bouton = document.getElementById('btn-notifications');
     const panneau = document.getElementById('notifications-panel');
@@ -264,6 +495,10 @@ function initialiserNotificationsHeader() {
         const estOuvert = !panneau.classList.contains('hidden');
         panneau.classList.toggle('hidden', estOuvert);
         bouton.setAttribute('aria-expanded', estOuvert ? 'false' : 'true');
+
+        if (estOuvert === false && typeof window.actualiserNotificationsHeader === 'function') {
+            window.actualiserNotificationsHeader();
+        }
     });
 
     panneau.addEventListener('click', (event) => {

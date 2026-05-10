@@ -961,6 +961,10 @@ window.chargerPageHistoire = async function() {
                 const spanLikes = document.getElementById('histoire-likes-count');
                 if(spanLikes) spanLikes.innerHTML = `❤️ ${count || 0} Pactes`;
 
+                if (typeof window.actualiserNotificationsHeader === 'function') {
+                    window.actualiserNotificationsHeader();
+                }
+
                 nouveauBtn.disabled = false;
             });
         } else {

@@ -486,12 +486,14 @@ window._supabase.auth.onAuthStateChange((event, session) => {
 
             window.estAdmin = session.user.email === "nitroapex@gmail.com";
             if (typeof window.activerBouclier === 'function') window.activerBouclier();
+            if (typeof window.actualiserNotificationsHeader === 'function') window.actualiserNotificationsHeader();
         } else {
             if (authContainer) authContainer.classList.remove('hidden');
             if (userContainer) userContainer.classList.add('hidden');
             if (btnForge) btnForge.style.display = "none";
             window.estAdmin = false;
             if (typeof window.activerBouclier === 'function') window.activerBouclier();
+            if (typeof window.actualiserNotificationsHeader === 'function') window.actualiserNotificationsHeader();
         }
     } catch (e) {
         console.error("Le radar a trébuché :", e);

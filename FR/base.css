@@ -445,6 +445,7 @@ button:hover, .genre-btn:hover {
 }
 
 .notifications-btn {
+    position: relative;
     width: 42px;
     height: 42px;
     padding: 0;
@@ -453,6 +454,25 @@ button:hover, .genre-btn:hover {
     justify-content: center;
     font-size: 1rem;
     line-height: 1;
+}
+
+.notifications-count {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    box-sizing: border-box;
+    border-radius: 999px;
+    background: var(--accent-red);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
 }
 
 .notifications-panel {
@@ -466,6 +486,40 @@ button:hover, .genre-btn:hover {
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow-box);
     z-index: 1200;
+}
+
+.notifications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 360px;
+    overflow-y: auto;
+}
+
+.notification-item {
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    background: rgba(0, 0, 0, 0.16);
+    color: var(--text-main);
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.notification-item.is-read {
+    opacity: 0.55;
+    filter: grayscale(0.35);
+}
+
+.notification-link {
+    color: var(--accent-blue);
+    font-weight: 700;
+    text-decoration: none;
+    border-bottom: 1px dashed currentColor;
+}
+
+.notification-link:hover {
+    color: var(--text-title);
 }
 
 .notifications-panel::before {
