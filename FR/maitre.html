@@ -39,6 +39,13 @@
         <div id="user-container" class="hidden">
             <img id="header-avatar" src="default-avatar.png" alt="Avatar">
             <span id="user-name"></span>
+
+            <div class="notifications-menu">
+                <button id="btn-notifications" class="genre-btn notifications-btn" type="button" aria-label="Notifications" aria-expanded="false">🔔</button>
+                <div id="notifications-panel" class="notifications-panel hidden" role="status" aria-live="polite">
+                    <p class="notifications-empty">Aucun parchemin ne vous est destinée</p>
+                </div>
+            </div>
             
             <div class="dropdown">
                 <button id="btn-profile-main" class="genre-btn">Mon Profil ▼</button>

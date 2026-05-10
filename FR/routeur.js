@@ -243,6 +243,34 @@ window.programmerMiseAJourScrollRapideSite = function() {
     });
 };
 
+function fermerPanneauNotifications() {
+    const bouton = document.getElementById('btn-notifications');
+    const panneau = document.getElementById('notifications-panel');
+
+    if (panneau) panneau.classList.add('hidden');
+    if (bouton) bouton.setAttribute('aria-expanded', 'false');
+}
+
+function initialiserNotificationsHeader() {
+    const bouton = document.getElementById('btn-notifications');
+    const panneau = document.getElementById('notifications-panel');
+
+    if (!bouton || !panneau || bouton.dataset.notificationsReady === 'true') return;
+
+    bouton.dataset.notificationsReady = 'true';
+
+    bouton.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const estOuvert = !panneau.classList.contains('hidden');
+        panneau.classList.toggle('hidden', estOuvert);
+        bouton.setAttribute('aria-expanded', estOuvert ? 'false' : 'true');
+    });
+
+    panneau.addEventListener('click', (event) => {
+        event.stopPropagation();
+    });
+}
+
 // Le Détecteur de Mouvement (Écoute quand l'URL change, même via les flèches du navigateur)
 window.addEventListener('hashchange', () => {
     const route = extraireRouteDepuisHash();
@@ -413,6 +441,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnScrollBottom = document.getElementById('site-scroll-bottom');
     const root = document.getElementById('sanctuaire-root');
 
+    initialiserNotificationsHeader();
+
     if (btnScrollTop) {
         btnScrollTop.addEventListener('click', () => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -427,6 +457,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('scroll', window.programmerMiseAJourScrollRapideSite, { passive: true });
     window.addEventListener('resize', window.programmerMiseAJourScrollRapideSite);
+    document.addEventListener('click', fermerPanneauNotifications);
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            fermerPanneauNotifications();
+        }
+    });
 
     if (root) {
         const observer = new MutationObserver(() => {
