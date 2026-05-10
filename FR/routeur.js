@@ -267,7 +267,9 @@ function setNotificationsEmpty(message = 'Aucun parchemin ne vous est destinée'
     setNotificationsCount(0);
 }
 
-function getDatePacteParHistoire(pactes = []) {
+const NOTIFICATIONS_CHAPITRES_DEPUIS = new Date('2026-05-11T01:52:01.488+02:00');
+
+function getDateDebutNotificationsParHistoire(pactes = []) {
     const dates = new Map();
 
     pactes.forEach((pacte) => {
@@ -275,7 +277,10 @@ function getDatePacteParHistoire(pactes = []) {
         if (!histoireId) return;
 
         const datePacte = pacte.created_at ? new Date(pacte.created_at) : new Date(0);
-        dates.set(histoireId, datePacte);
+        dates.set(
+            histoireId,
+            datePacte > NOTIFICATIONS_CHAPITRES_DEPUIS ? datePacte : NOTIFICATIONS_CHAPITRES_DEPUIS
+        );
     });
 
     return dates;
@@ -419,8 +424,8 @@ window.actualiserNotificationsHeader = async function() {
         return;
     }
 
-    const datePacteParHistoire = getDatePacteParHistoire(pactes);
-    const idsHistoires = [...datePacteParHistoire.keys()];
+    const dateDebutParHistoire = getDateDebutNotificationsParHistoire(pactes);
+    const idsHistoires = [...dateDebutParHistoire.keys()];
     const maintenantIso = new Date().toISOString();
 
     const { data: chapitres, error: erreurChapitres } = await window._supabase
@@ -439,10 +444,10 @@ window.actualiserNotificationsHeader = async function() {
     }
 
     const chapitresNotifiables = (chapitres || []).filter((chapitre) => {
-        const datePacte = datePacteParHistoire.get(Number(chapitre.histoire_id));
+        const dateDebut = dateDebutParHistoire.get(Number(chapitre.histoire_id));
         const datePublication = chapitre.date_publication ? new Date(chapitre.date_publication) : null;
 
-        return datePacte && datePublication && datePublication >= datePacte;
+        return dateDebut && datePublication && datePublication > dateDebut;
     });
 
     if (chapitresNotifiables.length === 0) {
