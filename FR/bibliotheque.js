@@ -26,8 +26,97 @@ function getStoryPseudo(histoire) {
     return histoire.pseudo_auteur || histoire.auteur?.split('@')[0] || 'Auteur inconnu';
 }
 
-function getStorySynopsis(histoire) {
-    return histoire.synopsis || "Cette œuvre n'a pas encore révélé ses secrets.";
+function getDefaultStoryStats() {
+    return {
+        chapitres: 0,
+        mots: 0
+    };
+}
+
+function getStoryStats(histoire) {
+    return {
+        ...getDefaultStoryStats(),
+        ...(histoire.stats || {})
+    };
+}
+
+function formaterNombreCarte(nombre) {
+    return new Intl.NumberFormat('fr-FR').format(Number(nombre) || 0);
+}
+
+function libellePluriel(nombre, singulier, pluriel) {
+    return Number(nombre) === 1 ? singulier : pluriel;
+}
+
+function creerBlocStatsCarte(histoire, options = {}) {
+    const stats = getStoryStats(histoire);
+    const chapitres = Number(stats.chapitres) || 0;
+    const mots = Number(stats.mots) || 0;
+    const vues = Number(options.vues ?? histoire.vues) || 0;
+
+    return `
+        <div class="story-card-stats" aria-label="Informations de l'œuvre">
+            <div class="story-card-stat">
+                <span class="story-card-stat-value">${formaterNombreCarte(chapitres)}</span>
+                <span class="story-card-stat-label">${libellePluriel(chapitres, 'chapitre', 'chapitres')}</span>
+            </div>
+            <div class="story-card-stat">
+                <span class="story-card-stat-value">${formaterNombreCarte(mots)}</span>
+                <span class="story-card-stat-label">${libellePluriel(mots, 'mot', 'mots')}</span>
+            </div>
+            <div class="story-card-stat">
+                <span class="story-card-stat-value">${formaterNombreCarte(vues)}</span>
+                <span class="story-card-stat-label">${libellePluriel(vues, 'vue', 'vues')}</span>
+            </div>
+        </div>
+    `;
+}
+
+async function chargerStatsCartesHistoires(histoires = []) {
+    const statsParHistoire = new Map();
+    const idsHistoires = [...new Set(
+        histoires
+            .map((histoire) => Number(histoire?.id))
+            .filter(Boolean)
+    )];
+
+    idsHistoires.forEach((id) => statsParHistoire.set(id, getDefaultStoryStats()));
+
+    if (idsHistoires.length === 0) return statsParHistoire;
+
+    const { data, error } = await window._supabase
+        .from('chapitres')
+        .select('histoire_id, nombre_mots, date_publication')
+        .in('histoire_id', idsHistoires)
+        .eq('est_publie', true);
+
+    if (error) {
+        console.error('Erreur de statistiques des cartes :', error);
+        return statsParHistoire;
+    }
+
+    const maintenant = new Date();
+
+    (data || []).forEach((chapitre) => {
+        const datePublication = chapitre.date_publication ? new Date(chapitre.date_publication) : null;
+        if (datePublication && datePublication > maintenant) return;
+
+        const histoireId = Number(chapitre.histoire_id);
+        const stats = statsParHistoire.get(histoireId) || getDefaultStoryStats();
+
+        stats.chapitres += 1;
+        stats.mots += Number(chapitre.nombre_mots) || 0;
+        statsParHistoire.set(histoireId, stats);
+    });
+
+    return statsParHistoire;
+}
+
+function ajouterStatsAuxHistoires(histoires = [], statsParHistoire = new Map()) {
+    return histoires.map((histoire) => ({
+        ...histoire,
+        stats: statsParHistoire.get(Number(histoire.id)) || getDefaultStoryStats()
+    }));
 }
 
 function ouvrirHistoireDepuisCarte(histoireId) {
@@ -64,7 +153,7 @@ function creerCarteHistoire(histoire, options = {}) {
         </div>
         <h3>${histoire.titre}</h3>
         <span class="text-small text-muted">Par Comte ${pseudo}</span>
-        <p>${getStorySynopsis(histoire)}</p>
+        ${creerBlocStatsCarte(histoire, { vues })}
         <button class="genre-btn w-100 mt-15" type="button">${miseEnAvant ? "Découvrir l'œuvre" : "Lire l'œuvre"}</button>
     `;
 
@@ -79,6 +168,10 @@ function creerCarteHistoire(histoire, options = {}) {
 
     return card;
 }
+
+window.creerCarteHistoire = creerCarteHistoire;
+window.chargerStatsCartesHistoires = chargerStatsCartesHistoires;
+window.ajouterStatsAuxHistoires = ajouterStatsAuxHistoires;
 
 function trierMisesEnAvantParGenre(histoires = []) {
     return [...histoires].sort((a, b) => {
@@ -134,19 +227,25 @@ async function chargerMisesEnAvantHebdomadairesAccueil() {
 
     container.innerHTML = '';
     const selectionsUniques = dedoublonnerMisesEnAvantParGenre(data);
+    const histoiresSelectionnees = selectionsUniques.map((selection) => ({
+        id: selection.histoire_id,
+        titre: selection.titre,
+        synopsis: selection.synopsis,
+        genre: selection.genre,
+        classification: selection.classification,
+        statut: selection.statut,
+        contenu_sensible: selection.contenu_sensible,
+        image_couverture: selection.image_couverture,
+        pseudo_auteur: selection.pseudo_auteur,
+        auteur: selection.auteur,
+        vues: selection.vues
+    }));
+    const statsParHistoire = await chargerStatsCartesHistoires(histoiresSelectionnees);
 
-    selectionsUniques.forEach((selection) => {
+    selectionsUniques.forEach((selection, index) => {
         const histoire = {
-            id: selection.histoire_id,
-            titre: selection.titre,
-            synopsis: selection.synopsis,
-            genre: selection.genre,
-            classification: selection.classification,
-            statut: selection.statut,
-            contenu_sensible: selection.contenu_sensible,
-            image_couverture: selection.image_couverture,
-            pseudo_auteur: selection.pseudo_auteur,
-            auteur: selection.auteur
+            ...histoiresSelectionnees[index],
+            stats: statsParHistoire.get(Number(selection.histoire_id)) || getDefaultStoryStats()
         };
 
         container.appendChild(creerCarteHistoire(histoire, {
@@ -220,7 +319,10 @@ window.chargerVitrine = async function(genreFilter = null) {
         return;
     }
 
-    histoiresAffichees.forEach((histoire) => {
+    const statsParHistoire = await chargerStatsCartesHistoires(histoiresAffichees);
+    const histoiresAvecStats = ajouterStatsAuxHistoires(histoiresAffichees, statsParHistoire);
+
+    histoiresAvecStats.forEach((histoire) => {
         storiesContainer.appendChild(creerCarteHistoire(histoire));
     });
 };

@@ -50,40 +50,11 @@ window.chargerGenre = async function() {
         return;
     }
 
-    // --- CONSTRUCTION DES CARTES (Zéro Style Inline, tout via base.css) ---
-    histoires.forEach(histoire => {
-        const carte = document.createElement('div');
-        carte.className = 'story-card'; // Membre de list-col ou grid selon base.css
+    // --- CONSTRUCTION DES CARTES ---
+    const statsParHistoire = await window.chargerStatsCartesHistoires(histoires);
+    const histoiresAvecStats = window.ajouterStatsAuxHistoires(histoires, statsParHistoire);
 
-        // Sécurité pour la classification d'âge (Couleurs dynamiques basées sur le format original)
-        let classeAge = 'tag-age';
-        if (histoire.classification === 'Tout public') classeAge += ' age-tout-public';
-        else if (histoire.classification === 'R15') classeAge += ' age-r15';
-        else if (histoire.classification === 'R16') classeAge += ' age-r16';
-        else if (histoire.classification === 'R18') classeAge += ' age-r18';
-
-        const imageCouverture = window.getStoryCoverUrl(histoire.image_couverture);
-
-        carte.innerHTML = `
-            <img src="${imageCouverture}" alt="${histoire.titre}">
-            <h3>${histoire.titre}</h3>
-            
-            <div class="story-tags">
-                <span class="tag tag-genre">${histoire.genre}</span>
-                <span class="tag ${classeAge}">${histoire.classification || 'Indéfini'}</span>
-                ${histoire.contenu_sensible ? '<span class="tag tag-sensible">Contenu Sensible</span>' : '<span class="tag tag-sensible-off">Sans Alerte</span>'}
-            </div>
-            
-            <p>${histoire.synopsis || "Cette œuvre est nimbée de mystères, son intrigue demeure cachée."}</p>
-            
-            <div class="mt-15">
-                <span class="text-small text-muted-italic">Par ${histoire.pseudo_auteur || histoire.auteur || "Auteur Inconnu"}</span>
-                <span class="tag tag-statut" style="float: right;">${histoire.statut || "Inconnu"}</span>
-            </div>
-            
-            <button class="genre-btn btn-outline-blue mt-15 w-100" onclick="localStorage.setItem('currentOeuvreId', ${histoire.id}); window.changerDePage('oeuvre');">Ouvrir le Grimoire</button>
-        `;
-        
-        conteneur.appendChild(carte);
+    histoiresAvecStats.forEach(histoire => {
+        conteneur.appendChild(window.creerCarteHistoire(histoire));
     });
 };

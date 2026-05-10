@@ -317,6 +317,46 @@ button:hover, .genre-btn:hover {
     margin-bottom: 0;
 }
 
+.story-card-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border-color);
+}
+
+.story-card-stat {
+    min-width: 0;
+    padding: 8px 6px;
+    background: rgba(0, 0, 0, 0.18);
+    border: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.story-card-stat-value,
+.story-card-stat-label {
+    display: block;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.story-card-stat-value {
+    color: var(--text-title);
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.story-card-stat-label {
+    margin-top: 3px;
+    color: var(--text-muted);
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+}
+
 .story-tags {
     display: flex;
     gap: 10px;
