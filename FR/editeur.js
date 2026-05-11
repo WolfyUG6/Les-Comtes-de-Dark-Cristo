@@ -7,6 +7,34 @@
 let quill, quillNoteDebut, quillNoteFin;
 window.compteMotsLive = 0;
 
+async function chargerSelectVolumesChapitre(volumeSelectionne = null) {
+    const select = document.getElementById('chapitre-volume');
+    if (!select || !window.currentOeuvreId) return;
+
+    select.innerHTML = '<option value="">Générale</option>';
+
+    const { data: volumes, error } = await window._supabase
+        .from('volumes')
+        .select('id, titre, ordre')
+        .eq('histoire_id', window.currentOeuvreId)
+        .order('ordre', { ascending: true })
+        .order('id', { ascending: true });
+
+    if (error) {
+        console.error('Erreur de chargement des volumes :', error);
+        return;
+    }
+
+    (volumes || []).forEach((volume) => {
+        const option = document.createElement('option');
+        option.value = volume.id;
+        option.textContent = volume.titre;
+        select.appendChild(option);
+    });
+
+    select.value = volumeSelectionne ? String(volumeSelectionne) : '';
+}
+
 function initialiserCalendrierChapitre() {
     const champDate = document.getElementById('chapitre-date-pub');
     const boutonOuvrir = document.getElementById('chapitre-date-trigger');
@@ -72,6 +100,7 @@ window.chargerEditeurChapitre = async function() {
     quillNoteFin.root.innerHTML = '';
     document.getElementById('chapitre-publie').checked = true;
     document.getElementById('chapitre-date-pub').value = '';
+    await chargerSelectVolumesChapitre();
     window.compteMotsLive = 0;
     actualiserAffichageCompteur();
 
@@ -169,6 +198,7 @@ async function recupererDonneesChapitre(id) {
         quillNoteFin.clipboard.dangerouslyPasteHTML(chapitre.note_fin || '');
         
         document.getElementById('chapitre-publie').checked = chapitre.est_publie !== false; // false explicite
+        await chargerSelectVolumesChapitre(chapitre.volume_id);
         
         if (chapitre.date_publication && window.horlogeChapitre) {
             window.horlogeChapitre.setDate(chapitre.date_publication);
@@ -203,6 +233,7 @@ if (!window.editeurEventHooked) {
             const estPublie = document.getElementById('chapitre-publie').checked;
             const champDate = document.getElementById('chapitre-date-pub').value;
             const datePublication = champDate ? new Date(champDate).toISOString() : new Date().toISOString();
+            const volumeSelectionne = document.getElementById('chapitre-volume')?.value || null;
 
             if (!numero || !titre || contenu === '<p><br></p>' || !contenu) {
                 await window.siteAlert("Les Ténèbres exigent un Numéro, un Titre et un Contenu pour ce chapitre !", { danger: true });
@@ -226,7 +257,8 @@ if (!window.editeurEventHooked) {
                         note_fin: contenuFin,
                         nombre_mots: compteMots,
                         est_publie: estPublie,
-                        date_publication: datePublication
+                        date_publication: datePublication,
+                        volume_id: volumeSelectionne
                     })
                     .eq('id', window.currentChapitreId);
                 erreurGravure = error;
@@ -243,7 +275,8 @@ if (!window.editeurEventHooked) {
                         note_fin: contenuFin,
                         nombre_mots: compteMots,
                         est_publie: estPublie,
-                        date_publication: datePublication
+                        date_publication: datePublication,
+                        volume_id: volumeSelectionne
                     }]);
                 erreurGravure = error;
             }

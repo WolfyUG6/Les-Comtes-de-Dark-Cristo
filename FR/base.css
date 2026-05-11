@@ -1009,6 +1009,17 @@ body.modal-open {
 .book-cover-placeholder { width: 160px; height: 230px; background: #000; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; color: var(--text-muted); text-align: center; }
 .book-info-content { flex: 1; }
 .book-synopsis { color: var(--text-muted); line-height: 1.7; font-size: 0.98rem; font-family: 'Segoe UI', sans-serif; word-break: break-word; }
+.volumes-section { margin-bottom: 50px; }
+.volumes-list { display: flex; flex-direction: column; gap: 12px; }
+.volume-item { display: flex; align-items: center; gap: 14px; padding: 12px; border: 1px solid var(--border-color); background: rgba(0, 0, 0, 0.16); }
+.volume-cover-thumb { width: 58px; height: 82px; object-fit: cover; border: 1px solid var(--border-color); flex-shrink: 0; }
+.volume-info { flex: 1; min-width: 0; }
+.volume-info h3 { margin: 0 0 6px 0; font-size: 1rem; }
+.volume-info p { margin: 0; color: var(--text-muted); font-family: 'Segoe UI', sans-serif; font-size: 0.88rem; line-height: 1.45; }
+.volume-form { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) auto; gap: 14px; align-items: end; }
+.volume-form .form-group { margin-bottom: 0; }
+.volume-cover-group input[type="file"] { padding: 8px; }
+.tag-volume { margin-left: 10px; background-color: transparent; color: var(--text-muted); border: 1px dotted var(--border-color); }
 .page-histoire .info-panel { gap: 35px; }
 .page-histoire .book-cover { width: 240px; height: 360px; flex-shrink: 0; box-shadow: var(--shadow-box); }
 .page-histoire .book-info-content { min-width: 0; }
@@ -1027,6 +1038,16 @@ body.modal-open {
 .btn-outline-red { border-color: var(--accent-red); color: var(--accent-red); }
 .btn-small { font-size: 0.75rem; margin-right: 10px; }
 .btn-small-last { font-size: 0.75rem; }
+
+@media (max-width: 768px) {
+    .volume-form {
+        grid-template-columns: 1fr;
+    }
+
+    .volume-item {
+        align-items: flex-start;
+    }
+}
 
 .age-todo-public,
 .age-tout-public { border-color: #28a745 !important; color: #28a745 !important; }

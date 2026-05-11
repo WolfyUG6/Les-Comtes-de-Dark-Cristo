@@ -3,6 +3,58 @@
 // Affichage des infos et tri des chapitres
 // ==========================================
 
+window.volumesOeuvreCache = [];
+window.histoireGestionCache = null;
+
+function escapeGestionHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function getVolumeCoverUrl(volume, histoire) {
+    return window.getStoryCoverUrl(volume?.image_couverture || histoire?.image_couverture);
+}
+
+function getVolumeTitle(volumeId) {
+    if (!volumeId) return 'Générale';
+    const volume = (window.volumesOeuvreCache || []).find((item) => Number(item.id) === Number(volumeId));
+    return volume?.titre || 'Générale';
+}
+
+function getNomFichierVolumeCover(file, session, histoireId) {
+    const nomNettoye = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+    return `${session.user.id}/histoire-${histoireId}/${Date.now()}-${nomNettoye}`;
+}
+
+async function uploadVolumeCover(file, histoireId, session) {
+    if (!file) return null;
+
+    let fichierAEnvoyer = file;
+    try {
+        fichierAEnvoyer = await imageCompression(file, {
+            maxSizeMB: 0.5,
+            maxWidthOrHeight: 1920,
+            useWebWorker: true
+        });
+    } catch (compressionError) {
+        console.error("Erreur de compression de couverture de volume :", compressionError);
+    }
+
+    const chemin = getNomFichierVolumeCover(file, session, histoireId);
+    const { error } = await window._supabase.storage
+        .from('VolumeCover')
+        .upload(chemin, fichierAEnvoyer, { cacheControl: '3600', upsert: false });
+
+    if (error) throw error;
+
+    const { data } = window._supabase.storage.from('VolumeCover').getPublicUrl(chemin);
+    return data.publicUrl;
+}
+
 window.chargerGestionOeuvre = async function() {
     // 0. Restauration de l'ID après un F5
     if (!window.currentOeuvreId) window.currentOeuvreId = localStorage.getItem('currentOeuvreId');
@@ -27,6 +79,8 @@ window.chargerGestionOeuvre = async function() {
         return;
     }
 
+    window.histoireGestionCache = histoire;
+
     // 2. Affichage des infos avec le style de base.css
     const imageCouverture = window.getStoryCoverUrl(histoire.image_couverture);
     const imgHtml = `<img src="${imageCouverture}" class="book-cover">`;
@@ -45,9 +99,149 @@ window.chargerGestionOeuvre = async function() {
         </div>
     `;
 
-    // 3. On lance la récupération des chapitres
+    // 3. On lance la récupération des volumes et chapitres
+    await chargerVolumesOeuvre();
     chargerChapitresCategories();
 };
+
+window.chargerVolumesOeuvre = async function() {
+    const liste = document.getElementById('volumes-liste');
+    if (!liste || !window.currentOeuvreId) return;
+
+    liste.innerHTML = '<p class="loading-text">Lecture des volumes...</p>';
+
+    const { data: volumes, error } = await window._supabase
+        .from('volumes')
+        .select('*')
+        .eq('histoire_id', window.currentOeuvreId)
+        .order('ordre', { ascending: true })
+        .order('id', { ascending: true });
+
+    if (error) {
+        liste.innerHTML = `<p class="text-error">Erreur volumes : ${error.message}</p>`;
+        return;
+    }
+
+    window.volumesOeuvreCache = volumes || [];
+    afficherVolumesOeuvre();
+};
+
+function afficherVolumesOeuvre() {
+    const liste = document.getElementById('volumes-liste');
+    const histoire = window.histoireGestionCache;
+    if (!liste || !histoire) return;
+
+    liste.innerHTML = '';
+
+    const volumeGeneral = document.createElement('article');
+    volumeGeneral.className = 'volume-item volume-general';
+    volumeGeneral.innerHTML = `
+        <img src="${window.getStoryCoverUrl(histoire.image_couverture)}" alt="Couverture générale" class="volume-cover-thumb">
+        <div class="volume-info">
+            <h3>Générale</h3>
+            <p>Volume par défaut, non modifiable. Les chapitres sans volume restent ici.</p>
+        </div>
+        <span class="tag tag-statut">Base</span>
+    `;
+    liste.appendChild(volumeGeneral);
+
+    if (!window.volumesOeuvreCache || window.volumesOeuvreCache.length === 0) {
+        const vide = document.createElement('p');
+        vide.className = 'text-muted-italic text-small';
+        vide.innerText = "Aucun volume personnalisé pour le moment.";
+        liste.appendChild(vide);
+        return;
+    }
+
+    window.volumesOeuvreCache.forEach((volume) => {
+        const item = document.createElement('article');
+        item.className = 'volume-item';
+        item.innerHTML = `
+            <img src="${getVolumeCoverUrl(volume, histoire)}" alt="Couverture ${escapeGestionHtml(volume.titre)}" class="volume-cover-thumb">
+            <div class="volume-info">
+                <h3>${escapeGestionHtml(volume.titre)}</h3>
+                <p>Ordre ${volume.ordre || 1}</p>
+            </div>
+            <button class="genre-btn btn-outline-red btn-small-last" type="button" data-volume-delete="${volume.id}">Supprimer</button>
+        `;
+        liste.appendChild(item);
+    });
+}
+
+async function creerVolumeDepuisFormulaire(form) {
+    const titreInput = document.getElementById('volume-title');
+    const fileInput = document.getElementById('volume-cover-file');
+    const submit = document.getElementById('btn-create-volume');
+    const titre = titreInput?.value.trim();
+    const file = fileInput?.files?.[0] || null;
+
+    if (!titre) {
+        await window.siteAlert("Donnez un nom au volume avant de le créer.", { danger: true });
+        return;
+    }
+
+    const { data: { session } } = await window._supabase.auth.getSession();
+    if (!session) {
+        await window.siteAlert("Vous devez être connecté pour créer un volume.", { danger: true });
+        return;
+    }
+
+    if (submit) {
+        submit.disabled = true;
+        submit.innerText = "Création...";
+    }
+
+    try {
+        const imageUrl = file ? await uploadVolumeCover(file, window.currentOeuvreId, session) : null;
+        const prochainOrdre = (window.volumesOeuvreCache || []).reduce((max, volume) => Math.max(max, Number(volume.ordre) || 0), 0) + 1;
+
+        const { error } = await window._supabase
+            .from('volumes')
+            .insert([{
+                histoire_id: window.currentOeuvreId,
+                titre,
+                image_couverture: imageUrl,
+                ordre: prochainOrdre
+            }]);
+
+        if (error) throw error;
+
+        form.reset();
+        await window.chargerVolumesOeuvre();
+    } catch (error) {
+        await window.siteAlert("Impossible de créer le volume : " + error.message, { danger: true });
+    } finally {
+        if (submit) {
+            submit.disabled = false;
+            submit.innerText = "Créer le volume";
+        }
+    }
+}
+
+async function supprimerVolume(volumeId) {
+    const volume = (window.volumesOeuvreCache || []).find((item) => Number(item.id) === Number(volumeId));
+    if (!volume) return;
+
+    const confirmation = await window.siteConfirm(`Supprimer le volume "${volume.titre}" ? Les chapitres associés retourneront dans Générale.`, {
+        confirmText: 'Supprimer',
+        cancelText: 'Annuler',
+        danger: true
+    });
+    if (!confirmation) return;
+
+    const { error } = await window._supabase
+        .from('volumes')
+        .delete()
+        .eq('id', volumeId);
+
+    if (error) {
+        await window.siteAlert("Impossible de supprimer le volume : " + error.message, { danger: true });
+        return;
+    }
+
+    await window.chargerVolumesOeuvre();
+    window.chargerChapitresCategories();
+}
 
 window.chargerChapitresCategories = async function() {
     const listeBrouillons = document.getElementById('liste-brouillons');
@@ -96,7 +290,8 @@ window.chargerChapitresCategories = async function() {
 
         div.innerHTML = `
             <div>
-                <strong class="chapter-title">Chapitre ${chap.numero} : ${chap.titre}</strong>
+                <strong class="chapter-title">Chapitre ${chap.numero} : ${escapeGestionHtml(chap.titre)}</strong>
+                <span class="tag tag-volume">${escapeGestionHtml(getVolumeTitle(chap.volume_id))}</span>
                 ${infoDate}
             </div>
             <div>
@@ -158,5 +353,17 @@ document.addEventListener('click', (e) => {
         window.currentChapitreId = null; // C'est une création
         localStorage.removeItem('currentChapitreId');
         window.changerDePage('editeur-chapitre');
+    }
+
+    const boutonSuppressionVolume = e.target.closest('[data-volume-delete]');
+    if (boutonSuppressionVolume) {
+        supprimerVolume(boutonSuppressionVolume.dataset.volumeDelete);
+    }
+});
+
+document.addEventListener('submit', (e) => {
+    if (e.target && e.target.id === 'volume-create-form') {
+        e.preventDefault();
+        creerVolumeDepuisFormulaire(e.target);
     }
 });

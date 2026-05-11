@@ -9,6 +9,28 @@
         <p class="loading-text">Déchiffrage des runes en cours...</p>
     </section>
 
+    <section class="volumes-section card">
+        <div class="chapters-header">
+            <h2 class="title-m0">Volumes du Grimoire</h2>
+        </div>
+
+        <div id="volumes-liste" class="volumes-list">
+            <p class="loading-text">Lecture des volumes...</p>
+        </div>
+
+        <form id="volume-create-form" class="volume-form mt-15">
+            <div class="form-group volume-title-group">
+                <label for="volume-title">Nom du volume</label>
+                <input type="text" id="volume-title" class="custom-input" placeholder="Ex: Volume I - Les Cendres">
+            </div>
+            <div class="form-group volume-cover-group">
+                <label for="volume-cover-file">Couverture du volume (optionnelle)</label>
+                <input type="file" id="volume-cover-file" accept="image/*" class="custom-input">
+            </div>
+            <button type="submit" id="btn-create-volume" class="genre-btn btn-primary">Créer le volume</button>
+        </form>
+    </section>
+
     <section class="chapitres-section">
         <div class="chapters-header">
             <h2 class="title-m0">Les Parchemins (Chapitres)</h2>
