@@ -119,6 +119,44 @@ function ajouterStatsAuxHistoires(histoires = [], statsParHistoire = new Map()) 
     }));
 }
 
+async function chargerVuesActuellesHistoires(histoires = []) {
+    const vuesParHistoire = new Map();
+    const idsHistoires = [...new Set(
+        histoires
+            .map((histoire) => Number(histoire?.id))
+            .filter(Boolean)
+    )];
+
+    if (idsHistoires.length === 0) return vuesParHistoire;
+
+    const { data, error } = await window._supabase
+        .from('histoires')
+        .select('id, vues')
+        .in('id', idsHistoires);
+
+    if (error) {
+        console.error('Erreur de récupération des vues des cartes :', error);
+        return vuesParHistoire;
+    }
+
+    (data || []).forEach((histoire) => {
+        vuesParHistoire.set(Number(histoire.id), Number(histoire.vues) || 0);
+    });
+
+    return vuesParHistoire;
+}
+
+function ajouterVuesActuellesAuxHistoires(histoires = [], vuesParHistoire = new Map()) {
+    return histoires.map((histoire) => {
+        const vuesActuelles = vuesParHistoire.get(Number(histoire.id));
+
+        return {
+            ...histoire,
+            vues: vuesActuelles ?? histoire.vues
+        };
+    });
+}
+
 function ouvrirHistoireDepuisCarte(histoireId) {
     localStorage.setItem('currentOeuvreId', histoireId);
     window.changerDePage('oeuvre', { id: histoireId });
@@ -129,7 +167,7 @@ function creerCarteHistoire(histoire, options = {}) {
         miseEnAvant = false,
         score = null,
         followersCount = 0,
-        vues = 0
+        vues = null
     } = options;
 
     const card = document.createElement('div');
@@ -172,6 +210,8 @@ function creerCarteHistoire(histoire, options = {}) {
 window.creerCarteHistoire = creerCarteHistoire;
 window.chargerStatsCartesHistoires = chargerStatsCartesHistoires;
 window.ajouterStatsAuxHistoires = ajouterStatsAuxHistoires;
+window.chargerVuesActuellesHistoires = chargerVuesActuellesHistoires;
+window.ajouterVuesActuellesAuxHistoires = ajouterVuesActuellesAuxHistoires;
 
 function trierMisesEnAvantParGenre(histoires = []) {
     return [...histoires].sort((a, b) => {
@@ -240,19 +280,22 @@ async function chargerMisesEnAvantHebdomadairesAccueil() {
         auteur: selection.auteur,
         vues: selection.vues
     }));
-    const statsParHistoire = await chargerStatsCartesHistoires(histoiresSelectionnees);
+    const [statsParHistoire, vuesParHistoire] = await Promise.all([
+        chargerStatsCartesHistoires(histoiresSelectionnees),
+        chargerVuesActuellesHistoires(histoiresSelectionnees)
+    ]);
+    const histoiresAvecVues = ajouterVuesActuellesAuxHistoires(histoiresSelectionnees, vuesParHistoire);
 
     selectionsUniques.forEach((selection, index) => {
         const histoire = {
-            ...histoiresSelectionnees[index],
+            ...histoiresAvecVues[index],
             stats: statsParHistoire.get(Number(selection.histoire_id)) || getDefaultStoryStats()
         };
 
         container.appendChild(creerCarteHistoire(histoire, {
             miseEnAvant: true,
             score: selection.score,
-            followersCount: selection.followers_count,
-            vues: selection.vues
+            followersCount: selection.followers_count
         }));
     });
 

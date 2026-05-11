@@ -51,8 +51,12 @@ window.chargerGenre = async function() {
     }
 
     // --- CONSTRUCTION DES CARTES ---
-    const statsParHistoire = await window.chargerStatsCartesHistoires(histoires);
-    const histoiresAvecStats = window.ajouterStatsAuxHistoires(histoires, statsParHistoire);
+    const [statsParHistoire, vuesParHistoire] = await Promise.all([
+        window.chargerStatsCartesHistoires(histoires),
+        window.chargerVuesActuellesHistoires(histoires)
+    ]);
+    const histoiresAvecVues = window.ajouterVuesActuellesAuxHistoires(histoires, vuesParHistoire);
+    const histoiresAvecStats = window.ajouterStatsAuxHistoires(histoiresAvecVues, statsParHistoire);
 
     histoiresAvecStats.forEach(histoire => {
         conteneur.appendChild(window.creerCarteHistoire(histoire));
