@@ -7,8 +7,16 @@ const COMMENTAIRES_MIN = 50;
 const COMMENTAIRES_MAX = 1000;
 const COMMENTAIRES_TABLE = 'commentaires';
 const ADMIN_EMAIL = 'nitroapex@gmail.com';
+const VOLUMES_PAR_PAGE_HISTOIRE = 5;
 
 window._commentairesInstances = window._commentairesInstances || {};
+window._histoireVolumesState = window._histoireVolumesState || {
+    histoire: null,
+    volumes: [],
+    chapitresPublies: [],
+    volumeActif: 'general',
+    indexDebut: 0
+};
 
 function getCommentaireElements(section) {
     return {
@@ -212,6 +220,171 @@ function initialiserBoutonPartageHistoire(idHistoire) {
             await window.siteAlert(`Impossible de copier automatiquement. Voici le lien à partager :\n${lien}`, { danger: true });
         }
     });
+}
+
+function getVolumeHistoireCover(volume, histoire) {
+    return window.getStoryCoverUrl(volume?.image_couverture || histoire?.image_couverture);
+}
+
+function getVolumesAffichablesHistoire(histoire, volumes = []) {
+    return [
+        {
+            id: 'general',
+            titre: 'Générale',
+            image_couverture: histoire?.image_couverture,
+            estGeneral: true
+        },
+        ...(volumes || []).map((volume) => ({
+            ...volume,
+            id: String(volume.id),
+            estGeneral: false
+        }))
+    ];
+}
+
+function getNombreVolumesVisiblesHistoire() {
+    return window.matchMedia?.('(max-width: 768px)').matches ? 2 : VOLUMES_PAR_PAGE_HISTOIRE;
+}
+
+function getChapitresFiltresHistoire() {
+    const state = window._histoireVolumesState;
+
+    if (state.volumeActif === 'general') {
+        return [...state.chapitresPublies].sort((a, b) => {
+            const dateA = a.date_publication ? new Date(a.date_publication).getTime() : 0;
+            const dateB = b.date_publication ? new Date(b.date_publication).getTime() : 0;
+            return dateA - dateB;
+        });
+    }
+
+    return state.chapitresPublies.filter((chapitre) => String(chapitre.volume_id) === String(state.volumeActif));
+}
+
+function dessinerChapitresHistoire(chapitres) {
+    const chapitresListe = document.getElementById('lecteur-chapitres-liste');
+    if (!chapitresListe) return;
+
+    if (!chapitres || chapitres.length === 0) {
+        chapitresListe.innerHTML = '<p class="text-muted-italic text-center mt-15">Aucun chapitre n\'est disponible dans ce volume.</p>';
+        return;
+    }
+
+    chapitresListe.innerHTML = '';
+
+    chapitres.forEach((chap) => {
+        const dateChap = chap.date_publication ? new Date(chap.date_publication) : new Date();
+        const dateAffichee = dateChap.toLocaleDateString('fr-FR');
+        const div = document.createElement('div');
+        div.className = 'chapter-item';
+        div.innerHTML = `
+            <div>
+                <strong class="chapter-title">Chapitre ${chap.numero} : ${escapeCommentaireHtml(chap.titre || '')}</strong>
+                <span class="published-date ml-10">(Publié le ${dateAffichee})</span>
+            </div>
+            <div>
+                <button class="genre-btn btn-outline-blue btn-small" type="button" data-chapitre-read="${chap.id}">Lire</button>
+            </div>
+        `;
+        chapitresListe.appendChild(div);
+    });
+}
+
+function appliquerFiltreVolumeHistoire(volumeId) {
+    const state = window._histoireVolumesState;
+    state.volumeActif = String(volumeId || 'general');
+
+    const volumes = getVolumesAffichablesHistoire(state.histoire, state.volumes);
+    const indexActif = volumes.findIndex((volume) => String(volume.id) === state.volumeActif);
+    const nombreVisible = getNombreVolumesVisiblesHistoire();
+
+    if (indexActif >= 0) {
+        if (indexActif < state.indexDebut) {
+            state.indexDebut = indexActif;
+        } else if (indexActif >= state.indexDebut + nombreVisible) {
+            state.indexDebut = Math.max(0, indexActif - nombreVisible + 1);
+        }
+    }
+
+    dessinerBandeauVolumesHistoire();
+    dessinerChapitresHistoire(getChapitresFiltresHistoire());
+}
+
+function dessinerBandeauVolumesHistoire() {
+    const section = document.getElementById('histoire-volumes-section');
+    const strip = document.getElementById('histoire-volumes-strip');
+    const btnGauche = document.getElementById('volumes-scroll-left');
+    const btnDroite = document.getElementById('volumes-scroll-right');
+    const state = window._histoireVolumesState;
+
+    if (!section || !strip || !state.histoire) return;
+
+    const volumes = getVolumesAffichablesHistoire(state.histoire, state.volumes);
+    section.classList.remove('hidden');
+    strip.innerHTML = '';
+
+    const nombreVisible = getNombreVolumesVisiblesHistoire();
+    const maxIndex = Math.max(0, volumes.length - nombreVisible);
+    state.indexDebut = Math.min(Math.max(0, state.indexDebut), maxIndex);
+    const volumesVisibles = volumes.slice(state.indexDebut, state.indexDebut + nombreVisible);
+
+    volumesVisibles.forEach((volume) => {
+        const bouton = document.createElement('button');
+        bouton.type = 'button';
+        bouton.className = `histoire-volume-card${String(volume.id) === state.volumeActif ? ' active' : ''}`;
+        bouton.dataset.volumeId = volume.id;
+        bouton.innerHTML = `
+            <img src="${getVolumeHistoireCover(volume, state.histoire)}" alt="Couverture ${escapeCommentaireHtml(volume.titre)}">
+            <span>${escapeCommentaireHtml(volume.titre)}</span>
+        `;
+        strip.appendChild(bouton);
+    });
+
+    const navigationNecessaire = volumes.length > nombreVisible;
+
+    [btnGauche, btnDroite].forEach((bouton) => {
+        if (!bouton) return;
+        bouton.classList.toggle('hidden', !navigationNecessaire);
+    });
+
+    if (btnGauche) btnGauche.disabled = !navigationNecessaire || state.indexDebut <= 0;
+    if (btnDroite) btnDroite.disabled = !navigationNecessaire || state.indexDebut >= maxIndex;
+}
+
+function deplacerBandeauVolumesHistoire(direction) {
+    const state = window._histoireVolumesState;
+    const volumes = getVolumesAffichablesHistoire(state.histoire, state.volumes);
+    const maxIndex = Math.max(0, volumes.length - getNombreVolumesVisiblesHistoire());
+
+    state.indexDebut = Math.min(Math.max(0, state.indexDebut + direction), maxIndex);
+    dessinerBandeauVolumesHistoire();
+}
+
+async function initialiserVolumesHistoire(histoire, idHistoire) {
+    const section = document.getElementById('histoire-volumes-section');
+    if (section) section.classList.add('hidden');
+
+    const { data: volumes, error } = await window._supabase
+        .from('volumes')
+        .select('*')
+        .eq('histoire_id', idHistoire)
+        .order('ordre', { ascending: true })
+        .order('id', { ascending: true });
+
+    if (error) {
+        console.error('Erreur de chargement des volumes de l\'histoire :', error);
+        return [];
+    }
+
+    window._histoireVolumesState = {
+        histoire,
+        volumes: volumes || [],
+        chapitresPublies: [],
+        volumeActif: 'general',
+        indexDebut: 0
+    };
+
+    dessinerBandeauVolumesHistoire();
+    return volumes || [];
 }
 
 function resetCommentaireForm(instance) {
@@ -739,6 +912,12 @@ async function supprimerCommentaireInstance(instance, commentaireId) {
 }
 
 if (!window.commentairesEventsHooked) {
+    window.addEventListener('resize', () => {
+        if (window._pageCourante === 'oeuvre') {
+            dessinerBandeauVolumesHistoire();
+        }
+    });
+
     document.addEventListener('input', (event) => {
         if (event.target?.matches?.('[data-role="message"]')) {
             const instance = getCommentaireInstanceFromNode(event.target);
@@ -770,6 +949,30 @@ if (!window.commentairesEventsHooked) {
     });
 
     document.addEventListener('click', async (event) => {
+        const boutonVolume = event.target.closest('.histoire-volume-card');
+        if (boutonVolume) {
+            appliquerFiltreVolumeHistoire(boutonVolume.dataset.volumeId || 'general');
+            return;
+        }
+
+        if (event.target.id === 'volumes-scroll-left') {
+            deplacerBandeauVolumesHistoire(-1);
+            return;
+        }
+
+        if (event.target.id === 'volumes-scroll-right') {
+            deplacerBandeauVolumesHistoire(1);
+            return;
+        }
+
+        const boutonLecture = event.target.closest('[data-chapitre-read]');
+        if (boutonLecture) {
+            const chapitreId = boutonLecture.dataset.chapitreRead;
+            localStorage.setItem('currentChapitreId', chapitreId);
+            window.changerDePage('lecture', { id: chapitreId });
+            return;
+        }
+
         const action = event.target?.dataset?.action;
         if (!action) return;
 
@@ -974,7 +1177,8 @@ window.chargerPageHistoire = async function() {
         }
     }
 
-    // 6. Chargement des chapitres
+    // 6. Chargement des volumes et chapitres
+    await initialiserVolumesHistoire(histoire, idHistoire);
     chargerListeChapitres(idHistoire);
 
     // 7. Chargement des commentaires globaux
@@ -1014,15 +1218,16 @@ async function chargerListeChapitres(idHistoire) {
         chapitresListe.innerHTML = '<p class="text-muted-italic text-center mt-15">Aucun chapitre n\'est disponible pour le moment.</p>';
         const spanMots = document.getElementById('histoire-mots-count');
         if (spanMots) spanMots.innerText = "0";
+        window._histoireVolumesState.chapitresPublies = [];
+        dessinerBandeauVolumesHistoire();
         return;
     }
 
-    chapitresListe.innerHTML = '';
     let totalMotsOeuvre = 0;
     const maintenant = new Date(); // L'heure magique !
     
     let prochainChapitre = null;
-    let chapitresPublies = 0;
+    const chapitresPublies = [];
 
     chapitres.forEach(chap => {
         const dateChap = chap.date_publication ? new Date(chap.date_publication) : new Date();
@@ -1035,27 +1240,17 @@ async function chargerListeChapitres(idHistoire) {
             }
         } else {
             // C'est un chapitre publié
-            chapitresPublies++;
+            chapitresPublies.push(chap);
             totalMotsOeuvre += chap.nombre_mots || 0;
-            const dateAffichee = dateChap.toLocaleDateString('fr-FR');
-            
-            const div = document.createElement('div');
-            div.className = "chapter-item";
-            div.innerHTML = `
-                <div>
-                    <strong class="chapter-title">Chapitre ${chap.numero} : ${chap.titre}</strong>
-                    <span class="published-date ml-10">(Publié le ${dateAffichee})</span>
-                </div>
-                <div>
-                    <button class="genre-btn btn-outline-blue btn-small" onclick="localStorage.setItem('currentChapitreId', ${chap.id}); window.changerDePage('lecture', { id: ${chap.id} });">Lire</button>
-                </div>
-            `;
-            chapitresListe.appendChild(div);
         }
     });
+
+    window._histoireVolumesState.chapitresPublies = chapitresPublies;
+    dessinerBandeauVolumesHistoire();
+    dessinerChapitresHistoire(getChapitresFiltresHistoire());
     
     // Si aucun chapitre n'est publié, on affiche un message dans la liste
-    if (chapitresPublies === 0) {
+    if (chapitresPublies.length === 0) {
         chapitresListe.innerHTML = '<p class="text-muted-italic text-center mt-15">L\'œuvre n\'a pas encore de parchemin lisible.</p>';
     }
 

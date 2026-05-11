@@ -1061,6 +1061,52 @@ body.modal-open {
 .histoire-actions-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 25px; }
 .histoire-actions { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; width: 100%; }
 .prochain-chapitre { width: 100%; border-bottom: 1px dashed var(--border-color); padding-bottom: 15px; margin-bottom: 15px; }
+.histoire-volumes-section { margin-bottom: 30px; padding: 16px; overflow: visible; }
+.histoire-volumes-header { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: stretch; gap: 12px; }
+.histoire-volumes-strip { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; min-width: 0; }
+.histoire-volume-card {
+    min-width: 0;
+    padding: 8px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    text-align: center;
+}
+.histoire-volume-card img { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; border: 1px solid var(--border-color); }
+.histoire-volume-card span {
+    min-height: 2.6em;
+    color: var(--text-main);
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 0.82rem;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.histoire-volume-card.active { border-color: var(--accent-blue); box-shadow: var(--shadow-hover); }
+.histoire-volume-card:hover { border-color: var(--border-hover); background: rgba(0, 0, 0, 0.18); box-shadow: var(--shadow-box); }
+.volume-scroll-btn {
+    width: 44px;
+    min-height: 100%;
+    padding: 0;
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.volume-scroll-btn:disabled {
+    opacity: 0.28;
+    cursor: not-allowed;
+    box-shadow: none;
+    border-color: var(--border-color);
+    color: var(--text-muted);
+}
 
 /* -- Commentaires -- */
 .commentaires-section { overflow: hidden; }
@@ -1106,6 +1152,19 @@ body.modal-open {
 
     .page-histoire .book-info-content {
         width: 100%;
+    }
+
+    .histoire-volumes-header {
+        grid-template-columns: 36px minmax(0, 1fr) 36px;
+        gap: 8px;
+    }
+
+    .histoire-volumes-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .histoire-volume-card span {
+        font-size: 0.78rem;
     }
 
     .commentaires-header,
