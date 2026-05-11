@@ -244,6 +244,12 @@ function getVolumesAffichablesHistoire(histoire, volumes = []) {
     ];
 }
 
+function getVolumeAffichableHistoire(volumeId) {
+    const state = window._histoireVolumesState;
+    return getVolumesAffichablesHistoire(state.histoire, state.volumes)
+        .find((volume) => String(volume.id) === String(volumeId || state.volumeActif));
+}
+
 function getNombreVolumesVisiblesHistoire() {
     return window.matchMedia?.('(max-width: 768px)').matches ? 2 : VOLUMES_PAR_PAGE_HISTOIRE;
 }
@@ -380,6 +386,42 @@ function appliquerFiltreVolumeHistoire(volumeId) {
     dessinerChapitresHistoire(getChapitresFiltresHistoire());
 }
 
+function fermerApercuVolumeHistoire() {
+    const backdrop = document.getElementById('volume-preview-backdrop');
+    const image = document.getElementById('volume-preview-image');
+    const titre = document.getElementById('volume-preview-title');
+
+    if (!backdrop) return;
+    const etaitOuvert = !backdrop.classList.contains('hidden');
+
+    backdrop.classList.add('hidden');
+    if (etaitOuvert) document.body.classList.remove('modal-open');
+
+    if (image) {
+        image.removeAttribute('src');
+        image.alt = '';
+    }
+    if (titre) titre.textContent = '';
+}
+
+function ouvrirApercuVolumeHistoire(volumeId) {
+    const volume = getVolumeAffichableHistoire(volumeId);
+    const state = window._histoireVolumesState;
+    const backdrop = document.getElementById('volume-preview-backdrop');
+    const image = document.getElementById('volume-preview-image');
+    const titre = document.getElementById('volume-preview-title');
+
+    if (!volume || !backdrop || !image || !titre) return;
+
+    const titreVolume = volume.titre || 'Volume';
+    image.src = getVolumeHistoireCover(volume, state.histoire);
+    image.alt = `Couverture ${titreVolume}`;
+    image.draggable = false;
+    titre.textContent = titreVolume;
+    backdrop.classList.remove('hidden');
+    document.body.classList.add('modal-open');
+}
+
 function dessinerBandeauVolumesHistoire() {
     const section = document.getElementById('histoire-volumes-section');
     const strip = document.getElementById('histoire-volumes-strip');
@@ -404,7 +446,7 @@ function dessinerBandeauVolumesHistoire() {
         bouton.className = `histoire-volume-card${String(volume.id) === state.volumeActif ? ' active' : ''}`;
         bouton.dataset.volumeId = volume.id;
         bouton.innerHTML = `
-            <img src="${getVolumeHistoireCover(volume, state.histoire)}" alt="Couverture ${escapeCommentaireHtml(volume.titre)}">
+            <img src="${getVolumeHistoireCover(volume, state.histoire)}" alt="Couverture ${escapeCommentaireHtml(volume.titre)}" draggable="false">
             <span>${escapeCommentaireHtml(volume.titre)}</span>
         `;
         strip.appendChild(bouton);
@@ -991,6 +1033,13 @@ if (!window.commentairesEventsHooked) {
         }
     });
 
+    document.addEventListener('keydown', (event) => {
+        const backdrop = document.getElementById('volume-preview-backdrop');
+        if (event.key === 'Escape' && backdrop && !backdrop.classList.contains('hidden')) {
+            fermerApercuVolumeHistoire();
+        }
+    });
+
     document.addEventListener('input', (event) => {
         if (event.target?.matches?.('[data-role="message"]')) {
             const instance = getCommentaireInstanceFromNode(event.target);
@@ -1031,7 +1080,24 @@ if (!window.commentairesEventsHooked) {
     document.addEventListener('click', async (event) => {
         const boutonVolume = event.target.closest('.histoire-volume-card');
         if (boutonVolume) {
-            appliquerFiltreVolumeHistoire(boutonVolume.dataset.volumeId || 'general');
+            const volumeId = boutonVolume.dataset.volumeId || 'general';
+            const estVolumeActif = String(volumeId) === String(window._histoireVolumesState.volumeActif);
+            if (estVolumeActif && event.target?.matches?.('img')) {
+                ouvrirApercuVolumeHistoire(volumeId);
+                return;
+            }
+
+            appliquerFiltreVolumeHistoire(volumeId);
+            return;
+        }
+
+        if (event.target?.id === 'volume-preview-close' || event.target?.id === 'volume-preview-backdrop') {
+            fermerApercuVolumeHistoire();
+            return;
+        }
+
+        if (event.target?.id === 'volume-preview-image') {
+            event.preventDefault();
             return;
         }
 
@@ -1110,6 +1176,24 @@ if (!window.commentairesEventsHooked) {
             });
             if (!ok) return;
             await supprimerCommentaireInstance(instance, commentaireId);
+        }
+    });
+
+    document.addEventListener('contextmenu', (event) => {
+        if (event.target?.closest?.('#volume-preview-backdrop, .histoire-volume-card')) {
+            event.preventDefault();
+        }
+    });
+
+    document.addEventListener('dragstart', (event) => {
+        if (event.target?.closest?.('#volume-preview-backdrop, .histoire-volume-card')) {
+            event.preventDefault();
+        }
+    });
+
+    document.addEventListener('copy', (event) => {
+        if (event.target?.closest?.('#volume-preview-backdrop')) {
+            event.preventDefault();
         }
     });
 
