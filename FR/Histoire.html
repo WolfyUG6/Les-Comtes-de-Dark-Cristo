@@ -29,11 +29,20 @@
     <section class="chapitres-section">
         <div class="chapters-header">
             <h2 class="title-m0">Liste des Parchemins (Chapitres)</h2>
+            <label class="chapter-page-size">
+                <span>Afficher</span>
+                <select id="histoire-chapitres-page-size" class="custom-select">
+                    <option value="15" selected>15</option>
+                    <option value="30">30</option>
+                    <option value="50">50</option>
+                </select>
+            </label>
         </div>
         
         <div class="chapter-list" id="lecteur-chapitres-liste">
             <!-- La liste des chapitres publiés s'affichera ici -->
         </div>
+        <div id="histoire-chapitres-pagination" class="chapter-pagination hidden"></div>
     </section>
 
     <section id="commentaires-histoire-section" class="commentaires-section mt-15 card hidden" data-commentaires-root>

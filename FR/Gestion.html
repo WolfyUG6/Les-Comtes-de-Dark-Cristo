@@ -38,18 +38,51 @@
         </div>
 
         <div class="chapter-section">
-            <h3 class="chapter-section-title-brouillon">📝 Brouillons (Cachés)</h3>
+            <div class="chapter-section-toolbar">
+                <h3 class="chapter-section-title-brouillon">📝 Brouillons (Cachés)</h3>
+                <label class="chapter-page-size">
+                    <span>Afficher</span>
+                    <select id="gestion-brouillons-page-size" class="custom-select" data-gestion-page-size="brouillons">
+                        <option value="15" selected>15</option>
+                        <option value="30">30</option>
+                        <option value="50">50</option>
+                    </select>
+                </label>
+            </div>
             <div id="liste-brouillons" class="chapter-list"></div>
+            <div id="pagination-brouillons" class="chapter-pagination hidden"></div>
         </div>
 
         <div class="chapter-section">
-            <h3 class="chapter-section-title-programme">⏳ Programmés (En attente)</h3>
+            <div class="chapter-section-toolbar">
+                <h3 class="chapter-section-title-programme">⏳ Programmés (En attente)</h3>
+                <label class="chapter-page-size">
+                    <span>Afficher</span>
+                    <select id="gestion-programmes-page-size" class="custom-select" data-gestion-page-size="programmes">
+                        <option value="15" selected>15</option>
+                        <option value="30">30</option>
+                        <option value="50">50</option>
+                    </select>
+                </label>
+            </div>
             <div id="liste-programmes" class="chapter-list"></div>
+            <div id="pagination-programmes" class="chapter-pagination hidden"></div>
         </div>
 
         <div class="chapter-section">
-            <h3 class="chapter-section-title-publie">👁️ Publiés (Visibles de tous)</h3>
+            <div class="chapter-section-toolbar">
+                <h3 class="chapter-section-title-publie">👁️ Publiés (Visibles de tous)</h3>
+                <label class="chapter-page-size">
+                    <span>Afficher</span>
+                    <select id="gestion-publies-page-size" class="custom-select" data-gestion-page-size="publies">
+                        <option value="15" selected>15</option>
+                        <option value="30">30</option>
+                        <option value="50">50</option>
+                    </select>
+                </label>
+            </div>
             <div id="liste-publies" class="chapter-list"></div>
+            <div id="pagination-publies" class="chapter-pagination hidden"></div>
         </div>
     </section>
 

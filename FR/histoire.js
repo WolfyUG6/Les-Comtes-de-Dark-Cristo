@@ -15,7 +15,9 @@ window._histoireVolumesState = window._histoireVolumesState || {
     volumes: [],
     chapitresPublies: [],
     volumeActif: 'general',
-    indexDebut: 0
+    indexDebut: 0,
+    pageCourante: 1,
+    taillePage: 15
 };
 
 function getCommentaireElements(section) {
@@ -246,6 +248,12 @@ function getNombreVolumesVisiblesHistoire() {
     return window.matchMedia?.('(max-width: 768px)').matches ? 2 : VOLUMES_PAR_PAGE_HISTOIRE;
 }
 
+function getTaillePageChapitresHistoire() {
+    const select = document.getElementById('histoire-chapitres-page-size');
+    const valeur = Number(select?.value || window._histoireVolumesState.taillePage || 15);
+    return [15, 30, 50].includes(valeur) ? valeur : 15;
+}
+
 function getChapitresFiltresHistoire() {
     const state = window._histoireVolumesState;
 
@@ -260,18 +268,78 @@ function getChapitresFiltresHistoire() {
     return state.chapitresPublies.filter((chapitre) => String(chapitre.volume_id) === String(state.volumeActif));
 }
 
+function getPagesPagination(totalPages, pageCourante) {
+    const pages = new Set([1, totalPages, pageCourante]);
+    for (let i = pageCourante - 2; i <= pageCourante + 2; i++) {
+        if (i >= 1 && i <= totalPages) pages.add(i);
+    }
+    return [...pages].sort((a, b) => a - b);
+}
+
+function dessinerPaginationChapitresHistoire(totalItems) {
+    const pagination = document.getElementById('histoire-chapitres-pagination');
+    if (!pagination) return;
+
+    const state = window._histoireVolumesState;
+    const totalPages = Math.max(1, Math.ceil(totalItems / state.taillePage));
+    state.pageCourante = Math.min(Math.max(1, state.pageCourante), totalPages);
+
+    if (totalPages <= 1) {
+        pagination.classList.add('hidden');
+        pagination.innerHTML = '';
+        return;
+    }
+
+    pagination.classList.remove('hidden');
+    pagination.innerHTML = '';
+
+    const boutons = [
+        { label: '«', page: 1, disabled: state.pageCourante === 1 },
+        { label: '-5', page: Math.max(1, state.pageCourante - 5), disabled: state.pageCourante === 1 },
+        { label: '‹', page: Math.max(1, state.pageCourante - 1), disabled: state.pageCourante === 1 }
+    ];
+
+    getPagesPagination(totalPages, state.pageCourante).forEach((page) => {
+        boutons.push({ label: String(page), page, active: page === state.pageCourante });
+    });
+
+    boutons.push(
+        { label: '›', page: Math.min(totalPages, state.pageCourante + 1), disabled: state.pageCourante === totalPages },
+        { label: '+5', page: Math.min(totalPages, state.pageCourante + 5), disabled: state.pageCourante === totalPages },
+        { label: '»', page: totalPages, disabled: state.pageCourante === totalPages }
+    );
+
+    boutons.forEach((config) => {
+        const bouton = document.createElement('button');
+        bouton.type = 'button';
+        bouton.className = `genre-btn chapter-page-btn${config.active ? ' active' : ''}`;
+        bouton.dataset.histoirePage = config.page;
+        bouton.disabled = Boolean(config.disabled);
+        bouton.textContent = config.label;
+        pagination.appendChild(bouton);
+    });
+}
+
 function dessinerChapitresHistoire(chapitres) {
     const chapitresListe = document.getElementById('lecteur-chapitres-liste');
     if (!chapitresListe) return;
 
     if (!chapitres || chapitres.length === 0) {
         chapitresListe.innerHTML = '<p class="text-muted-italic text-center mt-15">Aucun chapitre n\'est disponible dans ce volume.</p>';
+        dessinerPaginationChapitresHistoire(0);
         return;
     }
 
+    const state = window._histoireVolumesState;
+    state.taillePage = getTaillePageChapitresHistoire();
+    const totalPages = Math.max(1, Math.ceil(chapitres.length / state.taillePage));
+    state.pageCourante = Math.min(Math.max(1, state.pageCourante), totalPages);
+    const debut = (state.pageCourante - 1) * state.taillePage;
+    const chapitresPage = chapitres.slice(debut, debut + state.taillePage);
+
     chapitresListe.innerHTML = '';
 
-    chapitres.forEach((chap) => {
+    chapitresPage.forEach((chap) => {
         const dateChap = chap.date_publication ? new Date(chap.date_publication) : new Date();
         const dateAffichee = dateChap.toLocaleDateString('fr-FR');
         const div = document.createElement('div');
@@ -287,11 +355,14 @@ function dessinerChapitresHistoire(chapitres) {
         `;
         chapitresListe.appendChild(div);
     });
+
+    dessinerPaginationChapitresHistoire(chapitres.length);
 }
 
 function appliquerFiltreVolumeHistoire(volumeId) {
     const state = window._histoireVolumesState;
     state.volumeActif = String(volumeId || 'general');
+    state.pageCourante = 1;
 
     const volumes = getVolumesAffichablesHistoire(state.histoire, state.volumes);
     const indexActif = volumes.findIndex((volume) => String(volume.id) === state.volumeActif);
@@ -380,7 +451,9 @@ async function initialiserVolumesHistoire(histoire, idHistoire) {
         volumes: volumes || [],
         chapitresPublies: [],
         volumeActif: 'general',
-        indexDebut: 0
+        indexDebut: 0,
+        pageCourante: 1,
+        taillePage: getTaillePageChapitresHistoire()
     };
 
     dessinerBandeauVolumesHistoire();
@@ -927,6 +1000,13 @@ if (!window.commentairesEventsHooked) {
     });
 
     document.addEventListener('change', async (event) => {
+        if (event.target?.id === 'histoire-chapitres-page-size') {
+            window._histoireVolumesState.taillePage = getTaillePageChapitresHistoire();
+            window._histoireVolumesState.pageCourante = 1;
+            dessinerChapitresHistoire(getChapitresFiltresHistoire());
+            return;
+        }
+
         if (event.target?.matches?.('[data-role="tri"]')) {
             const instance = getCommentaireInstanceFromNode(event.target);
             if (!instance) return;
@@ -970,6 +1050,13 @@ if (!window.commentairesEventsHooked) {
             const chapitreId = boutonLecture.dataset.chapitreRead;
             localStorage.setItem('currentChapitreId', chapitreId);
             window.changerDePage('lecture', { id: chapitreId });
+            return;
+        }
+
+        const boutonPageHistoire = event.target.closest('[data-histoire-page]');
+        if (boutonPageHistoire) {
+            window._histoireVolumesState.pageCourante = Number(boutonPageHistoire.dataset.histoirePage) || 1;
+            dessinerChapitresHistoire(getChapitresFiltresHistoire());
             return;
         }
 
