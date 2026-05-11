@@ -10,6 +10,7 @@ window.chapitresGestionPagination = window.chapitresGestionPagination || {
     programmes: { items: [], pageCourante: 1, taillePage: 15 },
     publies: { items: [], pageCourante: 1, taillePage: 15 }
 };
+const VOLUME_COVER_BUCKET = 'VolumeCover';
 
 function escapeGestionHtml(value) {
     return String(value ?? '')
@@ -35,6 +36,42 @@ function getNomFichierVolumeCover(file, session, histoireId) {
     return `${session.user.id}/histoire-${histoireId}/${Date.now()}-${nomNettoye}`;
 }
 
+function getCheminVolumeCoverDepuisUrl(url) {
+    const valeur = typeof url === 'string' ? url.trim() : '';
+    if (!valeur) return null;
+
+    const extraireDepuisPathname = (pathname) => {
+        const prefixes = [
+            `/storage/v1/object/public/${VOLUME_COVER_BUCKET}/`,
+            `/storage/v1/object/sign/${VOLUME_COVER_BUCKET}/`
+        ];
+        const prefix = prefixes.find((item) => pathname.includes(item));
+        if (!prefix) return null;
+
+        const chemin = pathname.slice(pathname.indexOf(prefix) + prefix.length);
+        return chemin ? decodeURIComponent(chemin) : null;
+    };
+
+    try {
+        const urlObjet = new URL(valeur);
+        return extraireDepuisPathname(urlObjet.pathname);
+    } catch (_erreur) {
+        const cheminSansParams = valeur.split('?')[0];
+        return extraireDepuisPathname(cheminSansParams);
+    }
+}
+
+async function supprimerCoverVolumeStorage(url) {
+    const chemin = getCheminVolumeCoverDepuisUrl(url);
+    if (!chemin) return;
+
+    const { error } = await window._supabase.storage
+        .from(VOLUME_COVER_BUCKET)
+        .remove([chemin]);
+
+    if (error) throw error;
+}
+
 async function uploadVolumeCover(file, histoireId, session) {
     if (!file) return null;
 
@@ -51,12 +88,12 @@ async function uploadVolumeCover(file, histoireId, session) {
 
     const chemin = getNomFichierVolumeCover(file, session, histoireId);
     const { error } = await window._supabase.storage
-        .from('VolumeCover')
+        .from(VOLUME_COVER_BUCKET)
         .upload(chemin, fichierAEnvoyer, { cacheControl: '3600', upsert: false });
 
     if (error) throw error;
 
-    const { data } = window._supabase.storage.from('VolumeCover').getPublicUrl(chemin);
+    const { data } = window._supabase.storage.from(VOLUME_COVER_BUCKET).getPublicUrl(chemin);
     return data.publicUrl;
 }
 
@@ -233,6 +270,13 @@ async function supprimerVolume(volumeId) {
         danger: true
     });
     if (!confirmation) return;
+
+    try {
+        await supprimerCoverVolumeStorage(volume.image_couverture);
+    } catch (error) {
+        await window.siteAlert("Impossible de supprimer l'image du volume : " + error.message, { danger: true });
+        return;
+    }
 
     const { error } = await window._supabase
         .from('volumes')
