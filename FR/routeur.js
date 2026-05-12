@@ -798,6 +798,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    const miniLogo = document.getElementById('mini-logo');
+    if (miniLogo) {
+        const retourAccueilDepuisLogo = () => {
+            if (window._pageCourante !== 'accueil') {
+                window.changerDePage('accueil');
+            }
+        };
+
+        miniLogo.addEventListener('click', retourAccueilDepuisLogo);
+        miniLogo.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                retourAccueilDepuisLogo();
+            }
+        });
+    }
+
     // Lancer la page demandée dans l'URL (ou l'accueil par défaut)
     const routeInitiale = extraireRouteDepuisHash();
     appliquerParamsRoute(routeInitiale);

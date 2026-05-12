@@ -622,10 +622,19 @@ button:hover, .genre-btn:hover {
     align-items: center;
     gap: 10px;
     z-index: 1000;
+    cursor: pointer;
+    transition: color 0.2s ease, filter 0.2s ease;
 }
 
 #mini-logo img {
     height: 40px;
+}
+
+#mini-logo:hover,
+#mini-logo:focus-visible {
+    color: var(--text-title);
+    filter: brightness(1.12);
+    outline: none;
 }
 
 /* =========================================
