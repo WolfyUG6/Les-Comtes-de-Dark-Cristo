@@ -10,6 +10,9 @@ window.chargerGenre = async function() {
     
     // Récupération de la thématique choisie et mémorisée
     const genreChoisi = localStorage.getItem('currentGenre');
+    const langueActive = ['FR', 'EN', 'JP'].includes(String(window._siteLocale || '').toUpperCase())
+        ? String(window._siteLocale).toUpperCase()
+        : 'FR';
 
     if (!conteneur || !titrePage) return;
 
@@ -28,6 +31,7 @@ window.chargerGenre = async function() {
         .from('histoires')
         .select('*')
         .eq('genre', genreChoisi)
+        .eq('langue', langueActive)
         .order('date_publication', { ascending: false });
 
     if (error) {
