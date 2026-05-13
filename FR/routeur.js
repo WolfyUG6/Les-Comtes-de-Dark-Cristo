@@ -758,6 +758,7 @@ window.chargerPageInterne = async function(pageDemandee) {
         // --- 🌑 L'ÉCLIPSE DU LOGO & DU MENU (Nouveau Mécanisme) 🌑 ---
         const miniLogo = document.getElementById('mini-logo');
         const heroLogo = document.getElementById('hero-logo-area');
+        const languageSwitcher = document.getElementById('language-switcher');
         const menuGenre = document.getElementById('main-genre-menu'); // <-- Le menu des catégories
 
         if (pageDemandee === 'accueil') {
@@ -765,16 +766,19 @@ window.chargerPageInterne = async function(pageDemandee) {
             if (miniLogo) miniLogo.classList.add('hidden');
             if (heroLogo) heroLogo.classList.remove('hidden');
             if (menuGenre) menuGenre.classList.remove('hidden');
+            if (languageSwitcher) languageSwitcher.classList.remove('hidden');
         } else if (pageDemandee === 'categorie-genre') {
             // Dans les rayons : Petit Logo activé, Gros Logo caché, mais Menu TOUJOURS affiché
             if (miniLogo) miniLogo.classList.remove('hidden');
             if (heroLogo) heroLogo.classList.add('hidden');
             if (menuGenre) menuGenre.classList.remove('hidden');
+            if (languageSwitcher) languageSwitcher.classList.add('hidden');
         } else {
             // Partout ailleurs : Petit Logo activé, Gros Logo caché, Menu masqué
             if (miniLogo) miniLogo.classList.remove('hidden');
             if (heroLogo) heroLogo.classList.add('hidden');
             if (menuGenre) menuGenre.classList.add('hidden');
+            if (languageSwitcher) languageSwitcher.classList.add('hidden');
         }
         // -------------------------------------------------------------
 

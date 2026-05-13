@@ -445,6 +445,74 @@ button:hover, .genre-btn:hover {
     color: #ffb0b0;
 }
 
+.language-switcher {
+    position: fixed;
+    top: 15px;
+    left: 20px;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.language-btn {
+    width: 42px;
+    height: 30px;
+    padding: 3px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-color: rgba(243, 236, 221, 0.35);
+    background: rgba(0, 0, 0, 0.18);
+    box-shadow: none;
+}
+
+.language-btn:hover,
+.language-btn:focus-visible,
+.language-btn.active {
+    border-color: var(--border-hover);
+    box-shadow: var(--shadow-hover);
+    outline: none;
+}
+
+.language-flag {
+    width: 30px;
+    height: 20px;
+    display: block;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.42);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+}
+
+.flag-fr {
+    background: linear-gradient(90deg, #002654 0 33.33%, #fff 33.33% 66.66%, #ce1126 66.66% 100%);
+}
+
+.flag-en {
+    background:
+        linear-gradient(27deg, transparent 0 43%, #fff 43% 48%, #c8102e 48% 52%, #fff 52% 57%, transparent 57% 100%),
+        linear-gradient(153deg, transparent 0 43%, #fff 43% 48%, #c8102e 48% 52%, #fff 52% 57%, transparent 57% 100%),
+        linear-gradient(90deg, transparent 0 38%, #fff 38% 45%, #c8102e 45% 55%, #fff 55% 62%, transparent 62% 100%),
+        linear-gradient(0deg, transparent 0 32%, #fff 32% 42%, #c8102e 42% 58%, #fff 58% 68%, transparent 68% 100%),
+        #012169;
+}
+
+.flag-jp {
+    position: relative;
+    background: #fff;
+}
+
+.flag-jp::before {
+    content: '';
+    position: absolute;
+    inset: 50% auto auto 50%;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: #bc002d;
+    transform: translate(-50%, -50%);
+}
+
 .notifications-menu {
     position: relative;
     display: inline-flex;
@@ -655,6 +723,21 @@ button:hover, .genre-btn:hover {
 }
 
 @media (max-width: 900px) {
+    .language-switcher {
+        left: 12px;
+        gap: 6px;
+    }
+
+    .language-btn {
+        width: 38px;
+        height: 28px;
+    }
+
+    .language-flag {
+        width: 27px;
+        height: 18px;
+    }
+
     #mini-logo {
         left: 12px;
         max-width: calc(100vw - 340px);
@@ -681,6 +764,28 @@ button:hover, .genre-btn:hover {
 }
 
 @media (max-width: 700px) {
+    .language-switcher {
+        top: 16px;
+        left: 8px;
+        gap: 4px;
+    }
+
+    .language-btn {
+        width: 32px;
+        height: 26px;
+        padding: 2px;
+    }
+
+    .language-flag {
+        width: 24px;
+        height: 16px;
+    }
+
+    .flag-jp::before {
+        width: 9px;
+        height: 9px;
+    }
+
     #mini-logo {
         top: 17px;
         max-width: 38px;
