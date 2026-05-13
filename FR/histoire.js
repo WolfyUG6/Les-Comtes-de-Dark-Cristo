@@ -1295,7 +1295,7 @@ window.chargerPageHistoire = async function() {
 
     const imageCouverture = window.getStoryCoverUrl(histoire.image_couverture);
     const imgHtml = `<img src="${imageCouverture}" class="book-cover" alt="Couverture">`;
-    const metaHistoireHtml = `
+    const metaHistoireHtml = () => `
         <div class="story-side-meta" aria-label="Informations de l'histoire">
             <span class="tag tag-genre story-meta-line">${traduireGenreHistoire(histoire.genre)}</span>
             <span class="tag tag-statut story-meta-line">${traduireStatutHistoire(histoire.statut)}</span>
@@ -1323,7 +1323,7 @@ window.chargerPageHistoire = async function() {
     infoPanel.innerHTML = `
         <div class="book-cover-column">
             ${imgHtml}
-            ${metaHistoireHtml}
+            ${metaHistoireHtml()}
         </div>
         <div class="book-info-content">
             <h2 class="story-title-m0">${histoire.titre}</h2>
