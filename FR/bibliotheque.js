@@ -11,6 +11,11 @@ const HOME_GENRE_ORDER = [
     'Horreur Psychologique'
 ];
 
+function getLangueActiveAccueil() {
+    const langue = String(window._siteLocale || localStorage.getItem('siteLocale') || 'FR').toUpperCase();
+    return ['FR', 'EN', 'JP'].includes(langue) ? langue : 'FR';
+}
+
 function getStoryAgeClass(classification = '') {
     let classe = 'tag tag-age';
 
@@ -251,6 +256,101 @@ function dedoublonnerMisesEnAvantParGenre(selections = []) {
     });
 }
 
+async function filtrerMisesEnAvantParLangue(selections = [], langueActive = 'FR') {
+    const selectionsValides = (selections || []).filter(Boolean);
+    if (selectionsValides.length === 0) return [];
+
+    const toutesAvecLangue = selectionsValides.every((selection) => 'langue' in selection);
+    if (toutesAvecLangue) {
+        return selectionsValides.filter((selection) => String(selection.langue || 'FR').toUpperCase() === langueActive);
+    }
+
+    const idsHistoires = [...new Set(
+        selectionsValides
+            .map((selection) => Number(selection.histoire_id || selection.id))
+            .filter(Boolean)
+    )];
+
+    if (idsHistoires.length === 0) return [];
+
+    const { data, error } = await window._supabase
+        .from('histoires')
+        .select('id')
+        .in('id', idsHistoires)
+        .eq('langue', langueActive);
+
+    if (error) {
+        console.error('Erreur de filtrage des mises en avant par langue :', error);
+        return [];
+    }
+
+    const idsAutorises = new Set((data || []).map((histoire) => Number(histoire.id)));
+    return selectionsValides.filter((selection) => idsAutorises.has(Number(selection.histoire_id || selection.id)));
+}
+
+async function chargerCandidatsMisesEnAvantLangue(langueActive = 'FR') {
+    const { data: histoires, error } = await window._supabase
+        .from('histoires')
+        .select('*')
+        .eq('langue', langueActive)
+        .order('date_publication', { ascending: false })
+        .limit(60);
+
+    if (error) {
+        console.error('Erreur de lecture des mises en avant par langue :', error);
+        return [];
+    }
+
+    const idsHistoires = (histoires || [])
+        .map((histoire) => Number(histoire.id))
+        .filter(Boolean);
+
+    const pactesParHistoire = new Map();
+    if (idsHistoires.length > 0) {
+        const { data: pactes, error: pactesError } = await window._supabase
+            .from('favoris')
+            .select('histoire_id')
+            .in('histoire_id', idsHistoires);
+
+        if (!pactesError) {
+            (pactes || []).forEach((pacte) => {
+                const histoireId = Number(pacte.histoire_id);
+                pactesParHistoire.set(histoireId, (pactesParHistoire.get(histoireId) || 0) + 1);
+            });
+        }
+    }
+
+    return (histoires || [])
+        .map((histoire) => {
+            const followersCount = pactesParHistoire.get(Number(histoire.id)) || 0;
+            return {
+                histoire_id: histoire.id,
+                titre: histoire.titre,
+                synopsis: histoire.synopsis,
+                genre: histoire.genre,
+                classification: histoire.classification,
+                statut: histoire.statut,
+                contenu_sensible: histoire.contenu_sensible,
+                image_couverture: histoire.image_couverture,
+                pseudo_auteur: histoire.pseudo_auteur,
+                auteur: histoire.auteur,
+                vues: histoire.vues,
+                slug: histoire.slug,
+                score: followersCount + (Number(histoire.vues) || 0),
+                followers_count: followersCount
+            };
+        })
+        .sort((a, b) => {
+            if ((b.followers_count || 0) !== (a.followers_count || 0)) {
+                return (b.followers_count || 0) - (a.followers_count || 0);
+            }
+            if ((b.vues || 0) !== (a.vues || 0)) {
+                return (b.vues || 0) - (a.vues || 0);
+            }
+            return (b.histoire_id || 0) - (a.histoire_id || 0);
+        });
+}
+
 async function chargerMisesEnAvantHebdomadairesAccueil() {
     const section = document.getElementById('weekly-highlights-section');
     const container = document.getElementById('weekly-highlights-container');
@@ -260,6 +360,7 @@ async function chargerMisesEnAvantHebdomadairesAccueil() {
     section.classList.remove('hidden');
     container.innerHTML = `<p class="loading-text">${window.t?.('home.weeklyHighlights.loading', {}, 'Lecture des mises en avant hebdomadaires...') || 'Lecture des mises en avant hebdomadaires...'}</p>`;
 
+    const langueActive = getLangueActiveAccueil();
     const { data, error } = await window._supabase.rpc('get_mises_en_avant_hebdomadaires_courantes');
 
     if (error) {
@@ -268,13 +369,20 @@ async function chargerMisesEnAvantHebdomadairesAccueil() {
         return { ids: [], genres: [] };
     }
 
-    if (!data || data.length === 0) {
+    const selectionsLangue = await filtrerMisesEnAvantParLangue(data || [], langueActive);
+    const candidatsLangue = await chargerCandidatsMisesEnAvantLangue(langueActive);
+    const selectionsCompletes = [
+        ...selectionsLangue,
+        ...candidatsLangue
+    ];
+
+    if (!selectionsCompletes || selectionsCompletes.length === 0) {
         container.innerHTML = `<p class="loading-text">${window.t?.('home.weeklyHighlights.empty', {}, 'Aucune mise en avant hebdomadaire n’a encore été calculée.') || 'Aucune mise en avant hebdomadaire n’a encore été calculée.'}</p>`;
         return { ids: [], genres: [] };
     }
 
     container.innerHTML = '';
-    const selectionsUniques = dedoublonnerMisesEnAvantParGenre(data);
+    const selectionsUniques = dedoublonnerMisesEnAvantParGenre(selectionsCompletes);
     const histoiresSelectionnees = selectionsUniques.map((selection) => ({
         id: selection.histoire_id,
         titre: selection.titre,
@@ -286,7 +394,8 @@ async function chargerMisesEnAvantHebdomadairesAccueil() {
         image_couverture: selection.image_couverture,
         pseudo_auteur: selection.pseudo_auteur,
         auteur: selection.auteur,
-        vues: selection.vues
+        vues: selection.vues,
+        slug: selection.slug
     }));
     const [statsParHistoire, vuesParHistoire] = await Promise.all([
         chargerStatsCartesHistoires(histoiresSelectionnees),
@@ -318,6 +427,7 @@ async function chargerMisesEnAvantHebdomadairesAccueil() {
 window.chargerVitrine = async function(genreFilter = null) {
     const storiesContainer = document.getElementById('stories-container');
     const weeklyHighlightsSection = document.getElementById('weekly-highlights-section');
+    const langueActive = getLangueActiveAccueil();
 
     if (!storiesContainer) return;
 
@@ -334,6 +444,7 @@ window.chargerVitrine = async function(genreFilter = null) {
     let query = window._supabase
         .from('histoires')
         .select('*')
+        .eq('langue', langueActive)
         .order('date_publication', { ascending: false });
 
     if (genreFilter && genreFilter !== 'accueil') {
