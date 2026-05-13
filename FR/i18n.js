@@ -385,7 +385,8 @@ function appliquerTraductionsCreationStory(root = document) {
     if (commentsLabel) commentsLabel.textContent = window.t('creationStory.commentsLabel', {}, commentsLabel.textContent);
     setText('label[for="story-cover-file"]', 'creationStory.coverLabel', root);
     setText('.publish-options .text-muted', 'creationStory.coverHelp', root);
-    setText('label[for="story-delete-cover"] strong', 'creationStory.deleteCoverLabel', root);
+    const deleteCoverLabel = root.querySelector('#story-delete-cover')?.closest('label')?.querySelector('strong');
+    if (deleteCoverLabel) deleteCoverLabel.textContent = window.t('creationStory.deleteCoverLabel', {}, deleteCoverLabel.textContent);
 }
 
 function appliquerTraductionsEditeur(root = document) {

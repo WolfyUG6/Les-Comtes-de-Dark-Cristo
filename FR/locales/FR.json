@@ -351,7 +351,7 @@
     "commentsLabel": "Autoriser les commentaires sur cette histoire",
     "coverLabel": "Couverture de l'Œuvre (Optionnelle - Format Image, 5Mo max)",
     "coverHelp": "Une bannière automatique sera générée si vous ne fournissez aucune illustration des abysses.",
-    "deleteCoverLabel": "Bannir l'illustration actuelle (effacer la couverture sans la remplacer)",
+    "deleteCoverLabel": "Supprimer définitivement la couverture actuelle de cette œuvre. Attention : si vous n'avez plus le fichier original, cette image sera perdue et remplacée par la couverture par défaut.",
     "disconnectedError": "Erreur critique : Tu as été déconnecté par le vide spatial. Reconnecte-toi.",
     "requiredError": "Les fondations sont instables ! Remplissez tous les champs obligatoires (Titre, Synopsis, Genre, Classification).",
     "forging": "Forgeage en cours...",

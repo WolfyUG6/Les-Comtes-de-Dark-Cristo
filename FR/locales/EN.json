@@ -351,7 +351,7 @@
     "commentsLabel": "Allow comments on this story",
     "coverLabel": "Work cover (Optional - image format, 5 MB max)",
     "coverHelp": "An automatic banner will be generated if you do not provide an illustration from the depths.",
-    "deleteCoverLabel": "Banish the current illustration (delete the cover without replacing it)",
+    "deleteCoverLabel": "Permanently delete the current cover for this work. Warning: if you no longer have the original file, this image will be lost and replaced by the default cover.",
     "disconnectedError": "Critical error: the void disconnected you. Log in again.",
     "requiredError": "The foundations are unstable. Fill in every required field: title, synopsis, genre and rating.",
     "forging": "Forging...",
