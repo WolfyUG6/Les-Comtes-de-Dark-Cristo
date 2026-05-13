@@ -527,8 +527,45 @@ async function chargerLocaleSite(locale = 'FR') {
     }
 }
 
+async function enregistrerLanguePrefereeSite(locale = 'FR') {
+    const localeNormalisee = normaliserLocaleSite(locale);
+
+    if (!window._supabase?.auth) return;
+
+    try {
+        const { data: { session } } = await window._supabase.auth.getSession();
+        const userId = session?.user?.id;
+        if (!userId) return;
+
+        const payload = { langue_preferee: localeNormalisee };
+        const { data: profil, error: selectError } = await window._supabase
+            .from('noms_de_plume')
+            .select('user_id')
+            .eq('user_id', userId)
+            .maybeSingle();
+
+        if (selectError) throw selectError;
+
+        const { error } = profil
+            ? await window._supabase
+                .from('noms_de_plume')
+                .update(payload)
+                .eq('user_id', userId)
+            : await window._supabase
+                .from('noms_de_plume')
+                .insert({ user_id: userId, ...payload });
+
+        if (error) throw error;
+    } catch (error) {
+        console.error("Impossible d'enregistrer la langue preferee :", error);
+    }
+}
+
 window.changerLangueSite = async function(locale) {
-    await chargerLocaleSite(locale);
+    const localeNormalisee = normaliserLocaleSite(locale);
+
+    await chargerLocaleSite(localeNormalisee);
+    await enregistrerLanguePrefereeSite(localeNormalisee);
     appliquerTraductionsChrome();
 
     if (window._pageCourante && typeof window.chargerPageInterne === 'function') {
