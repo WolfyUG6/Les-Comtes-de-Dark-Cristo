@@ -1295,6 +1295,17 @@ window.chargerPageHistoire = async function() {
 
     const imageCouverture = window.getStoryCoverUrl(histoire.image_couverture);
     const imgHtml = `<img src="${imageCouverture}" class="book-cover" alt="Couverture">`;
+    const metaHistoireHtml = `
+        <div class="story-side-meta" aria-label="Informations de l'histoire">
+            <span class="tag tag-genre story-meta-line">${traduireGenreHistoire(histoire.genre)}</span>
+            <span class="tag tag-statut story-meta-line">${traduireStatutHistoire(histoire.statut)}</span>
+            <span class="tag ${classeAge} story-meta-line">${histoire.classification || 'Tout public'}</span>
+            ${tagSensible.replace('class="tag ', 'class="tag story-meta-line ')}
+            <span class="tag story-meta-line">👁️ ${window.t?.('story.views', { count: histoire.vues || 0 }, `${histoire.vues || 0} Vues`) || `${histoire.vues || 0} Vues`}</span>
+            <span class="tag story-meta-line" id="histoire-likes-count">❤️ ${window.t?.('story.likes', { count: totalLikes || 0 }, `${totalLikes || 0} Pactes`) || `${totalLikes || 0} Pactes`}</span>
+            <span class="tag story-meta-line">📝 <span id="histoire-mots-count">...</span> ${window.t?.('common.words', {}, 'Mots') || 'Mots'}</span>
+        </div>
+    `;
     const synopsisBrut = typeof histoire.synopsis === 'string' ? histoire.synopsis : '';
     const synopsisHtml = synopsisBrut.trim()
         ? escapeCommentaireHtml(synopsisBrut)
@@ -1310,22 +1321,12 @@ window.chargerPageHistoire = async function() {
 
     // 4. Affichage du panneau
     infoPanel.innerHTML = `
-        ${imgHtml}
+        <div class="book-cover-column">
+            ${imgHtml}
+            ${metaHistoireHtml}
+        </div>
         <div class="book-info-content">
             <h2 class="story-title-m0">${histoire.titre}</h2>
-            <div class="story-tags mb-15 mt-15">
-                <span class="tag tag-genre">${traduireGenreHistoire(histoire.genre)}</span>
-                <span class="tag tag-statut">${traduireStatutHistoire(histoire.statut)}</span>
-                <span class="tag ${classeAge}">${histoire.classification || 'Tout public'}</span>
-                ${tagSensible}
-            </div>
-            
-            <div class="story-tags mb-15">
-                <span class="tag">👁️ ${window.t?.('story.views', { count: histoire.vues || 0 }, `${histoire.vues || 0} Vues`) || `${histoire.vues || 0} Vues`}</span>
-                <span class="tag" id="histoire-likes-count">❤️ ${window.t?.('story.likes', { count: totalLikes || 0 }, `${totalLikes || 0} Pactes`) || `${totalLikes || 0} Pactes`}</span>
-                <span class="tag">📝 <span id="histoire-mots-count">...</span> ${window.t?.('common.words', {}, 'Mots') || 'Mots'}</span>
-            </div>
-            
             <span class="text-small text-muted-italic mb-15">${window.t?.('story.author', { pseudo: histoire.pseudo_auteur || histoire.auteur.split('@')[0] }, `Auteur : Comte ${histoire.pseudo_auteur || histoire.auteur.split('@')[0]}`) || `Auteur : Comte ${histoire.pseudo_auteur || histoire.auteur.split('@')[0]}`}</span>
             
             <div class="book-synopsis story-synopsis-detail mt-15">${synopsisHtml}</div>

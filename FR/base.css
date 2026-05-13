@@ -1241,8 +1241,29 @@ body.modal-open {
 .volume-cover-group input[type="file"] { padding: 8px; }
 .tag-volume { margin-left: 10px; background-color: transparent; color: var(--text-muted); border: 1px dotted var(--border-color); }
 .page-histoire .info-panel { gap: 35px; }
+.page-histoire .book-cover-column {
+    width: 240px;
+    flex: 0 0 240px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+}
 .page-histoire .book-cover { width: 240px; height: 360px; flex-shrink: 0; box-shadow: var(--shadow-box); }
 .page-histoire .book-info-content { min-width: 0; }
+.story-side-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.story-meta-line {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
 .story-synopsis-detail { display: block; white-space: pre-wrap; overflow: visible; max-height: none; -webkit-line-clamp: unset; line-clamp: unset; overflow-wrap: anywhere; }
 .chapters-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; }
 .chapter-section { margin-bottom: 40px; }
@@ -1435,6 +1456,11 @@ body.modal-open {
     .page-histoire .book-cover {
         width: min(100%, 280px);
         height: auto;
+    }
+
+    .page-histoire .book-cover-column {
+        width: min(100%, 280px);
+        flex-basis: auto;
     }
 
     .page-histoire .book-info-content {
