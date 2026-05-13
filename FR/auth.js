@@ -74,6 +74,19 @@ window.recupererStatutAdmin = async function(sessionParam = null) {
     }
 };
 
+function actualiserStatutAdminDepuisSession(session) {
+    window.estAdmin = false;
+    if (typeof window.activerBouclier === 'function') window.activerBouclier();
+
+    if (!session) return;
+
+    setTimeout(async () => {
+        const estAdmin = await window.recupererStatutAdmin(session);
+        window.estAdmin = estAdmin;
+        if (typeof window.activerBouclier === 'function') window.activerBouclier();
+    }, 0);
+}
+
 window.tenterAccesCreationHistoire = async function() {
     const { session, active } = await window.recupererEtatForgeUtilisateur();
 
@@ -410,7 +423,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Version stable : lit user_metadata en priorité
 // puis tente noms_de_plume en fallback silencieux
 // ==========================================
-window._supabase.auth.onAuthStateChange(async (event, session) => {
+window._supabase.auth.onAuthStateChange((event, session) => {
     try {
         if (event === 'PASSWORD_RECOVERY') {
             window._authPasswordRecoveryPending = true;
@@ -504,15 +517,13 @@ window._supabase.auth.onAuthStateChange(async (event, session) => {
                     .catch(() => {});
             }
 
-            window.estAdmin = await window.recupererStatutAdmin(session);
-            if (typeof window.activerBouclier === 'function') window.activerBouclier();
+            actualiserStatutAdminDepuisSession(session);
             if (typeof window.actualiserNotificationsHeader === 'function') window.actualiserNotificationsHeader();
         } else {
             if (authContainer) authContainer.classList.remove('hidden');
             if (userContainer) userContainer.classList.add('hidden');
             if (btnForge) btnForge.style.display = "none";
-            window.estAdmin = false;
-            if (typeof window.activerBouclier === 'function') window.activerBouclier();
+            actualiserStatutAdminDepuisSession(null);
             if (typeof window.actualiserNotificationsHeader === 'function') window.actualiserNotificationsHeader();
         }
     } catch (e) {
