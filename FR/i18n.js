@@ -361,6 +361,8 @@ function appliquerTraductionsCreationStory(root = document) {
     setAttr('#story-title', 'placeholder', 'creationStory.titlePlaceholder', root);
     setText('label[for="story-synopsis"]', 'creationStory.synopsisLabel', root);
     setAttr('#story-synopsis', 'placeholder', 'creationStory.synopsisPlaceholder', root);
+    setText('#story-language-label', 'creationStory.languageLabel', root);
+    setText('.story-language-help', 'creationStory.languageHelp', root);
     setText('label[for="story-genre"]', 'creationStory.genreLabel', root);
     setOptionText('#story-genre option[value=""]', 'creationStory.genrePlaceholder', root);
     setOptionText('#story-genre option[value="High & Low Fantasy"]', 'navigation.genres.highLowFantasy', root);

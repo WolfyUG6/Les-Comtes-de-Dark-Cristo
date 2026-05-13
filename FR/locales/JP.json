@@ -338,6 +338,8 @@
     "titlePlaceholder": "例：深淵の詠唱",
     "synopsisLabel": "あらすじ / 裏表紙文",
     "synopsisPlaceholder": "物語の始まりを語ってください...",
+    "languageLabel": "物語の言語",
+    "languageHelp": "この物語は選択した言語でのみ表示されます。",
     "genreLabel": "主なジャンル",
     "genrePlaceholder": "-- ジャンルを選択 --",
     "ageLabel": "年齢区分",

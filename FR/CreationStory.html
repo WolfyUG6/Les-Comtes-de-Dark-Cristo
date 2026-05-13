@@ -19,6 +19,28 @@
             <textarea id="story-synopsis" class="custom-input" rows="6" placeholder="Racontez-nous les prémices de votre histoire..."></textarea>
         </div>
 
+        <div class="form-group story-language-group">
+            <p id="story-language-label" class="form-label">Langue de l'histoire</p>
+            <div class="story-language-options" role="radiogroup" aria-labelledby="story-language-label">
+                <label class="story-language-option">
+                    <input type="radio" name="story-language" value="FR" checked>
+                    <span class="language-flag flag-fr" aria-hidden="true"></span>
+                    <span>FR</span>
+                </label>
+                <label class="story-language-option">
+                    <input type="radio" name="story-language" value="EN">
+                    <span class="language-flag flag-en" aria-hidden="true"></span>
+                    <span>EN</span>
+                </label>
+                <label class="story-language-option">
+                    <input type="radio" name="story-language" value="JP">
+                    <span class="language-flag flag-jp" aria-hidden="true"></span>
+                    <span>JP</span>
+                </label>
+            </div>
+            <p class="text-muted text-small text-muted-italic story-language-help">Cette histoire sera visible uniquement dans la langue choisie.</p>
+        </div>
+
         <div class="form-group-row" style="display: flex; gap: 20px; flex-wrap: wrap;"> <!-- J'utilise un flex basique ici pour préserver la structure sans figer la largeur -->
             <div class="form-group">
                 <label for="story-genre">Genre Littéraire dominant</label>

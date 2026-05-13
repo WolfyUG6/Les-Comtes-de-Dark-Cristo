@@ -3,6 +3,23 @@
 // Formulaire de publication
 // ==========================================
 
+const LANGUES_HISTOIRE_DISPONIBLES = ['FR', 'EN', 'JP'];
+
+function normaliserLangueHistoire(langue = 'FR') {
+    const langueNormalisee = String(langue || 'FR').toUpperCase();
+    return LANGUES_HISTOIRE_DISPONIBLES.includes(langueNormalisee) ? langueNormalisee : 'FR';
+}
+
+function getLangueHistoireSelectionnee() {
+    return normaliserLangueHistoire(document.querySelector('input[name="story-language"]:checked')?.value || window._siteLocale || 'FR');
+}
+
+function definirLangueHistoireSelectionnee(langue = 'FR') {
+    const langueNormalisee = normaliserLangueHistoire(langue);
+    const input = document.querySelector(`input[name="story-language"][value="${langueNormalisee}"]`);
+    if (input) input.checked = true;
+}
+
 window.chargerCreationStory = function() {
     console.log("Chargement de la page de création d'œuvre");
     
@@ -18,6 +35,7 @@ window.chargerCreationStory = function() {
     document.getElementById('story-sensible').checked = false;
     document.getElementById('story-comments-enabled').checked = true;
     document.getElementById('story-cover-file').value = '';
+    definirLangueHistoireSelectionnee(window._siteLocale || 'FR');
 
     const deleteBox = document.getElementById('delete-cover-container');
     if (deleteBox) deleteBox.classList.add('hidden');
@@ -51,6 +69,7 @@ window.chargerCreationStory = function() {
                     document.getElementById('story-status').value = histoire.statut || '✍️ En cours';
                     document.getElementById('story-sensible').checked = histoire.contenu_sensible || false;
                     document.getElementById('story-comments-enabled').checked = histoire.commentaires_actifs !== false;
+                    definirLangueHistoireSelectionnee(histoire.langue || 'FR');
                     
                     // On ne peut pas pré-remplir un <input type="file"> pour des raisons de sécurité navigateur.
                     const deleteBox = document.getElementById('delete-cover-container');
@@ -106,6 +125,7 @@ if (!window.creationStoryEventHooked) {
             const genre = document.getElementById('story-genre').value;
             const classification = document.getElementById('story-age').value;
             const statut = document.getElementById('story-status').value;
+            const langue = getLangueHistoireSelectionnee();
             const file = document.getElementById('story-cover-file').files[0];
             const isSensible = document.getElementById('story-sensible').checked;
             const commentairesActifs = document.getElementById('story-comments-enabled').checked;
@@ -223,6 +243,7 @@ if (!window.creationStoryEventHooked) {
                 genre: genre, 
                 classification: classification, 
                 statut: statut,
+                langue: langue,
                 contenu_sensible: isSensible,
                 commentaires_actifs: commentairesActifs,
                 auteur: session.user.email,

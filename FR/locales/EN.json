@@ -338,6 +338,8 @@
     "titlePlaceholder": "Ex: The Abyssal Chant",
     "synopsisLabel": "Synopsis / Back-cover text",
     "synopsisPlaceholder": "Tell us the first traces of your story...",
+    "languageLabel": "Story language",
+    "languageHelp": "This story will only be visible in the selected language.",
     "genreLabel": "Main literary genre",
     "genrePlaceholder": "-- Choose a genre --",
     "ageLabel": "Age rating",

@@ -338,6 +338,8 @@
     "titlePlaceholder": "Ex: Le Chant de l'Abysse",
     "synopsisLabel": "Synopsis / Quatrième de couverture",
     "synopsisPlaceholder": "Racontez-nous les prémices de votre histoire...",
+    "languageLabel": "Langue de l'histoire",
+    "languageHelp": "Cette histoire sera visible uniquement dans la langue choisie.",
     "genreLabel": "Genre Littéraire dominant",
     "genrePlaceholder": "-- Choisissez le genre --",
     "ageLabel": "Classification par âge",
