@@ -6,7 +6,6 @@
 const COMMENTAIRES_MIN = 50;
 const COMMENTAIRES_MAX = 1000;
 const COMMENTAIRES_TABLE = 'commentaires';
-const ADMIN_EMAIL = 'nitroapex@gmail.com';
 const VOLUMES_PAR_PAGE_HISTOIRE = 5;
 
 window._commentairesInstances = window._commentairesInstances || {};
@@ -139,18 +138,32 @@ function validerMessageCommentaire(message) {
     return '';
 }
 
-function estCompteAdminSession(session) {
-    return Boolean(session?.user?.email && session.user.email === ADMIN_EMAIL);
+async function estCompteAdminSession(session) {
+    if (!session) return false;
+
+    if (typeof window.recupererStatutAdmin === 'function') {
+        return await window.recupererStatutAdmin(session);
+    }
+
+    try {
+        const { data, error } = await window._supabase.rpc('est_admin');
+        if (error) throw error;
+        return data === true;
+    } catch (error) {
+        console.error("Impossible de vérifier le statut admin :", error);
+        return false;
+    }
 }
 
-function initialiserBoutonRetirerHistoire(idHistoire, session) {
+async function initialiserBoutonRetirerHistoire(idHistoire, session) {
     const bouton = document.getElementById('btn-retirer-histoire');
     if (!bouton) return;
 
     const clone = bouton.cloneNode(true);
     bouton.parentNode.replaceChild(clone, bouton);
 
-    if (!estCompteAdminSession(session)) {
+    const estAdmin = await estCompteAdminSession(session);
+    if (!estAdmin) {
         clone.classList.add('hidden');
         return;
     }
@@ -1279,7 +1292,7 @@ window.chargerPageHistoire = async function() {
     `;
 
     // 5. Gestion du bouton admin et du bouton Suivre l'Histoire
-    initialiserBoutonRetirerHistoire(idHistoire, session);
+    await initialiserBoutonRetirerHistoire(idHistoire, session);
     initialiserBoutonPartageHistoire(idHistoire);
 
     const btnSuivre = document.getElementById('btn-suivre-histoire');

@@ -54,6 +54,26 @@ window.recupererEtatForgeUtilisateur = async function(sessionParam = null) {
     return { session, active: true };
 };
 
+window.recupererStatutAdmin = async function(sessionParam = null) {
+    let session = sessionParam;
+
+    if (!session) {
+        const { data } = await window._supabase.auth.getSession();
+        session = data?.session || null;
+    }
+
+    if (!session) return false;
+
+    try {
+        const { data, error } = await window._supabase.rpc('est_admin');
+        if (error) throw error;
+        return data === true;
+    } catch (error) {
+        console.error("Impossible de vérifier le statut admin :", error);
+        return false;
+    }
+};
+
 window.tenterAccesCreationHistoire = async function() {
     const { session, active } = await window.recupererEtatForgeUtilisateur();
 
@@ -390,7 +410,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Version stable : lit user_metadata en priorité
 // puis tente noms_de_plume en fallback silencieux
 // ==========================================
-window._supabase.auth.onAuthStateChange((event, session) => {
+window._supabase.auth.onAuthStateChange(async (event, session) => {
     try {
         if (event === 'PASSWORD_RECOVERY') {
             window._authPasswordRecoveryPending = true;
@@ -484,7 +504,7 @@ window._supabase.auth.onAuthStateChange((event, session) => {
                     .catch(() => {});
             }
 
-            window.estAdmin = session.user.email === "nitroapex@gmail.com";
+            window.estAdmin = await window.recupererStatutAdmin(session);
             if (typeof window.activerBouclier === 'function') window.activerBouclier();
             if (typeof window.actualiserNotificationsHeader === 'function') window.actualiserNotificationsHeader();
         } else {
