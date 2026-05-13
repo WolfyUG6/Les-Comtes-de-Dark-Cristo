@@ -207,18 +207,26 @@ function estAuteurParent(histoire, session) {
     return Boolean(histoire.auteur_user_id && histoire.auteur_user_id === session.user.id);
 }
 
-function getLienPartageHistoire(idHistoire) {
+function getLienPartageHistoire(histoire) {
     const url = new URL(window.location.href);
-    url.hash = `oeuvre?id=${encodeURIComponent(idHistoire)}`;
+    const idHistoire = typeof histoire === 'object' ? histoire?.id : histoire;
+    const slugHistoire = typeof histoire === 'object' ? histoire?.slug : '';
+    url.hash = window.getHashOeuvre
+        ? window.getHashOeuvre(idHistoire, slugHistoire)
+        : `oeuvre?id=${encodeURIComponent(idHistoire)}`;
     return url.toString();
 }
 
-function synchroniserLienHistoireDansUrl(idHistoire) {
-    if (window.getRouteParam?.('id')) return;
-    window.history.replaceState({}, document.title, getLienPartageHistoire(idHistoire));
+function synchroniserLienHistoireDansUrl(histoire) {
+    if (!histoire?.id) return;
+
+    const slugRoute = window.getRouteParam?.('slug');
+    if (slugRoute && slugRoute === histoire.slug) return;
+
+    window.history.replaceState({}, document.title, getLienPartageHistoire(histoire));
 }
 
-function initialiserBoutonPartageHistoire(idHistoire) {
+function initialiserBoutonPartageHistoire(histoire) {
     const bouton = document.getElementById('btn-partager-histoire');
     if (!bouton) return;
 
@@ -226,7 +234,7 @@ function initialiserBoutonPartageHistoire(idHistoire) {
     bouton.parentNode.replaceChild(nouveauBouton, bouton);
 
     nouveauBouton.addEventListener('click', async () => {
-        const lien = getLienPartageHistoire(idHistoire);
+        const lien = getLienPartageHistoire(histoire);
 
         try {
             await navigator.clipboard.writeText(lien);
@@ -1215,31 +1223,40 @@ if (!window.commentairesEventsHooked) {
 
 window.chargerPageHistoire = async function() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    const idHistoire = window.getRouteParam?.('id') || localStorage.getItem('currentOeuvreId');
+    const slugHistoireRoute = window.getRouteParam?.('slug');
+    let idHistoire = window.getRouteParam?.('id') || localStorage.getItem('currentOeuvreId');
     const infoPanel = document.getElementById('histoire-presentation-panel');
     
-    if (!idHistoire || !infoPanel) {
+    if ((!idHistoire && !slugHistoireRoute) || !infoPanel) {
         window.changerDePage('accueil');
         return;
     }
 
-    window.currentOeuvreId = idHistoire;
-    localStorage.setItem('currentOeuvreId', idHistoire);
-    synchroniserLienHistoireDansUrl(idHistoire);
-
     infoPanel.innerHTML = '<p class="loading-text">Déchiffrage des runes en cours...</p>';
 
     // 1. Récupération des infos de l'histoire
-    const { data: histoire, error: errHistoire } = await window._supabase
+    let requeteHistoire = window._supabase
         .from('histoires')
-        .select('*')
-        .eq('id', idHistoire)
-        .single();
+        .select('*');
+
+    if (slugHistoireRoute) {
+        requeteHistoire = requeteHistoire.eq('slug', slugHistoireRoute);
+    } else {
+        requeteHistoire = requeteHistoire.eq('id', idHistoire);
+    }
+
+    const { data: histoire, error: errHistoire } = await requeteHistoire.maybeSingle();
 
     if (errHistoire || !histoire) {
         infoPanel.innerHTML = `<p class="text-error text-center">Erreur : L'œuvre est introuvable dans les abysses.</p>`;
         return;
     }
+
+    idHistoire = histoire.id;
+    window.currentOeuvreId = idHistoire;
+    localStorage.setItem('currentOeuvreId', idHistoire);
+    if (histoire.slug) localStorage.setItem('currentOeuvreSlug', histoire.slug);
+    synchroniserLienHistoireDansUrl(histoire);
 
     // 2. Gestion des tags
     let classeAge = 'tag-age';
@@ -1293,7 +1310,7 @@ window.chargerPageHistoire = async function() {
 
     // 5. Gestion du bouton admin et du bouton Suivre l'Histoire
     await initialiserBoutonRetirerHistoire(idHistoire, session);
-    initialiserBoutonPartageHistoire(idHistoire);
+    initialiserBoutonPartageHistoire(histoire);
 
     const btnSuivre = document.getElementById('btn-suivre-histoire');
     if (btnSuivre) {

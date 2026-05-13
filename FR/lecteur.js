@@ -99,6 +99,12 @@ window.lireChapitre = async function(idParam = null) {
         .select('*')
         .eq('id', chapitre.histoire_id)
         .maybeSingle();
+
+    if (histoireParente?.slug) {
+        localStorage.setItem('currentOeuvreSlug', histoireParente.slug);
+    } else {
+        localStorage.removeItem('currentOeuvreSlug');
+    }
     
     // 3. Application des paramètres sauvegardés
     appliquerStylePupitre();
@@ -298,8 +304,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target.id === 'btn-retour-oeuvre') {
             document.body.classList.remove('mode-zen');
             if (window.currentOeuvreId) {
-                localStorage.setItem('currentOeuvreId', window.currentOeuvreId);
-                window.changerDePage('oeuvre', { id: window.currentOeuvreId });
+                window.ouvrirPageOeuvre({
+                    id: window.currentOeuvreId,
+                    slug: localStorage.getItem('currentOeuvreSlug') || ''
+                });
             } else {
                 window.changerDePage('accueil');
             }

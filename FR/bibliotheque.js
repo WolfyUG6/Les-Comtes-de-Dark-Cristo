@@ -157,9 +157,17 @@ function ajouterVuesActuellesAuxHistoires(histoires = [], vuesParHistoire = new 
     });
 }
 
-function ouvrirHistoireDepuisCarte(histoireId) {
-    localStorage.setItem('currentOeuvreId', histoireId);
-    window.changerDePage('oeuvre', { id: histoireId });
+function ouvrirHistoireDepuisCarte(histoire) {
+    if (typeof window.ouvrirPageOeuvre === 'function') {
+        window.ouvrirPageOeuvre({
+            id: histoire?.id,
+            slug: histoire?.slug
+        });
+        return;
+    }
+
+    localStorage.setItem('currentOeuvreId', histoire.id);
+    window.changerDePage('oeuvre', { id: histoire.id });
 }
 
 function creerCarteHistoire(histoire, options = {}) {
@@ -201,7 +209,7 @@ function creerCarteHistoire(histoire, options = {}) {
 
     [image, title, button].forEach((element) => {
         if (!element) return;
-        element.addEventListener('click', () => ouvrirHistoireDepuisCarte(histoire.id));
+        element.addEventListener('click', () => ouvrirHistoireDepuisCarte(histoire));
     });
 
     return card;

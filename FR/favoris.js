@@ -45,6 +45,14 @@ function initialiserOngletsFavoris() {
     });
 }
 
+function escapeJsStringFavoris(value = '') {
+    return String(value)
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'")
+        .replace(/\r/g, '\\r')
+        .replace(/\n/g, '\\n');
+}
+
 async function chargerMesPactes() {
     const grille = document.getElementById('pactes-grid');
     if (!grille) return;
@@ -188,13 +196,14 @@ async function chargerMesPactes() {
 
         // Date du pacte formatée pour l'esthétique
         const dateAjout = h.date_pacte.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+        const slugOeuvre = escapeJsStringFavoris(h.slug || '');
 
         card.innerHTML = `
-            <div class="story-cover" onclick="localStorage.setItem('currentOeuvreId', ${h.id}); window.changerDePage('oeuvre', { id: ${h.id} });" style="cursor:pointer;">
+            <div class="story-cover" onclick="window.ouvrirPageOeuvreDepuisLien(${h.id}, '${slugOeuvre}');" style="cursor:pointer;">
                 ${htmlImage}
             </div>
             <div class="story-info">
-                <h3 class="story-title" onclick="localStorage.setItem('currentOeuvreId', ${h.id}); window.changerDePage('oeuvre', { id: ${h.id} });" style="cursor:pointer;">${h.titre}</h3>
+                <h3 class="story-title" onclick="window.ouvrirPageOeuvreDepuisLien(${h.id}, '${slugOeuvre}');" style="cursor:pointer;">${h.titre}</h3>
                 <span class="story-author">Par ${h.pseudo_auteur || h.auteur.split('@')[0]}</span>
                 
                 <div class="story-tags">
@@ -216,7 +225,7 @@ async function chargerMesPactes() {
                 </div>
 
                 <div style="display: flex; justify-content: center;">
-                    <button class="genre-btn btn-primary shadow-active btn-lire-oeuvre" onclick="localStorage.setItem('currentOeuvreId', ${h.id}); window.changerDePage('oeuvre', { id: ${h.id} });">Reprendre la Lecture</button>
+                    <button class="genre-btn btn-primary shadow-active btn-lire-oeuvre" onclick="window.ouvrirPageOeuvreDepuisLien(${h.id}, '${slugOeuvre}');">Reprendre la Lecture</button>
                 </div>
             </div>
         `;

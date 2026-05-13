@@ -2,17 +2,33 @@
 
 // --- LE CHEF D'ORCHESTRE (routeur.js) ---
 
-// L'Aiguilleur (Modifie l'URL sans recharger la page)
-window.changerDePage = function(pageDemandee, params = {}) {
+function construireHashPage(pageDemandee, params = {}) {
     const recherche = new URLSearchParams();
+    const slugOeuvre = pageDemandee === 'oeuvre' ? String(params?.slug || '').trim() : '';
 
     Object.entries(params || {}).forEach(([cle, valeur]) => {
+        if (cle === 'slug' && slugOeuvre) return;
         if (valeur !== null && valeur !== undefined && valeur !== '') {
             recherche.set(cle, valeur);
         }
     });
 
-    const hash = `${pageDemandee}${recherche.toString() ? `?${recherche.toString()}` : ''}`;
+    if (slugOeuvre) {
+        return `oeuvre/${encodeURIComponent(slugOeuvre)}${recherche.toString() ? `?${recherche.toString()}` : ''}`;
+    }
+
+    return `${pageDemandee}${recherche.toString() ? `?${recherche.toString()}` : ''}`;
+}
+
+function construireHashOeuvreDepuisDonnees(idHistoire, slugHistoire = '') {
+    const slug = String(slugHistoire || '').trim();
+    if (slug) return construireHashPage('oeuvre', { slug });
+    return construireHashPage('oeuvre', { id: idHistoire });
+}
+
+// L'Aiguilleur (Modifie l'URL sans recharger la page)
+window.changerDePage = function(pageDemandee, params = {}) {
+    const hash = construireHashPage(pageDemandee, params);
 
     if (window.location.hash === `#${hash}`) {
         const route = extraireRouteDepuisHash();
@@ -22,6 +38,29 @@ window.changerDePage = function(pageDemandee, params = {}) {
     }
 
     window.location.hash = hash;
+};
+
+window.ouvrirPageOeuvre = function({ id, slug } = {}) {
+    if (id !== null && id !== undefined && id !== '') {
+        window.currentOeuvreId = id;
+        localStorage.setItem('currentOeuvreId', id);
+    }
+
+    if (slug) {
+        localStorage.setItem('currentOeuvreSlug', slug);
+        window.changerDePage('oeuvre', { slug });
+        return;
+    }
+
+    window.changerDePage('oeuvre', { id });
+};
+
+window.ouvrirPageOeuvreDepuisLien = function(id, slug = '') {
+    window.ouvrirPageOeuvre({ id, slug });
+};
+
+window.getHashOeuvre = function(idHistoire, slugHistoire = '') {
+    return construireHashOeuvreDepuisDonnees(idHistoire, slugHistoire);
 };
 
 function estHashAuthSupabase(hashValue = window.location.hash) {
@@ -47,11 +86,18 @@ function extraireRouteDepuisHash(hashValue = window.location.hash) {
         return { page: 'accueil', params: new URLSearchParams() };
     }
 
-    const [pageBrute, queryString = ''] = hashNettoye.split('?');
+    const [cheminBrut, queryString = ''] = hashNettoye.split('?');
+    const segmentsChemin = cheminBrut.split('/').filter(Boolean);
+    const pageBrute = segmentsChemin.shift() || '';
+    const params = new URLSearchParams(queryString);
+
+    if (pageBrute === 'oeuvre' && segmentsChemin.length > 0) {
+        params.set('slug', decodeURIComponent(segmentsChemin.join('/')));
+    }
 
     return {
         page: pageBrute || 'accueil',
-        params: new URLSearchParams(queryString)
+        params
     };
 }
 
@@ -60,9 +106,13 @@ function appliquerParamsRoute(route) {
 
     if (route.page === 'oeuvre') {
         const idHistoire = route.params.get('id');
+        const slugHistoire = route.params.get('slug');
         if (idHistoire) {
             window.currentOeuvreId = idHistoire;
             localStorage.setItem('currentOeuvreId', idHistoire);
+        }
+        if (slugHistoire) {
+            localStorage.setItem('currentOeuvreSlug', slugHistoire);
         }
     }
 
@@ -359,8 +409,10 @@ function creerLienNotification({ texte, href, notificationId, destination }) {
         fermerPanneauNotifications();
 
         if (destination.type === 'histoire') {
-            localStorage.setItem('currentOeuvreId', destination.id);
-            window.changerDePage('oeuvre', { id: destination.id });
+            window.ouvrirPageOeuvre({
+                id: destination.id,
+                slug: destination.slug
+            });
         } else if (destination.type === 'chapitre') {
             localStorage.setItem('currentChapitreId', destination.id);
             window.changerDePage('lecture', { id: destination.id });
@@ -417,9 +469,13 @@ function afficherNotificationsChapitres(notifications = []) {
 
         const lienHistoire = creerLienNotification({
             texte: notification.titreHistoire,
-            href: `#oeuvre?id=${encodeURIComponent(notification.histoireId)}`,
+            href: `#${window.getHashOeuvre(notification.histoireId, notification.slugHistoire)}`,
             notificationId: notification.id,
-            destination: { type: 'histoire', id: notification.histoireId }
+            destination: {
+                type: 'histoire',
+                id: notification.histoireId,
+                slug: notification.slugHistoire
+            }
         });
 
         const lienChapitre = creerLienNotification({
@@ -520,22 +576,27 @@ window.actualiserNotificationsHeader = async function() {
 
     const { data: histoires } = await window._supabase
         .from('histoires')
-        .select('id, titre')
+        .select('id, titre, slug')
         .in('id', idsHistoiresAvecChapitre);
 
-    const titresHistoires = new Map((histoires || []).map((histoire) => [
+    const histoiresParId = new Map((histoires || []).map((histoire) => [
         Number(histoire.id),
-        normaliserTitreNotification(histoire.titre, 'Cette histoire')
+        {
+            titre: normaliserTitreNotification(histoire.titre, 'Cette histoire'),
+            slug: histoire.slug || ''
+        }
     ]));
     const notifications = notificationsValides.map((notification) => {
         const chapitre = chapitresParId.get(Number(notification.chapitre_id));
         const histoireId = Number(chapitre?.histoire_id || notification.histoire_id);
+        const histoireReference = histoiresParId.get(histoireId);
 
         return {
             id: Number(notification.id),
             chapitreId: Number(chapitre.id),
             histoireId,
-            titreHistoire: titresHistoires.get(histoireId) || 'Cette histoire',
+            slugHistoire: histoireReference?.slug || '',
+            titreHistoire: histoireReference?.titre || 'Cette histoire',
             titreChapitre: normaliserTitreNotification(notification.titre_chapitre || chapitre.titre, 'Nouveau chapitre'),
             lue: notification.lu === true
         };
