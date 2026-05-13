@@ -66,7 +66,7 @@ function formaterDateCommentaire(value) {
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return '';
 
-    return date.toLocaleString('fr-FR', {
+    return date.toLocaleString(window.tRaw?.('meta.locale', 'fr') || 'fr', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
@@ -124,15 +124,15 @@ function validerMessageCommentaire(message) {
     const texte = (message || '').trim();
 
     if (!texte) {
-        return "Le message est obligatoire.";
+        return window.t?.('comments.required', {}, "Le message est obligatoire.") || "Le message est obligatoire.";
     }
 
     if (texte.length < COMMENTAIRES_MIN) {
-        return `Le message doit contenir au moins ${COMMENTAIRES_MIN} caracteres.`;
+        return window.t?.('comments.minLength', { count: COMMENTAIRES_MIN }, `Le message doit contenir au moins ${COMMENTAIRES_MIN} caracteres.`) || `Le message doit contenir au moins ${COMMENTAIRES_MIN} caracteres.`;
     }
 
     if (texte.length > COMMENTAIRES_MAX) {
-        return `Le message ne peut pas depasser ${COMMENTAIRES_MAX} caracteres.`;
+        return window.t?.('comments.maxLength', { count: COMMENTAIRES_MAX }, `Le message ne peut pas depasser ${COMMENTAIRES_MAX} caracteres.`) || `Le message ne peut pas depasser ${COMMENTAIRES_MAX} caracteres.`;
     }
 
     return '';
@@ -217,6 +217,31 @@ function getLienPartageHistoire(histoire) {
     return url.toString();
 }
 
+function getLocaleAffichageSite() {
+    return window.tRaw?.('meta.locale', 'fr') || 'fr';
+}
+
+function traduireGenreHistoire(genre = '') {
+    const genres = {
+        'High & Low Fantasy': 'navigation.genres.highLowFantasy',
+        'Dark Fantasy & Grimdark': 'navigation.genres.darkFantasyGrimdark',
+        'Romantasy Tragique': 'navigation.genres.romantasyTragique',
+        'Sci-Fi & Cyberpunk': 'navigation.genres.sciFiCyberpunk',
+        'Horreur Psychologique': 'navigation.genres.horreurPsychologique'
+    };
+
+    return genres[genre] ? window.t?.(genres[genre], {}, genre) || genre : genre;
+}
+
+function traduireStatutHistoire(statut = '') {
+    const statutNettoye = String(statut || '').replace('✍️', '').trim().toLowerCase();
+    if (!statutNettoye || statutNettoye === 'en cours') {
+        return window.t?.('story.statusInProgress', {}, '✍️ En cours') || '✍️ En cours';
+    }
+
+    return statut;
+}
+
 function synchroniserLienHistoireDansUrl(histoire) {
     if (!histoire?.id) return;
 
@@ -231,6 +256,7 @@ function initialiserBoutonPartageHistoire(histoire) {
     if (!bouton) return;
 
     const nouveauBouton = bouton.cloneNode(true);
+    nouveauBouton.innerText = window.t?.('story.share', {}, 'Copier le lien') || 'Copier le lien';
     bouton.parentNode.replaceChild(nouveauBouton, bouton);
 
     nouveauBouton.addEventListener('click', async () => {
@@ -368,7 +394,7 @@ function dessinerChapitresHistoire(chapitres) {
 
     chapitresPage.forEach((chap) => {
         const dateChap = chap.date_publication ? new Date(chap.date_publication) : new Date();
-        const dateAffichee = dateChap.toLocaleDateString('fr-FR');
+        const dateAffichee = dateChap.toLocaleDateString(getLocaleAffichageSite());
         const div = document.createElement('div');
         div.className = 'chapter-item';
         div.innerHTML = `
@@ -566,7 +592,7 @@ function definirReponseActive(instance, commentaireId = null) {
 
     if (instance.elements.replyState) instance.elements.replyState.classList.remove('hidden');
     if (instance.elements.replyLabel) {
-        instance.elements.replyLabel.innerText = `Reponse liee a ${instance.replyTargetPseudo}`;
+        instance.elements.replyLabel.innerText = window.t?.('comments.replyLinked', { pseudo: instance.replyTargetPseudo }, `Reponse liee a ${instance.replyTargetPseudo}`) || `Reponse liee a ${instance.replyTargetPseudo}`;
     }
 
     mettreAJourCompteurCommentaire(instance.elements.message, instance.elements.compteur);
@@ -641,7 +667,7 @@ function renderCommentaires(instance) {
         const peutSupprimer = estAuteurCommentaire || instance.estAuteurHistoire;
         const enEdition = String(instance.commentaireEnEdition) === String(commentaire.id);
         const dateAffichee = formaterDateCommentaire(commentaire.created_at);
-        const pseudo = escapeCommentaireHtml(commentaire.pseudo_auteur || 'Comte inconnu');
+        const pseudo = escapeCommentaireHtml(commentaire.pseudo_auteur || (window.t?.('common.unknownAuthor', {}, 'Comte inconnu') || 'Comte inconnu'));
         const parent = commentaire.parent_commentaire_id
             ? commentairesParId.get(String(commentaire.parent_commentaire_id))
             : null;
@@ -649,7 +675,7 @@ function renderCommentaires(instance) {
         const message = formaterMessageCommentaire(commentaire.contenu || '', discussionPseudos, pseudoReponse);
         const texteEdition = escapeCommentaireHtml(commentaire.contenu || '');
         const etiquetteReponse = parent?.pseudo_auteur
-            ? `<div class="commentaire-lien-parent">En reponse a <span class="comment-mention">${escapeCommentaireHtml(parent.pseudo_auteur)}</span></div>`
+            ? `<div class="commentaire-lien-parent">${window.t?.('comments.replyTo', { pseudo: `<span class="comment-mention">${escapeCommentaireHtml(parent.pseudo_auteur)}</span>` }, `En reponse a <span class="comment-mention">${escapeCommentaireHtml(parent.pseudo_auteur)}</span>`) || `En reponse a <span class="comment-mention">${escapeCommentaireHtml(parent.pseudo_auteur)}</span>`}</div>`
             : '';
 
         return `
@@ -667,10 +693,10 @@ function renderCommentaires(instance) {
                             <div class="commentaire-edition mt-15">
                                 <textarea class="custom-input commentaires-textarea" data-role="edit-message" minlength="${COMMENTAIRES_MIN}" maxlength="${COMMENTAIRES_MAX}">${texteEdition}</textarea>
                                 <div class="commentaires-form-footer mt-15">
-                                    <span class="commentaires-limites text-small text-muted">${COMMENTAIRES_MIN} a ${COMMENTAIRES_MAX} caracteres</span>
+                                    <span class="commentaires-limites text-small text-muted">${window.t?.('comments.editLimits', { min: COMMENTAIRES_MIN, max: COMMENTAIRES_MAX }, `${COMMENTAIRES_MIN} a ${COMMENTAIRES_MAX} caracteres`) || `${COMMENTAIRES_MIN} a ${COMMENTAIRES_MAX} caracteres`}</span>
                                     <div class="commentaire-actions">
-                                        <button type="button" class="genre-btn btn-primary btn-small" data-action="save-edit">Enregistrer</button>
-                                        <button type="button" class="genre-btn btn-outline-blue btn-small-last" data-action="cancel-edit">Annuler</button>
+                                        <button type="button" class="genre-btn btn-primary btn-small" data-action="save-edit">${window.t?.('common.save', {}, 'Enregistrer') || 'Enregistrer'}</button>
+                                        <button type="button" class="genre-btn btn-outline-blue btn-small-last" data-action="cancel-edit">${window.t?.('common.cancel', {}, 'Annuler') || 'Annuler'}</button>
                                     </div>
                                 </div>
                             </div>
@@ -682,9 +708,9 @@ function renderCommentaires(instance) {
                     !enEdition
                         ? `
                             <div class="commentaire-actions mt-15">
-                                <button type="button" class="genre-btn btn-outline-blue btn-small" data-action="reply">Repondre</button>
-                                ${peutModifier ? '<button type="button" class="genre-btn btn-outline-blue btn-small" data-action="edit">Modifier</button>' : ''}
-                                ${peutSupprimer ? '<button type="button" class="genre-btn btn-outline-red btn-small-last" data-action="delete">Supprimer</button>' : ''}
+                                <button type="button" class="genre-btn btn-outline-blue btn-small" data-action="reply">${window.t?.('comments.reply', {}, 'Repondre') || 'Repondre'}</button>
+                                ${peutModifier ? `<button type="button" class="genre-btn btn-outline-blue btn-small" data-action="edit">${window.t?.('common.edit', {}, 'Modifier') || 'Modifier'}</button>` : ''}
+                                ${peutSupprimer ? `<button type="button" class="genre-btn btn-outline-red btn-small-last" data-action="delete">${window.t?.('common.delete', {}, 'Supprimer') || 'Supprimer'}</button>` : ''}
                             </div>
                         `
                         : ''
@@ -717,7 +743,7 @@ async function chargerCommentairesInstance(instance) {
     if (!instance?.section) return;
 
     const triAscendant = instance.elements.tri?.value === 'anciens';
-    instance.elements.liste.innerHTML = '<p class="loading-text">Chargement des commentaires...</p>';
+    instance.elements.liste.innerHTML = `<p class="loading-text">${window.t?.('comments.loading', {}, 'Chargement des commentaires...') || 'Chargement des commentaires...'}</p>`;
     setCommentaireFeedback(instance);
 
     const histoireIdCible = instance.cibleType === 'chapitre'
@@ -746,7 +772,7 @@ async function chargerCommentairesInstance(instance) {
         instance.commentaires = [];
         instance.elements.liste.innerHTML = '';
         instance.elements.vide.classList.add('hidden');
-        setCommentaireFeedback(instance, `Impossible de charger les commentaires : ${error.message}`, 'text-error');
+        setCommentaireFeedback(instance, window.t?.('comments.loadError', { message: error.message }, `Impossible de charger les commentaires : ${error.message}`) || `Impossible de charger les commentaires : ${error.message}`, 'text-error');
         return;
     }
 
@@ -854,7 +880,7 @@ window.initialiserBlocCommentaires = async function({ sectionId, cibleType, hist
             window._commentairesInstances[sectionId] = instance;
             instance.elements.liste.innerHTML = '';
             instance.elements.vide.classList.add('hidden');
-            setCommentaireFeedback(instance, "Impossible de verifier le chapitre avant de charger les commentaires.", 'text-error');
+            setCommentaireFeedback(instance, window.t?.('comments.chapterReferenceError', {}, "Impossible de verifier le chapitre avant de charger les commentaires.") || "Impossible de verifier le chapitre avant de charger les commentaires.", 'text-error');
             return;
         }
 
@@ -881,7 +907,7 @@ async function publierCommentaire(instance) {
 
     const replyTarget = getReplyTargetValide(instance);
     if (instance.replyTargetId && !replyTarget) {
-        setCommentaireFeedback(instance, "La reponse ciblee n'est plus disponible dans cette discussion.", 'text-error');
+        setCommentaireFeedback(instance, window.t?.('comments.replyUnavailableStory', {}, "La reponse ciblee n'est plus disponible dans cette discussion.") || "La reponse ciblee n'est plus disponible dans cette discussion.", 'text-error');
         definirReponseActive(instance, null);
         return;
     }
@@ -889,7 +915,7 @@ async function publierCommentaire(instance) {
     const bouton = instance.elements.form?.querySelector('button[type="submit"]');
     if (bouton) {
         bouton.disabled = true;
-        bouton.innerText = 'Publication...';
+        bouton.innerText = window.t?.('comments.publishing', {}, 'Publication...') || 'Publication...';
     }
 
     const payload = {
@@ -906,17 +932,17 @@ async function publierCommentaire(instance) {
 
     if (bouton) {
         bouton.disabled = false;
-        bouton.innerText = 'Publier';
+        bouton.innerText = window.t?.('comments.publish', {}, 'Publier') || 'Publier';
     }
 
     if (error) {
-        setCommentaireFeedback(instance, `Impossible de publier ce commentaire : ${error.message}`, 'text-error');
+        setCommentaireFeedback(instance, window.t?.('comments.publishError', { message: error.message }, `Impossible de publier ce commentaire : ${error.message}`) || `Impossible de publier ce commentaire : ${error.message}`, 'text-error');
         return;
     }
 
     await chargerCommentairesInstance(instance);
     resetCommentaireForm(instance);
-    setCommentaireFeedback(instance, 'Commentaire publie avec succes.', 'text-success');
+    setCommentaireFeedback(instance, window.t?.('comments.publishSuccess', {}, 'Commentaire publie avec succes.') || 'Commentaire publie avec succes.', 'text-success');
 }
 
 async function publierCommentaireChapitre(instance) {
@@ -930,7 +956,7 @@ async function publierCommentaireChapitre(instance) {
 
     const referenceChapitre = await recupererReferenceChapitre(instance.chapitreId);
     if (!referenceChapitre) {
-        setCommentaireFeedback(instance, "Impossible de verifier les informations du chapitre avant publication.", 'text-error');
+        setCommentaireFeedback(instance, window.t?.('comments.chapterReferenceError', {}, "Impossible de verifier les informations du chapitre avant publication.") || "Impossible de verifier les informations du chapitre avant publication.", 'text-error');
         return;
     }
 
@@ -942,7 +968,7 @@ async function publierCommentaireChapitre(instance) {
 
     const replyTarget = getReplyTargetValide(instance);
     if (instance.replyTargetId && !replyTarget) {
-        setCommentaireFeedback(instance, "La reponse ciblee n'est plus disponible pour ce chapitre.", 'text-error');
+        setCommentaireFeedback(instance, window.t?.('comments.replyUnavailableChapter', {}, "La reponse ciblee n'est plus disponible pour ce chapitre.") || "La reponse ciblee n'est plus disponible pour ce chapitre.", 'text-error');
         definirReponseActive(instance, null);
         return;
     }
@@ -960,7 +986,7 @@ async function publierCommentaireChapitre(instance) {
     const bouton = instance.elements.form?.querySelector('button[type="submit"]');
     if (bouton) {
         bouton.disabled = true;
-        bouton.innerText = 'Publication...';
+        bouton.innerText = window.t?.('comments.publishing', {}, 'Publication...') || 'Publication...';
     }
 
     const { data, error } = await window._supabase
@@ -971,11 +997,11 @@ async function publierCommentaireChapitre(instance) {
 
     if (bouton) {
         bouton.disabled = false;
-        bouton.innerText = 'Publier';
+        bouton.innerText = window.t?.('comments.publish', {}, 'Publier') || 'Publier';
     }
 
     if (error) {
-        setCommentaireFeedback(instance, `Impossible de publier ce commentaire de chapitre : ${error.message}`, 'text-error');
+        setCommentaireFeedback(instance, window.t?.('comments.publishChapterError', { message: error.message }, `Impossible de publier ce commentaire de chapitre : ${error.message}`) || `Impossible de publier ce commentaire de chapitre : ${error.message}`, 'text-error');
         return;
     }
 
@@ -989,13 +1015,13 @@ async function publierCommentaireChapitre(instance) {
         && data.contenu === payload.contenu;
 
     if (!insertionValide) {
-        setCommentaireFeedback(instance, "Le commentaire n'a pas ete confirme par la base pour ce chapitre.", 'text-error');
+        setCommentaireFeedback(instance, window.t?.('comments.chapterConfirmError', {}, "Le commentaire n'a pas ete confirme par la base pour ce chapitre.") || "Le commentaire n'a pas ete confirme par la base pour ce chapitre.", 'text-error');
         return;
     }
 
     await chargerCommentairesInstance(instance);
     resetCommentaireForm(instance);
-    setCommentaireFeedback(instance, 'Commentaire de chapitre publie avec succes.', 'text-success');
+    setCommentaireFeedback(instance, window.t?.('comments.publishSuccess', {}, 'Commentaire de chapitre publie avec succes.') || 'Commentaire de chapitre publie avec succes.', 'text-success');
 }
 
 async function enregistrerEditionCommentaire(instance, card) {
@@ -1022,13 +1048,13 @@ async function enregistrerEditionCommentaire(instance, card) {
         .eq('user_id', instance.session.user.id);
 
     if (error) {
-        setCommentaireFeedback(instance, `Impossible de modifier ce commentaire : ${error.message}`, 'text-error');
+        setCommentaireFeedback(instance, window.t?.('comments.updateError', { message: error.message }, `Impossible de modifier ce commentaire : ${error.message}`) || `Impossible de modifier ce commentaire : ${error.message}`, 'text-error');
         return;
     }
 
     instance.commentaireEnEdition = null;
     await chargerCommentairesInstance(instance);
-    setCommentaireFeedback(instance, 'Commentaire modifie avec succes.', 'text-success');
+    setCommentaireFeedback(instance, window.t?.('comments.updateSuccess', {}, 'Commentaire modifie avec succes.') || 'Commentaire modifie avec succes.', 'text-success');
 }
 
 async function supprimerCommentaireInstance(instance, commentaireId) {
@@ -1038,13 +1064,13 @@ async function supprimerCommentaireInstance(instance, commentaireId) {
         .eq('id', commentaireId);
 
     if (error) {
-        setCommentaireFeedback(instance, `Impossible de supprimer ce commentaire : ${error.message}`, 'text-error');
+        setCommentaireFeedback(instance, window.t?.('comments.deleteError', { message: error.message }, `Impossible de supprimer ce commentaire : ${error.message}`) || `Impossible de supprimer ce commentaire : ${error.message}`, 'text-error');
         return;
     }
 
     instance.commentaireEnEdition = null;
     await chargerCommentairesInstance(instance);
-    setCommentaireFeedback(instance, 'Commentaire supprime.', 'text-success');
+    setCommentaireFeedback(instance, window.t?.('comments.deleteSuccess', {}, 'Commentaire supprime.') || 'Commentaire supprime.', 'text-success');
 }
 
 if (!window.commentairesEventsHooked) {
@@ -1193,9 +1219,9 @@ if (!window.commentairesEventsHooked) {
         }
 
         if (action === 'delete') {
-            const ok = await window.siteConfirm('Supprimer ce commentaire ? Cette action est irreversible.', {
-                confirmText: 'Supprimer',
-                cancelText: 'Annuler',
+            const ok = await window.siteConfirm(window.t?.('comments.deleteConfirm', {}, 'Supprimer ce commentaire ? Cette action est irreversible.') || 'Supprimer ce commentaire ? Cette action est irreversible.', {
+                confirmText: window.t?.('common.delete', {}, 'Supprimer') || 'Supprimer',
+                cancelText: window.t?.('common.cancel', {}, 'Annuler') || 'Annuler',
                 danger: true
             });
             if (!ok) return;
@@ -1293,8 +1319,8 @@ window.chargerPageHistoire = async function() {
         <div class="book-info-content">
             <h2 class="story-title-m0">${histoire.titre}</h2>
             <div class="story-tags mb-15 mt-15">
-                <span class="tag tag-genre">${histoire.genre}</span>
-                <span class="tag tag-statut">${histoire.statut || '✍️ En cours'}</span>
+                <span class="tag tag-genre">${traduireGenreHistoire(histoire.genre)}</span>
+                <span class="tag tag-statut">${traduireStatutHistoire(histoire.statut)}</span>
                 <span class="tag ${classeAge}">${histoire.classification || 'Tout public'}</span>
                 ${tagSensible}
             </div>
@@ -1462,7 +1488,7 @@ async function chargerListeChapitres(idHistoire) {
     const boxProchain = document.getElementById('prochain-chapitre-box');
     if (boxProchain) {
         if (prochainChapitre) {
-            const dateAffichee = prochainChapitre.date.toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            const dateAffichee = prochainChapitre.date.toLocaleString(getLocaleAffichageSite(), { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
             boxProchain.innerHTML = `
                 <div style="font-family: 'Cinzel', serif; color: var(--text-title); margin-bottom: 5px;">${window.t?.('story.nextPublication', {}, 'Prochaine publication :') || 'Prochaine publication :'}</div>
                 <div style="color: #ffd700; font-weight: bold; letter-spacing: 1px;">${window.t?.('story.nextPublicationDate', { date: dateAffichee }, `Le ${dateAffichee}`) || `Le ${dateAffichee}`}</div>
@@ -1477,6 +1503,6 @@ async function chargerListeChapitres(idHistoire) {
     // Mise à jour du compteur de mots global
     const spanMots = document.getElementById('histoire-mots-count');
     if (spanMots) {
-        spanMots.innerText = totalMotsOeuvre.toLocaleString('fr-FR');
+        spanMots.innerText = totalMotsOeuvre.toLocaleString(getLocaleAffichageSite());
     }
 }

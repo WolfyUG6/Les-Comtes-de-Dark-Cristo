@@ -197,7 +197,14 @@
     "chapterTitle": "Chapter {number}: {title}",
     "publishedDate": "(Published on {date})",
     "pageSizeLabel": "Show",
-    "volumePreviewClose": "Close volume preview"
+    "volumePreviewClose": "Close volume preview",
+    "backToLibrary": "← Back to the Library",
+    "share": "Copy link",
+    "readingStars": "Reading the stars...",
+    "chaptersListTitle": "Scroll List (Chapters)",
+    "volumePrevious": "Previous volumes",
+    "volumeNext": "Next volumes",
+    "statusInProgress": "✍️ In progress"
   },
   "reader": {
     "deciphering": "Deciphering the scroll...",
@@ -221,7 +228,8 @@
     "top": "⬆️ Top",
     "bottom": "⬇️ Depths",
     "quitReading": "← Leave reading",
-    "viewError": "View error: {message}"
+    "viewError": "View error: {message}",
+    "toggleSettings": "Show/Hide settings"
   },
   "forge": {
     "pageTitle": "The Forge",
@@ -325,7 +333,20 @@
     "replyUnavailableStory": "The reply target is no longer available in this discussion.",
     "replyUnavailableChapter": "The reply target is no longer available for this chapter.",
     "publishError": "Unable to publish this comment: {message}",
-    "publishSuccess": "Comment published successfully."
+    "publishSuccess": "Comment published successfully.",
+    "introStory": "Global comments for this story.",
+    "loading": "Loading comments...",
+    "reply": "Reply",
+    "replyTo": "In reply to {pseudo}",
+    "replyLinked": "Reply linked to {pseudo}",
+    "editLimits": "{min} to {max} characters",
+    "publishChapterError": "Unable to publish this chapter comment: {message}",
+    "chapterConfirmError": "The database did not confirm this comment for the chapter.",
+    "updateError": "Unable to edit this comment: {message}",
+    "updateSuccess": "Comment edited successfully.",
+    "deleteConfirm": "Delete this comment? This action cannot be undone.",
+    "deleteError": "Unable to delete this comment: {message}",
+    "deleteSuccess": "Comment deleted."
   },
   "legal": {
     "returnSite": "Return to the site",

@@ -214,6 +214,56 @@ function appliquerTraductionsLecteur(root = document) {
     setTextById('btn-pupitre-scroll-top', 'reader.top');
     setTextById('btn-pupitre-scroll-bottom', 'reader.bottom');
     setTextById('btn-retour-oeuvre', 'reader.quitReading');
+    setAttrById('btn-toggle-pupitre', 'aria-label', 'reader.toggleSettings');
+}
+
+function appliquerTraductionsCommentaires(root = document) {
+    root.querySelectorAll('[data-commentaires-root]').forEach((section) => {
+        const estChapitre = section.id === 'commentaires-chapitre-section';
+        const titre = section.querySelector('.commentaires-header h2');
+        const intro = section.querySelector('.commentaires-intro');
+        const triLabel = section.querySelector('.commentaires-tri-wrap span');
+        const optionRecents = section.querySelector('option[value="recents"]');
+        const optionAnciens = section.querySelector('option[value="anciens"]');
+        const message = section.querySelector('[data-role="message"]');
+        const boutonPublier = section.querySelector('[data-role="form"] button[type="submit"]');
+        const vide = section.querySelector('[data-role="vide"]');
+        const annulerReponse = section.querySelector('[data-action="cancel-reply"]');
+
+        if (titre) titre.textContent = window.t(estChapitre ? 'comments.titleChapter' : 'comments.titleStory', {}, titre.textContent);
+        if (intro) intro.textContent = window.t(estChapitre ? 'comments.introChapter' : 'comments.introStory', {}, intro.textContent);
+        if (triLabel) triLabel.textContent = window.t('comments.sortLabel', {}, triLabel.textContent);
+        if (optionRecents) optionRecents.textContent = window.t('comments.sortRecent', {}, optionRecents.textContent);
+        if (optionAnciens) optionAnciens.textContent = window.t('comments.sortOld', {}, optionAnciens.textContent);
+        if (message) message.setAttribute('placeholder', window.t('comments.placeholder', {}, message.getAttribute('placeholder') || ''));
+        if (boutonPublier) boutonPublier.textContent = window.t('comments.publish', {}, boutonPublier.textContent);
+        if (vide) vide.textContent = window.t('comments.empty', {}, vide.textContent);
+        if (annulerReponse) annulerReponse.textContent = window.t('comments.cancelReply', {}, annulerReponse.textContent);
+    });
+}
+
+function appliquerTraductionsHistoire(root = document) {
+    setTextById('btn-retour-bibliotheque', 'story.backToLibrary');
+    setTextById('btn-retirer-histoire', 'story.removeAdmin');
+    setTextById('btn-suivre-histoire', 'story.support');
+    setTextById('btn-partager-histoire', 'story.share');
+    setAttrById('volumes-scroll-left', 'aria-label', 'story.volumePrevious');
+    setAttrById('volumes-scroll-right', 'aria-label', 'story.volumeNext');
+    setAttrById('volume-preview-close', 'aria-label', 'story.volumePreviewClose');
+
+    const loading = root.querySelector('#histoire-presentation-panel .loading-text');
+    if (loading) loading.textContent = window.t('story.loading', {}, loading.textContent);
+
+    const stars = root.querySelector('#prochain-chapitre-box .text-muted-italic');
+    if (stars) stars.textContent = window.t('story.readingStars', {}, stars.textContent);
+
+    const chaptersTitle = root.querySelector('.chapters-header h2');
+    if (chaptersTitle) chaptersTitle.textContent = window.t('story.chaptersListTitle', {}, chaptersTitle.textContent);
+
+    const pageSizeLabel = root.querySelector('.chapter-page-size span');
+    if (pageSizeLabel) pageSizeLabel.textContent = window.t('story.pageSizeLabel', {}, pageSizeLabel.textContent);
+
+    appliquerTraductionsCommentaires(root);
 }
 
 window.appliquerTraductionsPage = function(page, root = document) {
@@ -223,8 +273,13 @@ window.appliquerTraductionsPage = function(page, root = document) {
         appliquerTraductionsAccueil(root);
     }
 
+    if (page === 'oeuvre') {
+        appliquerTraductionsHistoire(root);
+    }
+
     if (page === 'lecture') {
         appliquerTraductionsLecteur(root);
+        appliquerTraductionsCommentaires(root);
     }
 };
 

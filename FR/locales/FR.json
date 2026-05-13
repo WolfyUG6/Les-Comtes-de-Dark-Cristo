@@ -197,7 +197,14 @@
     "chapterTitle": "Chapitre {number} : {title}",
     "publishedDate": "(Publié le {date})",
     "pageSizeLabel": "Afficher",
-    "volumePreviewClose": "Fermer l'aperçu du volume"
+    "volumePreviewClose": "Fermer l'aperçu du volume",
+    "backToLibrary": "← Retour à la Bibliothèque",
+    "share": "Copier le lien",
+    "readingStars": "Lecture des astres en cours...",
+    "chaptersListTitle": "Liste des Parchemins (Chapitres)",
+    "volumePrevious": "Volumes précédents",
+    "volumeNext": "Volumes suivants",
+    "statusInProgress": "✍️ En cours"
   },
   "reader": {
     "deciphering": "Déchiffrement du parchemin...",
@@ -221,7 +228,8 @@
     "top": "⬆️ Sommet",
     "bottom": "⬇️ Abysses",
     "quitReading": "← Quitter la lecture",
-    "viewError": "Erreur de vue : {message}"
+    "viewError": "Erreur de vue : {message}",
+    "toggleSettings": "Afficher/Masquer les réglages"
   },
   "forge": {
     "pageTitle": "La Forge",
@@ -325,7 +333,20 @@
     "replyUnavailableStory": "La réponse ciblée n'est plus disponible dans cette discussion.",
     "replyUnavailableChapter": "La réponse ciblée n'est plus disponible pour ce chapitre.",
     "publishError": "Impossible de publier ce commentaire : {message}",
-    "publishSuccess": "Commentaire publié avec succès."
+    "publishSuccess": "Commentaire publié avec succès.",
+    "introStory": "Commentaires globaux de l'histoire.",
+    "loading": "Chargement des commentaires...",
+    "reply": "Répondre",
+    "replyTo": "En réponse à {pseudo}",
+    "replyLinked": "Réponse liée à {pseudo}",
+    "editLimits": "{min} à {max} caractères",
+    "publishChapterError": "Impossible de publier ce commentaire de chapitre : {message}",
+    "chapterConfirmError": "Le commentaire n'a pas été confirmé par la base pour ce chapitre.",
+    "updateError": "Impossible de modifier ce commentaire : {message}",
+    "updateSuccess": "Commentaire modifié avec succès.",
+    "deleteConfirm": "Supprimer ce commentaire ? Cette action est irréversible.",
+    "deleteError": "Impossible de supprimer ce commentaire : {message}",
+    "deleteSuccess": "Commentaire supprimé."
   },
   "legal": {
     "returnSite": "Retour au site",

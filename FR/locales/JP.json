@@ -197,7 +197,14 @@
     "chapterTitle": "第{number}章：{title}",
     "publishedDate": "（{date} 公開）",
     "pageSizeLabel": "表示数",
-    "volumePreviewClose": "巻のプレビューを閉じる"
+    "volumePreviewClose": "巻のプレビューを閉じる",
+    "backToLibrary": "← 書庫へ戻る",
+    "share": "リンクをコピー",
+    "readingStars": "星の巡りを読んでいます...",
+    "chaptersListTitle": "巻物一覧（章）",
+    "volumePrevious": "前の巻",
+    "volumeNext": "次の巻",
+    "statusInProgress": "✍️ 連載中"
   },
   "reader": {
     "deciphering": "巻物を解読しています...",
@@ -221,7 +228,8 @@
     "top": "⬆️ 上へ",
     "bottom": "⬇️ 深部へ",
     "quitReading": "← 読書を離れる",
-    "viewError": "閲覧エラー：{message}"
+    "viewError": "閲覧エラー：{message}",
+    "toggleSettings": "設定を表示/非表示"
   },
   "forge": {
     "pageTitle": "鍛冶場",
@@ -325,7 +333,20 @@
     "replyUnavailableStory": "返信先はこの議論では利用できなくなりました。",
     "replyUnavailableChapter": "返信先はこの章では利用できなくなりました。",
     "publishError": "このコメントを投稿できません：{message}",
-    "publishSuccess": "コメントを投稿しました。"
+    "publishSuccess": "コメントを投稿しました。",
+    "introStory": "この作品全体へのコメントです。",
+    "loading": "コメントを読み込んでいます...",
+    "reply": "返信",
+    "replyTo": "{pseudo} への返信",
+    "replyLinked": "{pseudo} への返信中",
+    "editLimits": "{min}〜{max}文字",
+    "publishChapterError": "この章へのコメントを投稿できません：{message}",
+    "chapterConfirmError": "この章へのコメントがデータベースで確認されませんでした。",
+    "updateError": "このコメントを編集できません：{message}",
+    "updateSuccess": "コメントを編集しました。",
+    "deleteConfirm": "このコメントを削除しますか？この操作は取り消せません。",
+    "deleteError": "このコメントを削除できません：{message}",
+    "deleteSuccess": "コメントを削除しました。"
   },
   "legal": {
     "returnSite": "サイトへ戻る",
