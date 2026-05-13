@@ -11,7 +11,7 @@ async function chargerSelectVolumesChapitre(volumeSelectionne = null) {
     const select = document.getElementById('chapitre-volume');
     if (!select || !window.currentOeuvreId) return;
 
-    select.innerHTML = '<option value="">Générale</option>';
+    select.innerHTML = `<option value="">${window.t?.('volumes.general', {}, 'Générale') || 'Générale'}</option>`;
 
     const { data: volumes, error } = await window._supabase
         .from('volumes')
@@ -54,7 +54,7 @@ function initialiserCalendrierChapitre() {
         altInput: true,
         altInputClass: "custom-input chapitre-date-visible",
         altFormat: "j F Y à H:i",
-        locale: window.flatpickr?.l10ns?.fr || "fr",
+        locale: window._siteLocale === 'EN' ? (window.flatpickr?.l10ns?.default || 'default') : (window.flatpickr?.l10ns?.fr || "fr"),
         minDate: "today",
         allowInput: false,
         clickOpens: true
@@ -84,7 +84,7 @@ window.chargerEditeurChapitre = async function() {
 
     console.log("Chargement de l'éditeur pour l'œuvre ID:", window.currentOeuvreId, "Chapitre ID:", window.currentChapitreId);
     if (!window.currentOeuvreId) {
-        await window.siteAlert("Erreur: Aucune œuvre sélectionnée !", { danger: true });
+        await window.siteAlert(window.t?.('editor.noStoryError', {}, 'Erreur: Aucune œuvre sélectionnée !') || 'Erreur: Aucune œuvre sélectionnée !', { danger: true });
         window.changerDePage('studio');
         return;
     }
@@ -106,14 +106,14 @@ window.chargerEditeurChapitre = async function() {
 
     // Modification du texte du bouton principal selon le mode
     const btnSubmit = document.getElementById('submit-chapitre');
-    btnSubmit.innerText = window.currentChapitreId ? "Graver les modifications" : "Graver le Chapitre";
+    btnSubmit.innerText = window.currentChapitreId ? (window.t?.('editor.submitEdit', {}, 'Graver les modifications') || 'Graver les modifications') : (window.t?.('editor.submitCreate', {}, 'Graver le Chapitre') || 'Graver le Chapitre');
 
     // 3. Réattacher le calendrier à chaque recréation du DOM
     initialiserCalendrierChapitre();
 
     // 4. Si on MODIFIE un chapitre existant, on va le chercher
     if (window.currentChapitreId) {
-        document.getElementById('chapitre-titre').value = "Recherche dans les archives...";
+        document.getElementById('chapitre-titre').value = window.t?.('creationStory.loadingArchive', {}, 'Recherche dans les archives...') || 'Recherche dans les archives...';
         recupererDonneesChapitre(window.currentChapitreId);
     }
 };
@@ -128,7 +128,7 @@ function initialiserPlumes() {
     // Initialisation de la Plume Principale
     quill = new Quill('#chapitre-contenu', {
         theme: 'snow',
-        placeholder: 'Rédigez votre texte ici...',
+        placeholder: window.t?.('editor.textPlaceholder', {}, 'Rédigez votre texte ici...') || 'Rédigez votre texte ici...',
         modules: {
             toolbar: [
                 [{ 'header': [1, 2, 3, false] }],
@@ -163,7 +163,7 @@ function initialiserPlumes() {
     // Initialisation des Plumes pour Notes (plus petites)
     const optionPlumeNote = {
         theme: 'snow',
-        placeholder: 'Un mot pour vos lecteurs ? (Optionnel)',
+        placeholder: window.t?.('editor.notePlaceholder', {}, 'Un mot pour vos lecteurs ? (Optionnel)') || 'Un mot pour vos lecteurs ? (Optionnel)',
         modules: { toolbar: [ ['bold', 'italic'], ['clean'] ] }
     };
     quillNoteDebut = new Quill('#note-debut-contenu', optionPlumeNote);
@@ -172,7 +172,7 @@ function initialiserPlumes() {
 
 function actualiserAffichageCompteur() {
     const compteurDiv = document.getElementById('compteur-mots-container');
-    if (compteurDiv) compteurDiv.innerText = "Mots gravés : " + window.compteMotsLive;
+    if (compteurDiv) compteurDiv.innerText = window.t?.('editor.wordCounter', { count: window.compteMotsLive }, "Mots gravés : " + window.compteMotsLive) || "Mots gravés : " + window.compteMotsLive;
 }
 
 // --- RECUPERATION DONNEES D'UN CHAPITRE EXISTANT ---
@@ -184,7 +184,7 @@ async function recupererDonneesChapitre(id) {
         .single();
 
     if (error) {
-        await window.siteAlert("Erreur de récupération : " + error.message, { danger: true });
+        await window.siteAlert(window.t?.('editor.fetchError', { message: error.message }, 'Erreur de récupération : ' + error.message) || 'Erreur de récupération : ' + error.message, { danger: true });
         window.changerDePage('gestion');
         return;
     }
@@ -236,11 +236,11 @@ if (!window.editeurEventHooked) {
             const volumeSelectionne = document.getElementById('chapitre-volume')?.value || null;
 
             if (!numero || !titre || contenu === '<p><br></p>' || !contenu) {
-                await window.siteAlert("Les Ténèbres exigent un Numéro, un Titre et un Contenu pour ce chapitre !", { danger: true });
+                await window.siteAlert(window.t?.('editor.requiredError', {}, 'Les Ténèbres exigent un Numéro, un Titre et un Contenu pour ce chapitre !') || 'Les Ténèbres exigent un Numéro, un Titre et un Contenu pour ce chapitre !', { danger: true });
                 return;
             }
 
-            btnSubmit.innerText = "Gravure...";
+            btnSubmit.innerText = window.t?.('editor.engraving', {}, 'Gravure...') || 'Gravure...';
             btnSubmit.disabled = true;
 
             let erreurGravure = null;
@@ -284,10 +284,10 @@ if (!window.editeurEventHooked) {
             btnSubmit.disabled = false;
 
             if (erreurGravure) {
-                await window.siteAlert("Le parchemin a pris feu : " + erreurGravure.message, { danger: true });
-                btnSubmit.innerText = window.currentChapitreId ? "Graver les modifications" : "Graver le Chapitre";
+                await window.siteAlert(window.t?.('editor.saveError', { message: erreurGravure.message }, 'Le parchemin a pris feu : ' + erreurGravure.message) || 'Le parchemin a pris feu : ' + erreurGravure.message, { danger: true });
+                btnSubmit.innerText = window.currentChapitreId ? (window.t?.('editor.submitEdit', {}, 'Graver les modifications') || 'Graver les modifications') : (window.t?.('editor.submitCreate', {}, 'Graver le Chapitre') || 'Graver le Chapitre');
             } else {
-                await window.siteAlert(window.currentChapitreId ? "Modifications gravées !" : "Chapitre ajouté !");
+                await window.siteAlert(window.currentChapitreId ? (window.t?.('editor.updated', {}, 'Modifications gravées !') || 'Modifications gravées !') : (window.t?.('editor.created', {}, 'Chapitre ajouté !') || 'Chapitre ajouté !'));
                 window.changerDePage('gestion');
             }
         }

@@ -54,11 +54,63 @@ function setAttrById(id, attr, key, params = {}) {
     element.setAttribute(attr, window.t(key, params, element.getAttribute(attr) || ''));
 }
 
+function setText(selector, key, root = document, params = {}) {
+    const element = root.querySelector(selector);
+    if (!element) return;
+    element.textContent = window.t(key, params, element.textContent);
+}
+
+function setAttr(selector, attr, key, root = document, params = {}) {
+    const element = root.querySelector(selector);
+    if (!element) return;
+    element.setAttribute(attr, window.t(key, params, element.getAttribute(attr) || ''));
+}
+
+function setOptionText(selector, key, root = document, params = {}) {
+    setText(selector, key, root, params);
+}
+
 function setHtml(selector, html) {
     const element = document.querySelector(selector);
     if (!element || typeof html !== 'string') return;
     element.innerHTML = html;
 }
+
+window.getLocaleAffichageSite = function() {
+    return window.tRaw('meta.locale', 'fr') || 'fr';
+};
+
+window.traduireGenreSite = function(genre) {
+    const map = {
+        'High & Low Fantasy': 'navigation.genres.highLowFantasy',
+        'Dark Fantasy & Grimdark': 'navigation.genres.darkFantasyGrimdark',
+        'Romantasy Tragique': 'navigation.genres.romantasyTragique',
+        'Sci-Fi & Cyberpunk': 'navigation.genres.sciFiCyberpunk',
+        'Horreur Psychologique': 'navigation.genres.horreurPsychologique'
+    };
+    return window.t(map[genre] || '', {}, genre || '');
+};
+
+window.traduireStatutSite = function(statut) {
+    const map = {
+        '✍️ En cours': 'story.statusInProgress',
+        '✅ Terminé': 'story.statusCompleted',
+        '⏳ En pause': 'story.statusPaused',
+        '☠️ Abandonné': 'story.statusAbandoned'
+    };
+    return window.t(map[statut] || '', {}, statut || window.t('story.statusInProgress', {}, '✍️ En cours'));
+};
+
+window.traduireClassificationSite = function(classification) {
+    const valeur = classification || 'Tout public';
+    const map = {
+        'Tout public': 'creationStory.ageAudience',
+        R15: 'creationStory.ageR15',
+        R16: 'creationStory.ageR16',
+        R18: 'creationStory.ageR18'
+    };
+    return window.t(map[valeur] || '', {}, valeur);
+};
 
 function appliquerTraductionsChrome() {
     if (!window._siteTranslations) return;
@@ -266,6 +318,155 @@ function appliquerTraductionsHistoire(root = document) {
     appliquerTraductionsCommentaires(root);
 }
 
+function appliquerTraductionsForge(root = document) {
+    setText('.welcome-content h2', 'forge.heroTitle', root);
+    setText('.welcome-content > p', 'forge.heroIntro', root);
+    setText('.forge-image-notice strong', 'forge.imageNoticeTitle', root);
+    setText('.forge-image-notice p', 'forge.imageNotice', root);
+    setText('#btn-publish', 'forge.newStory', root);
+    setText('#btn-retour-studio', 'forge.leave', root);
+    setText('.my-stories-section .section-title', 'forge.currentStories', root);
+    setOptionText('#tri-oeuvres option[value="recent"]', 'forge.sortRecent', root);
+    setOptionText('#tri-oeuvres option[value="ancien"]', 'forge.sortOld', root);
+    setOptionText('#tri-oeuvres option[value="az"]', 'forge.sortAz', root);
+    setOptionText('#tri-oeuvres option[value="za"]', 'forge.sortZa', root);
+    setText('#mes-oeuvres-liste .loading-text', 'forge.loadingMine', root);
+}
+
+function appliquerTraductionsGestion(root = document) {
+    setText('#btn-retour-gestion', 'gestion.backToForge', root);
+    setText('#btn-edit-histoire', 'gestion.editStory', root);
+    setText('#info-histoire-panel .loading-text', 'gestion.storyLoading', root);
+    setText('.volumes-section .chapters-header h2', 'gestion.volumesTitle', root);
+    setText('#volumes-liste .loading-text', 'gestion.volumesLoading', root);
+    setText('label[for="volume-title"]', 'gestion.volumeNameLabel', root);
+    setAttr('#volume-title', 'placeholder', 'gestion.volumeNamePlaceholder', root);
+    setText('label[for="volume-cover-file"]', 'gestion.volumeCoverLabel', root);
+    setText('#btn-create-volume', 'gestion.createVolume', root);
+    setText('.chapitres-section .chapters-header h2', 'gestion.chaptersTitle', root);
+    setText('#btn-add-chapitre', 'gestion.addChapter', root);
+    setText('.chapter-section-title-brouillon', 'gestion.draftsTitle', root);
+    setText('.chapter-section-title-programme', 'gestion.scheduledTitle', root);
+    setText('.chapter-section-title-publie', 'gestion.publishedTitle', root);
+    root.querySelectorAll('.chapter-page-size span').forEach((element) => {
+        element.textContent = window.t('story.pageSizeLabel', {}, element.textContent);
+    });
+}
+
+function appliquerTraductionsCreationStory(root = document) {
+    setText('#btn-retour-creation', 'gestion.backToForge', root);
+    setText('.editor-header h2', 'creationStory.newTitle', root);
+    setText('#submit-story', 'creationStory.submitCreate', root);
+    setText('label[for="story-title"]', 'creationStory.titleLabel', root);
+    setAttr('#story-title', 'placeholder', 'creationStory.titlePlaceholder', root);
+    setText('label[for="story-synopsis"]', 'creationStory.synopsisLabel', root);
+    setAttr('#story-synopsis', 'placeholder', 'creationStory.synopsisPlaceholder', root);
+    setText('label[for="story-genre"]', 'creationStory.genreLabel', root);
+    setOptionText('#story-genre option[value=""]', 'creationStory.genrePlaceholder', root);
+    setOptionText('#story-genre option[value="High & Low Fantasy"]', 'navigation.genres.highLowFantasy', root);
+    setOptionText('#story-genre option[value="Dark Fantasy & Grimdark"]', 'navigation.genres.darkFantasyGrimdark', root);
+    setOptionText('#story-genre option[value="Romantasy Tragique"]', 'navigation.genres.romantasyTragique', root);
+    setOptionText('#story-genre option[value="Sci-Fi & Cyberpunk"]', 'navigation.genres.sciFiCyberpunk', root);
+    setOptionText('#story-genre option[value="Horreur Psychologique"]', 'navigation.genres.horreurPsychologique', root);
+    setText('label[for="story-age"]', 'creationStory.ageLabel', root);
+    setOptionText('#story-age option[value=""]', 'creationStory.agePlaceholder', root);
+    setOptionText('#story-age option[value="Tout public"]', 'creationStory.ageAudience', root);
+    setOptionText('#story-age option[value="R15"]', 'creationStory.ageR15', root);
+    setOptionText('#story-age option[value="R16"]', 'creationStory.ageR16', root);
+    setOptionText('#story-age option[value="R18"]', 'creationStory.ageR18', root);
+    setText('label[for="story-status"]', 'creationStory.statusLabel', root);
+    setOptionText('#story-status option[value="✍️ En cours"]', 'story.statusInProgress', root);
+    setOptionText('#story-status option[value="✅ Terminé"]', 'story.statusCompleted', root);
+    setOptionText('#story-status option[value="⏳ En pause"]', 'story.statusPaused', root);
+    setOptionText('#story-status option[value="☠️ Abandonné"]', 'story.statusAbandoned', root);
+    const sensibleLabel = root.querySelector('#story-sensible')?.closest('label')?.querySelector('strong');
+    if (sensibleLabel) sensibleLabel.textContent = window.t('creationStory.sensitiveLabel', {}, sensibleLabel.textContent);
+    const commentsLabel = root.querySelector('#story-comments-enabled')?.closest('label')?.querySelector('strong');
+    if (commentsLabel) commentsLabel.textContent = window.t('creationStory.commentsLabel', {}, commentsLabel.textContent);
+    setText('label[for="story-cover-file"]', 'creationStory.coverLabel', root);
+    setText('.publish-options .text-muted', 'creationStory.coverHelp', root);
+    setText('label[for="story-delete-cover"] strong', 'creationStory.deleteCoverLabel', root);
+}
+
+function appliquerTraductionsEditeur(root = document) {
+    setText('#close-chapitre-modal', 'editor.cancel', root);
+    setText('.editor-header h2', 'editor.workshopTitle', root);
+    setText('#submit-chapitre', 'editor.submitCreate', root);
+    setText('label[for="chapitre-numero"]', 'editor.numberLabel', root);
+    setText('label[for="chapitre-titre"]', 'editor.titleLabel', root);
+    setAttr('#chapitre-titre', 'placeholder', 'editor.titlePlaceholder', root);
+    setText('label[for="chapitre-volume"]', 'editor.volumeLabel', root);
+    setOptionText('#chapitre-volume option[value=""]', 'volumes.general', root);
+    const labels = root.querySelectorAll('.editor-container > .form-group > label');
+    if (labels[1]) labels[1].textContent = window.t('editor.startNoteLabel', {}, labels[1].textContent);
+    if (labels[2]) labels[2].textContent = window.t('editor.contentLabel', {}, labels[2].textContent);
+    if (labels[3]) labels[3].textContent = window.t('editor.endNoteLabel', {}, labels[3].textContent);
+    setText('#compteur-mots-container', 'editor.wordCounter', root, { count: 0 });
+    const publishLabel = root.querySelector('#chapitre-publie')?.closest('label')?.querySelector('strong');
+    if (publishLabel) publishLabel.textContent = window.t('editor.publishNowLabel', {}, publishLabel.textContent);
+    setText('label[for="chapitre-date-pub"]', 'editor.scheduleLabel', root);
+    setText('.publish-help-text', 'editor.scheduleHelp', root);
+    setAttr('#chapitre-date-pub', 'placeholder', 'editor.noSchedule', root);
+    setText('#chapitre-date-trigger', 'editor.openCalendar', root);
+    setText('#chapitre-date-clear', 'editor.clearSchedule', root);
+}
+
+function appliquerTraductionsFavoris(root = document) {
+    setText('.accueil-header h1', 'favorites.title', root);
+    setText('.accueil-header p', 'favorites.subtitle', root);
+    setText('[data-tab="tab-pactes"]', 'favorites.tabPacts', root);
+    setText('[data-tab="tab-lectures"]', 'favorites.tabReadings', root);
+    setText('[data-tab="tab-archives"]', 'favorites.tabArchives', root);
+    setText('.favoris-sort label', 'favorites.sortLabel', root);
+    setOptionText('#sort-pactes option[value="recent"]', 'favorites.sortRecent', root);
+    setOptionText('#sort-pactes option[value="ancien"]', 'favorites.sortOld', root);
+    setOptionText('#sort-pactes option[value="az"]', 'favorites.sortAz', root);
+    setOptionText('#sort-pactes option[value="za"]', 'favorites.sortZa', root);
+    setText('.favoris-toolbar .btn-outline-blue', 'favorites.returnHome', root);
+    setText('#tab-lectures h2', 'favorites.readingsTitle', root);
+    setText('#tab-lectures p', 'favorites.readingsText', root);
+    setText('#tab-archives h2', 'favorites.archivesTitle', root);
+    setText('#tab-archives p', 'favorites.archivesText', root);
+}
+
+function appliquerTraductionsQuartiers(root = document) {
+    setText('.btn-retour-container button', 'profile.returnHome', root);
+    setText('[data-target="section-identite"]', 'profile.tabIdentity', root);
+    setText('[data-target="section-securite"]', 'profile.tabSecurity', root);
+    setText('[data-target="section-preferences"]', 'profile.tabPreferences', root);
+    setText('[data-target="section-compte"]', 'profile.tabAccount', root);
+    setText('#section-identite h2', 'profile.identityTitle', root);
+    setText('#section-identite label', 'profile.avatarLabel', root);
+    setText('#section-identite button[onclick*="quartiers-avatar-file"]', 'profile.chooseAvatar', root);
+    setText('#section-identite small', 'profile.avatarHelp', root);
+    setText('#section-identite .form-group:nth-of-type(2) label', 'profile.pseudoLabel', root);
+    setAttr('#quartiers-pseudo', 'placeholder', 'profile.pseudoPlaceholder', root);
+    setText('#btn-save-identite', 'profile.saveIdentity', root);
+    setText('#section-securite h2', 'profile.securityTitle', root);
+    const emailLabel = root.querySelector('#quartiers-email')?.closest('.form-group')?.querySelector('label');
+    if (emailLabel) emailLabel.textContent = window.t('profile.emailLabel', {}, emailLabel.textContent);
+    setAttr('#quartiers-email', 'placeholder', 'profile.emailPlaceholder', root);
+    setText('#btn-save-email', 'profile.emailButton', root);
+    const passwordLabel = root.querySelector('#quartiers-password')?.closest('.form-group')?.querySelector('label');
+    if (passwordLabel) passwordLabel.textContent = window.t('profile.passwordLabel', {}, passwordLabel.textContent);
+    setAttr('#quartiers-password', 'placeholder', 'profile.passwordPlaceholder', root);
+    setText('#btn-save-password', 'profile.passwordButton', root);
+    setText('#section-preferences h2', 'profile.preferencesTitle', root);
+    setText('#section-preferences .pref-item:nth-of-type(1) h3', 'profile.authorModeTitle', root);
+    setText('#section-preferences .pref-item:nth-of-type(1) p', 'profile.authorModeText', root);
+    setText('#section-preferences .pref-item:nth-of-type(2) h3', 'profile.commentsTitle', root);
+    setText('#section-preferences .pref-item:nth-of-type(2) p', 'profile.commentsText', root);
+    setText('#section-compte h2', 'profile.deleteTitle', root);
+    setText('#section-compte p', 'profile.deleteText', root);
+    setText('#btn-delete-account', 'profile.deleteButton', root);
+}
+
+function appliquerTraductionsCategorie(root = document) {
+    const genre = localStorage.getItem('currentGenre') || '';
+    setText('#genre-page-title', genre ? 'category.title' : 'category.unknownTitle', root, { genre: window.traduireGenreSite(genre) });
+    setText('.welcome-content .text-muted', 'category.intro', root);
+}
+
 window.appliquerTraductionsPage = function(page, root = document) {
     if (!window._siteTranslations) return;
 
@@ -281,6 +482,14 @@ window.appliquerTraductionsPage = function(page, root = document) {
         appliquerTraductionsLecteur(root);
         appliquerTraductionsCommentaires(root);
     }
+
+    if (page === 'studio') appliquerTraductionsForge(root);
+    if (page === 'gestion') appliquerTraductionsGestion(root);
+    if (page === 'creation-story') appliquerTraductionsCreationStory(root);
+    if (page === 'editeur-chapitre') appliquerTraductionsEditeur(root);
+    if (page === 'lectures') appliquerTraductionsFavoris(root);
+    if (page === 'quartiers') appliquerTraductionsQuartiers(root);
+    if (page === 'categorie-genre') appliquerTraductionsCategorie(root);
 };
 
 window.getPageStatiqueTraduite = function(page) {

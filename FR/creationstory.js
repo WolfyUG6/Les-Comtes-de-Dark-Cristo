@@ -26,7 +26,7 @@ window.chargerCreationStory = function() {
 
     const btnSubmit = document.getElementById('submit-story');
     if (btnSubmit) {
-        btnSubmit.innerText = "Forger l'Histoire";
+        btnSubmit.innerText = window.t?.('creationStory.submitCreate', {}, "Forger l'Histoire") || "Forger l'Histoire";
         btnSubmit.disabled = false;
     }
 
@@ -35,7 +35,7 @@ window.chargerCreationStory = function() {
     const idHistoire = localStorage.getItem('currentOeuvreId');
 
     if (modeEdition && idHistoire) {
-        if (btnSubmit) btnSubmit.innerText = "Recherche dans les archives...";
+        if (btnSubmit) btnSubmit.innerText = window.t?.('creationStory.loadingArchive', {}, 'Recherche dans les archives...') || 'Recherche dans les archives...';
         
         window._supabase.from('histoires').select('*').eq('id', idHistoire).single()
             .then(({ data: histoire, error }) => {
@@ -59,15 +59,15 @@ window.chargerCreationStory = function() {
                     }
                     
                     if (btnSubmit) {
-                        btnSubmit.innerText = "Sauvegarder les changements";
-                        document.querySelector('.title-m0').innerText = "Réviser le Grimoire";
+                        btnSubmit.innerText = window.t?.('creationStory.submitEdit', {}, 'Sauvegarder les changements') || 'Sauvegarder les changements';
+                        document.querySelector('.title-m0').innerText = window.t?.('creationStory.editTitle', {}, 'Réviser le Grimoire') || 'Réviser le Grimoire';
                     }
                 }
             });
     } else {
         // Rétablit le titre par défaut si c'est une création
         const titrePage = document.querySelector('.title-m0');
-        if (titrePage) titrePage.innerText = "Graver une Nouvelle Œuvre";
+        if (titrePage) titrePage.innerText = window.t?.('creationStory.newTitle', {}, 'Graver une Nouvelle Œuvre') || 'Graver une Nouvelle Œuvre';
     }
 };
 
@@ -113,16 +113,16 @@ if (!window.creationStoryEventHooked) {
             const { data: { session } } = await window._supabase.auth.getSession();
             
             if (!session) {
-                await window.siteAlert("Erreur critique : Tu as été déconnecté par le vide spatial. Reconnecte-toi.", { danger: true });
+                await window.siteAlert(window.t?.('creationStory.disconnectedError', {}, 'Erreur critique : Tu as été déconnecté par le vide spatial. Reconnecte-toi.') || 'Erreur critique : Tu as été déconnecté par le vide spatial. Reconnecte-toi.', { danger: true });
                 return;
             }
 
             if (!title || !synopsis || !genre || !classification) {
-                await window.siteAlert("Les fondations sont instables ! Remplissez tous les champs obligatoires (Titre, Synopsis, Genre, Classification).", { danger: true });
+                await window.siteAlert(window.t?.('creationStory.requiredError', {}, 'Les fondations sont instables ! Remplissez tous les champs obligatoires (Titre, Synopsis, Genre, Classification).') || 'Les fondations sont instables ! Remplissez tous les champs obligatoires (Titre, Synopsis, Genre, Classification).', { danger: true });
                 return;
             }
 
-            btnSubmit.innerText = "Forgeage en cours...";
+            btnSubmit.innerText = window.t?.('creationStory.forging', {}, 'Forgeage en cours...') || 'Forgeage en cours...';
             btnSubmit.disabled = true;
 
             const modeEdition = localStorage.getItem('modeEditionHistoire') === 'true';
@@ -159,7 +159,7 @@ if (!window.creationStoryEventHooked) {
 
             // 1. Dépôt de la couverture si fichier présent
             if (file) {
-                btnSubmit.innerText = "Téléversement de l'image...";
+                btnSubmit.innerText = window.t?.('creationStory.uploadingImage', {}, "Téléversement de l'image...") || "Téléversement de l'image...";
                 
                 // --- ON EFFACE D'ABORD L'ANCIENNE ---
                 if (oldImageUrl) {
@@ -199,8 +199,8 @@ if (!window.creationStoryEventHooked) {
                     const { data } = window._supabase.storage.from('couvertures').getPublicUrl(fileName);
                     imageUrl = data.publicUrl;
                 } else {
-                    await window.siteAlert("L'image a été rejetée par le portail : " + upErr.message, { danger: true });
-                    btnSubmit.innerText = modeEdition ? "Sauvegarder les changements" : "Forger l'Histoire";
+                    await window.siteAlert(window.t?.('creationStory.imageRejected', { message: upErr.message }, "L'image a été rejetée par le portail : " + upErr.message) || "L'image a été rejetée par le portail : " + upErr.message, { danger: true });
+                    btnSubmit.innerText = modeEdition ? (window.t?.('creationStory.submitEdit', {}, 'Sauvegarder les changements') || 'Sauvegarder les changements') : (window.t?.('creationStory.submitCreate', {}, "Forger l'Histoire") || "Forger l'Histoire");
                     btnSubmit.disabled = false;
                     return; // On arrête là si l'image plante
                 }
@@ -210,7 +210,7 @@ if (!window.creationStoryEventHooked) {
                 imageUrl = window.DEFAULT_STORY_COVER;
             }
 
-            btnSubmit.innerText = "Écriture dans le registre...";
+            btnSubmit.innerText = window.t?.('creationStory.writingRegistry', {}, 'Écriture dans le registre...') || 'Écriture dans le registre...';
 
             // 2. Gravure ou Révision du Grimoire (Table "histoires")
             const monPseudo = session.user.user_metadata?.pseudo || session.user.email.split('@')[0];
@@ -255,11 +255,11 @@ if (!window.creationStoryEventHooked) {
             const { data: histoireSauvee, error } = requeteResult;
 
             if (error) {
-                await window.siteAlert("Le registre Supabase a refusé l'inscription : " + error.message, { danger: true });
-                btnSubmit.innerText = modeEdition ? "Sauvegarder les changements" : "Forger l'Histoire";
+                await window.siteAlert((window.t?.('creationStory.registryError', {}, "Le registre Supabase a refusé l'inscription :") || "Le registre Supabase a refusé l'inscription :") + ' ' + error.message, { danger: true });
+                btnSubmit.innerText = modeEdition ? (window.t?.('creationStory.submitEdit', {}, 'Sauvegarder les changements') || 'Sauvegarder les changements') : (window.t?.('creationStory.submitCreate', {}, "Forger l'Histoire") || "Forger l'Histoire");
                 btnSubmit.disabled = false;
             } else {
-                await window.siteAlert(modeEdition ? "Les modifications ont été gravées dans la roche !" : "Un nouveau grimoire est apparu dans l'Atelier !");
+                await window.siteAlert(modeEdition ? (window.t?.('creationStory.updated', {}, 'Les modifications ont été gravées dans la roche !') || 'Les modifications ont été gravées dans la roche !') : (window.t?.('creationStory.created', {}, "Un nouveau grimoire est apparu dans l'Atelier !") || "Un nouveau grimoire est apparu dans l'Atelier !"));
                 
                 // Mémorisation pour le panneau Gestion
                 if (histoireSauvee && histoireSauvee.length > 0) {

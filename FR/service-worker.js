@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'dark-cristo-pwa-v4';
+const CACHE_VERSION = 'dark-cristo-pwa-v5';
 const APP_SHELL = [
     './',
     './maitre.html',

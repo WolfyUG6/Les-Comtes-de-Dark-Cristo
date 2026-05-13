@@ -26,9 +26,9 @@ function getVolumeCoverUrl(volume, histoire) {
 }
 
 function getVolumeTitle(volumeId) {
-    if (!volumeId) return 'Générale';
+    if (!volumeId) return window.t?.('volumes.general', {}, 'Générale') || 'Générale';
     const volume = (window.volumesOeuvreCache || []).find((item) => Number(item.id) === Number(volumeId));
-    return volume?.titre || 'Générale';
+    return volume?.titre || window.t?.('volumes.general', {}, 'Générale') || 'Générale';
 }
 
 function getNomFichierVolumeCover(file, session, histoireId) {
@@ -107,7 +107,7 @@ window.chargerGestionOeuvre = async function() {
         return;
     }
 
-    infoPanel.innerHTML = '<p class="loading-text">Déchiffrage des runes en cours...</p>';
+    infoPanel.innerHTML = `<p class="loading-text">${window.t?.('gestion.storyLoading', {}, 'Déchiffrage des runes en cours...') || 'Déchiffrage des runes en cours...'}</p>`;
 
     // 1. Récupération des infos de l'histoire
     const { data: histoire, error: errHistoire } = await window._supabase
@@ -117,7 +117,7 @@ window.chargerGestionOeuvre = async function() {
         .single();
 
     if (errHistoire || !histoire) {
-        infoPanel.innerHTML = `<p class="text-error">Erreur : L'œuvre est introuvable dans les abysses.</p>`;
+        infoPanel.innerHTML = `<p class="text-error">${window.t?.('gestion.storyNotFound', {}, "Erreur : L'œuvre est introuvable dans les abysses.") || "Erreur : L'œuvre est introuvable dans les abysses."}</p>`;
         return;
     }
 
@@ -132,10 +132,10 @@ window.chargerGestionOeuvre = async function() {
         <div class="book-info-content">
             <h2 class="story-title-m0">${histoire.titre}</h2>
             <div class="story-tags mb-15">
-                <span class="tag tag-genre">${histoire.genre}</span>
-                <span class="tag tag-statut">${histoire.statut || '✍️ En cours'}</span>
-                <span class="tag tag-age">${histoire.classification || 'Tout public'}</span>
-                ${histoire.contenu_sensible ? `<span class="tag tag-sensible">⚠️ Sensible</span>` : ''}
+                <span class="tag tag-genre">${window.traduireGenreSite?.(histoire.genre) || histoire.genre}</span>
+                <span class="tag tag-statut">${window.traduireStatutSite?.(histoire.statut) || histoire.statut || '✍️ En cours'}</span>
+                <span class="tag tag-age">${window.traduireClassificationSite?.(histoire.classification) || histoire.classification || 'Tout public'}</span>
+                ${histoire.contenu_sensible ? `<span class="tag tag-sensible">${window.t?.('home.sensitiveOn', {}, '⚠️ Sensible') || '⚠️ Sensible'}</span>` : ''}
             </div>
             <p class="book-synopsis">${histoire.synopsis}</p>
         </div>
@@ -150,7 +150,7 @@ window.chargerVolumesOeuvre = async function() {
     const liste = document.getElementById('volumes-liste');
     if (!liste || !window.currentOeuvreId) return;
 
-    liste.innerHTML = '<p class="loading-text">Lecture des volumes...</p>';
+    liste.innerHTML = `<p class="loading-text">${window.t?.('gestion.volumesLoading', {}, 'Lecture des volumes...') || 'Lecture des volumes...'}</p>`;
 
     const { data: volumes, error } = await window._supabase
         .from('volumes')
@@ -160,7 +160,7 @@ window.chargerVolumesOeuvre = async function() {
         .order('id', { ascending: true });
 
     if (error) {
-        liste.innerHTML = `<p class="text-error">Erreur volumes : ${error.message}</p>`;
+        liste.innerHTML = `<p class="text-error">${window.t?.('gestion.volumesError', {}, 'Erreur volumes :') || 'Erreur volumes :'} ${error.message}</p>`;
         return;
     }
 
@@ -178,19 +178,19 @@ function afficherVolumesOeuvre() {
     const volumeGeneral = document.createElement('article');
     volumeGeneral.className = 'volume-item volume-general';
     volumeGeneral.innerHTML = `
-        <img src="${window.getStoryCoverUrl(histoire.image_couverture)}" alt="Couverture générale" class="volume-cover-thumb">
+        <img src="${window.getStoryCoverUrl(histoire.image_couverture)}" alt="${window.t?.('volumes.generalCoverAlt', {}, 'Couverture générale') || 'Couverture générale'}" class="volume-cover-thumb">
         <div class="volume-info">
-            <h3>Générale</h3>
-            <p>Volume par défaut, non modifiable. Les chapitres sans volume restent ici.</p>
+            <h3>${window.t?.('volumes.general', {}, 'Générale') || 'Générale'}</h3>
+            <p>${window.t?.('volumes.defaultDescription', {}, 'Volume par défaut, non modifiable. Les chapitres sans volume restent ici.') || 'Volume par défaut, non modifiable. Les chapitres sans volume restent ici.'}</p>
         </div>
-        <span class="tag tag-statut">Base</span>
+        <span class="tag tag-statut">${window.t?.('volumes.baseTag', {}, 'Base') || 'Base'}</span>
     `;
     liste.appendChild(volumeGeneral);
 
     if (!window.volumesOeuvreCache || window.volumesOeuvreCache.length === 0) {
         const vide = document.createElement('p');
         vide.className = 'text-muted-italic text-small';
-        vide.innerText = "Aucun volume personnalisé pour le moment.";
+        vide.innerText = window.t?.('volumes.customEmpty', {}, 'Aucun volume personnalisé pour le moment.') || 'Aucun volume personnalisé pour le moment.';
         liste.appendChild(vide);
         return;
     }
@@ -202,9 +202,9 @@ function afficherVolumesOeuvre() {
             <img src="${getVolumeCoverUrl(volume, histoire)}" alt="Couverture ${escapeGestionHtml(volume.titre)}" class="volume-cover-thumb">
             <div class="volume-info">
                 <h3>${escapeGestionHtml(volume.titre)}</h3>
-                <p>Ordre ${volume.ordre || 1}</p>
+                <p>${window.t?.('volumes.orderLabel', { order: volume.ordre || 1 }, `Ordre ${volume.ordre || 1}`) || `Ordre ${volume.ordre || 1}`}</p>
             </div>
-            <button class="genre-btn btn-outline-red btn-small-last" type="button" data-volume-delete="${volume.id}">Supprimer</button>
+            <button class="genre-btn btn-outline-red btn-small-last" type="button" data-volume-delete="${volume.id}">${window.t?.('common.delete', {}, 'Supprimer') || 'Supprimer'}</button>
         `;
         liste.appendChild(item);
     });
@@ -218,19 +218,19 @@ async function creerVolumeDepuisFormulaire(form) {
     const file = fileInput?.files?.[0] || null;
 
     if (!titre) {
-        await window.siteAlert("Donnez un nom au volume avant de le créer.", { danger: true });
+        await window.siteAlert(window.t?.('volumes.nameRequired', {}, 'Donnez un nom au volume avant de le créer.') || 'Donnez un nom au volume avant de le créer.', { danger: true });
         return;
     }
 
     const { data: { session } } = await window._supabase.auth.getSession();
     if (!session) {
-        await window.siteAlert("Vous devez être connecté pour créer un volume.", { danger: true });
+        await window.siteAlert(window.t?.('volumes.loginRequired', {}, 'Vous devez être connecté pour créer un volume.') || 'Vous devez être connecté pour créer un volume.', { danger: true });
         return;
     }
 
     if (submit) {
         submit.disabled = true;
-        submit.innerText = "Création...";
+        submit.innerText = window.t?.('volumes.creating', {}, 'Création...') || 'Création...';
     }
 
     try {
@@ -251,11 +251,11 @@ async function creerVolumeDepuisFormulaire(form) {
         form.reset();
         await window.chargerVolumesOeuvre();
     } catch (error) {
-        await window.siteAlert("Impossible de créer le volume : " + error.message, { danger: true });
+        await window.siteAlert(window.t?.('volumes.createError', { message: error.message }, 'Impossible de créer le volume : ' + error.message) || 'Impossible de créer le volume : ' + error.message, { danger: true });
     } finally {
         if (submit) {
             submit.disabled = false;
-            submit.innerText = "Créer le volume";
+            submit.innerText = window.t?.('gestion.createVolume', {}, 'Créer le volume') || 'Créer le volume';
         }
     }
 }
@@ -264,9 +264,9 @@ async function supprimerVolume(volumeId) {
     const volume = (window.volumesOeuvreCache || []).find((item) => Number(item.id) === Number(volumeId));
     if (!volume) return;
 
-    const confirmation = await window.siteConfirm(`Supprimer le volume "${volume.titre}" ? Les chapitres associés retourneront dans Générale.`, {
-        confirmText: 'Supprimer',
-        cancelText: 'Annuler',
+    const confirmation = await window.siteConfirm(window.t?.('volumes.deleteConfirm', { title: volume.titre }, `Supprimer le volume "${volume.titre}" ? Les chapitres associés retourneront dans Générale.`) || `Supprimer le volume "${volume.titre}" ? Les chapitres associés retourneront dans Générale.`, {
+        confirmText: window.t?.('common.delete', {}, 'Supprimer') || 'Supprimer',
+        cancelText: window.t?.('common.cancel', {}, 'Annuler') || 'Annuler',
         danger: true
     });
     if (!confirmation) return;
@@ -274,7 +274,7 @@ async function supprimerVolume(volumeId) {
     try {
         await supprimerCoverVolumeStorage(volume.image_couverture);
     } catch (error) {
-        await window.siteAlert("Impossible de supprimer l'image du volume : " + error.message, { danger: true });
+        await window.siteAlert(window.t?.('volumes.coverDeleteError', { message: error.message }, "Impossible de supprimer l'image du volume : " + error.message) || "Impossible de supprimer l'image du volume : " + error.message, { danger: true });
         return;
     }
 
@@ -284,7 +284,7 @@ async function supprimerVolume(volumeId) {
         .eq('id', volumeId);
 
     if (error) {
-        await window.siteAlert("Impossible de supprimer le volume : " + error.message, { danger: true });
+        await window.siteAlert(window.t?.('volumes.deleteError', { message: error.message }, 'Impossible de supprimer le volume : ' + error.message) || 'Impossible de supprimer le volume : ' + error.message, { danger: true });
         return;
     }
 
@@ -362,13 +362,13 @@ function creerElementChapitreGestion(chap, infoDate) {
     div.className = "chapter-item";
     div.innerHTML = `
         <div>
-            <strong class="chapter-title">Chapitre ${chap.numero} : ${escapeGestionHtml(chap.titre)}</strong>
+            <strong class="chapter-title">${window.t?.('story.chapterTitle', { number: chap.numero, title: escapeGestionHtml(chap.titre) }, `Chapitre ${chap.numero} : ${escapeGestionHtml(chap.titre)}`) || `Chapitre ${chap.numero} : ${escapeGestionHtml(chap.titre)}`}</strong>
             <span class="tag tag-volume">${escapeGestionHtml(getVolumeTitle(chap.volume_id))}</span>
             ${infoDate}
         </div>
         <div>
-            <button class="genre-btn btn-outline-blue btn-small" onclick="window.ouvrirEditeurChapitre(${chap.id})">Modifier</button>
-            <button class="genre-btn btn-outline-red btn-small-last" onclick="supprimerChapitre(${chap.id})">Supprimer</button>
+            <button class="genre-btn btn-outline-blue btn-small" onclick="window.ouvrirEditeurChapitre(${chap.id})">${window.t?.('common.edit', {}, 'Modifier') || 'Modifier'}</button>
+            <button class="genre-btn btn-outline-red btn-small-last" onclick="supprimerChapitre(${chap.id})">${window.t?.('common.delete', {}, 'Supprimer') || 'Supprimer'}</button>
         </div>
     `;
     return div;
@@ -400,9 +400,9 @@ function dessinerListeChapitresGestion(type, liste, messageVide) {
 }
 
 function redessinerChapitresGestion() {
-    dessinerListeChapitresGestion('brouillons', document.getElementById('liste-brouillons'), 'Aucun parchemin en brouillon.');
-    dessinerListeChapitresGestion('programmes', document.getElementById('liste-programmes'), 'Aucun parchemin en attente.');
-    dessinerListeChapitresGestion('publies', document.getElementById('liste-publies'), 'Aucun parchemin visible.');
+    dessinerListeChapitresGestion('brouillons', document.getElementById('liste-brouillons'), window.t?.('gestion.emptyDrafts', {}, 'Aucun parchemin en brouillon.') || 'Aucun parchemin en brouillon.');
+    dessinerListeChapitresGestion('programmes', document.getElementById('liste-programmes'), window.t?.('gestion.emptyScheduled', {}, 'Aucun parchemin en attente.') || 'Aucun parchemin en attente.');
+    dessinerListeChapitresGestion('publies', document.getElementById('liste-publies'), window.t?.('gestion.emptyPublished', {}, 'Aucun parchemin visible.') || 'Aucun parchemin visible.');
 }
 
 window.chargerChapitresCategories = async function() {
@@ -412,9 +412,9 @@ window.chargerChapitresCategories = async function() {
 
     if (!listeBrouillons) return;
 
-    listeBrouillons.innerHTML = '<p class="loading-text">Recherche...</p>';
-    listeProgrammes.innerHTML = '<p class="loading-text">Recherche...</p>';
-    listePublies.innerHTML = '<p class="loading-text">Recherche...</p>';
+    listeBrouillons.innerHTML = `<p class="loading-text">${window.t?.('common.searching', {}, 'Recherche...') || 'Recherche...'}</p>`;
+    listeProgrammes.innerHTML = `<p class="loading-text">${window.t?.('common.searching', {}, 'Recherche...') || 'Recherche...'}</p>`;
+    listePublies.innerHTML = `<p class="loading-text">${window.t?.('common.searching', {}, 'Recherche...') || 'Recherche...'}</p>`;
 
     const { data: chapitres, error } = await window._supabase
         .from('chapitres')
@@ -423,7 +423,7 @@ window.chargerChapitresCategories = async function() {
         .order('numero', { ascending: true }); // On trie par numéro de chapitre (1, 2, 3...)
 
     if (error) {
-        listeBrouillons.innerHTML = `<p class="text-error">Erreur: ${error.message}</p>`;
+        listeBrouillons.innerHTML = `<p class="text-error">${window.t?.('errors.genericPrefix', {}, 'Erreur :') || 'Erreur :'} ${error.message}</p>`;
         return;
     }
 
@@ -445,11 +445,11 @@ window.chargerChapitresCategories = async function() {
         let infoDate = '';
 
         if (chap.est_publie && dateChap > maintenant) {
-            const dateAffichee = dateChap.toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-            infoDate = `<span class="scheduled-date">(Prévu le ${dateAffichee})</span>`;
+            const dateAffichee = dateChap.toLocaleString(window.getLocaleAffichageSite?.() || 'fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            infoDate = `<span class="scheduled-date">${window.t?.('gestion.scheduledDate', { date: dateAffichee }, `(Prévu le ${dateAffichee})`) || `(Prévu le ${dateAffichee})`}</span>`;
         } else if (chap.est_publie) {
-            const dateAffichee = dateChap.toLocaleDateString('fr-FR');
-            infoDate = `<span class="published-date">(Publié le ${dateAffichee})</span>`;
+            const dateAffichee = dateChap.toLocaleDateString(window.getLocaleAffichageSite?.() || 'fr-FR');
+            infoDate = `<span class="published-date">${window.t?.('story.publishedDate', { date: dateAffichee }, `(Publié le ${dateAffichee})`) || `(Publié le ${dateAffichee})`}</span>`;
         }
 
         // ⚖️ L'Aiguilleur : On range le chapitre dans la bonne case !
@@ -467,15 +467,15 @@ window.chargerChapitresCategories = async function() {
 
 // --- LE POUVOIR DE DESTRUCTION ---
 window.supprimerChapitre = async function(id) {
-    const confirmation = await window.siteConfirm("Détruire ce parchemin à jamais ? Cette action est irréversible.", {
-        confirmText: 'Supprimer',
-        cancelText: 'Annuler',
+    const confirmation = await window.siteConfirm(window.t?.('gestion.deleteChapterConfirm', {}, 'Détruire ce parchemin à jamais ? Cette action est irréversible.') || 'Détruire ce parchemin à jamais ? Cette action est irréversible.', {
+        confirmText: window.t?.('common.delete', {}, 'Supprimer') || 'Supprimer',
+        cancelText: window.t?.('common.cancel', {}, 'Annuler') || 'Annuler',
         danger: true
     });
     if (!confirmation) return;
 
     const { error } = await window._supabase.from('chapitres').delete().eq('id', id);
-    if(error) await window.siteAlert("Supabase a bloqué la destruction : " + error.message, { danger: true });
+    if(error) await window.siteAlert((window.t?.('gestion.deleteChapterError', {}, 'Supabase a bloqué la destruction :') || 'Supabase a bloqué la destruction :') + ' ' + error.message, { danger: true });
     else window.chargerChapitresCategories(); // On recharge la liste instantanément
 };
 

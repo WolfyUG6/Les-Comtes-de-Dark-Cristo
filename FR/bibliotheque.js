@@ -192,9 +192,9 @@ function creerCarteHistoire(histoire, options = {}) {
         ${miseEnAvant ? `<span class="story-highlight-kicker">${window.t?.('home.highlightKicker', {}, 'Mise en avant hebdomadaire') || 'Mise en avant hebdomadaire'}</span>` : ''}
         <img src="${imageCouverture}" alt="${histoire.titre}">
         <div class="story-tags">
-            <span class="tag tag-genre">${histoire.genre}</span>
-            <span class="tag tag-statut">${histoire.statut || '✍️ En cours'}</span>
-            <span class="${ageClass}">${histoire.classification || 'Tout public'}</span>
+            <span class="tag tag-genre">${window.traduireGenreSite?.(histoire.genre) || histoire.genre}</span>
+            <span class="tag tag-statut">${window.traduireStatutSite?.(histoire.statut) || histoire.statut || '✍️ En cours'}</span>
+            <span class="${ageClass}">${window.traduireClassificationSite?.(histoire.classification) || histoire.classification || 'Tout public'}</span>
             ${tagSensible}
         </div>
         <h3>${histoire.titre}</h3>

@@ -4,9 +4,13 @@
 
 window.chargerQuartiers = async function() {
     // 1. Charger et injecter le HTML
-    const reponse = await fetch('Parametre.html');
-    const html = await reponse.text();
-    document.getElementById('sanctuaire-root').innerHTML = html;
+    const root = document.getElementById('sanctuaire-root');
+    if (root && !root.querySelector('.quartiers-page')) {
+        const reponse = await fetch('Parametre.html');
+        const html = await reponse.text();
+        root.innerHTML = html;
+    }
+    window.appliquerTraductionsPage?.('quartiers', root || document);
 
     // 2. Initialiser la navigation de la Sidebar
     initialiserSidebarQuartiers();
@@ -81,30 +85,30 @@ async function changerEmail() {
     const btn = document.getElementById('btn-save-email');
 
     if (!nouvelEmail) {
-        afficherFeedback(feedback, "L'incantation est vide. Entrez un email.", "text-error");
+        afficherFeedback(feedback, window.t?.('profile.emailEmpty', {}, "L'incantation est vide. Entrez un email.") || "L'incantation est vide. Entrez un email.", "text-error");
         return;
     }
 
     // Validation basique du format email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(nouvelEmail)) {
-        afficherFeedback(feedback, "Ce grimoire d'adresse est mal formé.", "text-error");
+        afficherFeedback(feedback, window.t?.('profile.emailInvalid', {}, "Ce grimoire d'adresse est mal formé.") || "Ce grimoire d'adresse est mal formé.", "text-error");
         return;
     }
 
     btn.disabled = true;
-    btn.innerText = "Transmission...";
-    afficherFeedback(feedback, "Envoi du lien de confirmation...", "");
+    btn.innerText = window.t?.('profile.transmitting', {}, 'Transmission...') || 'Transmission...';
+    afficherFeedback(feedback, window.t?.('profile.confirmationSending', {}, 'Envoi du lien de confirmation...') || 'Envoi du lien de confirmation...', "");
 
     const { error } = await window._supabase.auth.updateUser({ email: nouvelEmail });
 
     btn.disabled = false;
-    btn.innerText = "Changer l'Email";
+    btn.innerText = window.t?.('profile.emailButton', {}, "Changer l'Email") || "Changer l'Email";
 
     if (error) {
-        afficherFeedback(feedback, "Refus du Sanctuaire : " + error.message, "text-error");
+        afficherFeedback(feedback, (window.t?.('profile.sanctuaryRefusal', {}, 'Refus du Sanctuaire :') || 'Refus du Sanctuaire :') + ' ' + error.message, "text-error");
     } else {
-        afficherFeedback(feedback, "✅ Un lien de confirmation a été envoyé à " + nouvelEmail + ". Vérifiez vos courriers. Après validation, les histoires liées à votre compte seront resynchronisées automatiquement.", "text-success");
+        afficherFeedback(feedback, window.t?.('profile.emailConfirmationSent', { email: nouvelEmail }, `✅ Un lien de confirmation a été envoyé à ${nouvelEmail}. Vérifiez vos courriers. Après validation, les histoires liées à votre compte seront resynchronisées automatiquement.`) || `✅ Un lien de confirmation a été envoyé à ${nouvelEmail}. Vérifiez vos courriers. Après validation, les histoires liées à votre compte seront resynchronisées automatiquement.`, "text-success");
         document.getElementById('quartiers-email').value = '';
     }
 }
@@ -116,28 +120,28 @@ async function changerMotDePasse() {
     const btn = document.getElementById('btn-save-password');
 
     if (!nouveauMdp) {
-        afficherFeedback(feedback, "Le Sceau de Garde ne peut être vide.", "text-error");
+        afficherFeedback(feedback, window.t?.('profile.passwordEmpty', {}, 'Le Sceau de Garde ne peut être vide.') || 'Le Sceau de Garde ne peut être vide.', "text-error");
         return;
     }
 
     if (nouveauMdp.length < 6) {
-        afficherFeedback(feedback, "Le Sceau doit contenir au moins 6 caractères.", "text-error");
+        afficherFeedback(feedback, window.t?.('profile.passwordTooShort', {}, 'Le Sceau doit contenir au moins 6 caractères.') || 'Le Sceau doit contenir au moins 6 caractères.', "text-error");
         return;
     }
 
     btn.disabled = true;
-    btn.innerText = "Forgeage...";
-    afficherFeedback(feedback, "Gravure du nouveau Sceau...", "");
+    btn.innerText = window.t?.('profile.forging', {}, 'Forgeage...') || 'Forgeage...';
+    afficherFeedback(feedback, window.t?.('profile.passwordSaving', {}, 'Gravure du nouveau Sceau...') || 'Gravure du nouveau Sceau...', "");
 
     const { error } = await window._supabase.auth.updateUser({ password: nouveauMdp });
 
     btn.disabled = false;
-    btn.innerText = "Forger le Sceau";
+    btn.innerText = window.t?.('profile.passwordButton', {}, 'Forger le Sceau') || 'Forger le Sceau';
 
     if (error) {
-        afficherFeedback(feedback, "Refus du Sanctuaire : " + error.message, "text-error");
+        afficherFeedback(feedback, (window.t?.('profile.sanctuaryRefusal', {}, 'Refus du Sanctuaire :') || 'Refus du Sanctuaire :') + ' ' + error.message, "text-error");
     } else {
-        afficherFeedback(feedback, "✅ Nouveau Sceau de Garde gravé avec succès.", "text-success");
+        afficherFeedback(feedback, window.t?.('profile.passwordSaved', {}, '✅ Nouveau Sceau de Garde gravé avec succès.') || '✅ Nouveau Sceau de Garde gravé avec succès.', "text-success");
         document.getElementById('quartiers-password').value = '';
     }
 }
@@ -203,10 +207,10 @@ async function supprimerMonCompte() {
     const btn = document.getElementById('btn-delete-account');
 
     const confirmation = await window.siteConfirm(
-        "Confirmez-vous la suppression définitive de votre compte et de toutes vos données ? Cette action effacera votre profil, vos histoires, vos chapitres, vos commentaires, vos favoris et vos fichiers liés. Elle est irréversible.",
+        window.t?.('profile.deleteConfirm', {}, "Confirmez-vous la suppression définitive de votre compte et de toutes vos données ? Cette action effacera votre profil, vos histoires, vos chapitres, vos commentaires, vos favoris et vos fichiers liés. Elle est irréversible.") || "Confirmez-vous la suppression définitive de votre compte et de toutes vos données ? Cette action effacera votre profil, vos histoires, vos chapitres, vos commentaires, vos favoris et vos fichiers liés. Elle est irréversible.",
         {
-            confirmText: 'Supprimer définitivement',
-            cancelText: 'Annuler',
+            confirmText: window.t?.('profile.deleteConfirmButton', {}, 'Supprimer définitivement') || 'Supprimer définitivement',
+            cancelText: window.t?.('common.cancel', {}, 'Annuler') || 'Annuler',
             danger: true
         }
     );
@@ -214,13 +218,13 @@ async function supprimerMonCompte() {
     if (!confirmation || !btn) return;
 
     btn.disabled = true;
-    btn.innerText = "Anéantissement...";
-    afficherFeedback(feedback, "Purge des archives personnelles en cours...", "");
+    btn.innerText = window.t?.('profile.deleting', {}, 'Anéantissement...') || 'Anéantissement...';
+    afficherFeedback(feedback, window.t?.('profile.purgingStorage', {}, 'Purge des archives personnelles en cours...') || 'Purge des archives personnelles en cours...', "");
 
     try {
         await supprimerObjetsStorageDuCompte();
 
-        afficherFeedback(feedback, "Suppression du compte dans le Sanctuaire...", "");
+        afficherFeedback(feedback, window.t?.('profile.deletingAccount', {}, 'Suppression du compte dans le Sanctuaire...') || 'Suppression du compte dans le Sanctuaire...', "");
 
         const { error } = await window._supabase.rpc('supprimer_mon_compte_complet');
         if (error) throw error;
@@ -232,17 +236,17 @@ async function supprimerMonCompte() {
         }
 
         nettoyerEtatLocalApresSuppressionCompte();
-        await window.siteAlert("Votre compte et toutes les données qui lui étaient liées ont été supprimés.");
+        await window.siteAlert(window.t?.('profile.deleteSuccess', {}, 'Votre compte et toutes les données qui lui étaient liées ont été supprimés.') || 'Votre compte et toutes les données qui lui étaient liées ont été supprimés.');
         window.changerDePage('accueil');
     } catch (erreur) {
-        afficherFeedback(feedback, "Échec de l'anéantissement : " + erreur.message, "text-error");
+        afficherFeedback(feedback, (window.t?.('profile.deleteError', {}, "Échec de l'anéantissement :") || "Échec de l'anéantissement :") + ' ' + erreur.message, "text-error");
         btn.disabled = false;
-        btn.innerText = "Pulvériser mon existence";
+        btn.innerText = window.t?.('profile.deleteButton', {}, 'Pulvériser mon existence') || 'Pulvériser mon existence';
         return;
     }
 
     btn.disabled = false;
-    btn.innerText = "Pulvériser mon existence";
+    btn.innerText = window.t?.('profile.deleteButton', {}, 'Pulvériser mon existence') || 'Pulvériser mon existence';
 }
 
 // =====================================
@@ -272,7 +276,7 @@ async function remplirDonneesProfil() {
     // Pré-remplir l'email actuel dans le champ email
     const emailInput = document.getElementById('quartiers-email');
     if (emailInput && session.user.email) {
-        emailInput.placeholder = "Email actuel : " + session.user.email;
+        emailInput.placeholder = window.t?.('profile.currentEmailPlaceholder', { email: session.user.email }, `Email actuel : ${session.user.email}`) || `Email actuel : ${session.user.email}`;
     }
 
     if (profil) {
@@ -322,13 +326,13 @@ window.sauvegarderIdentite = async function() {
     const userId = session.user.id;
 
     if (!pseudo) {
-        afficherFeedback(feedback, "Un Nom de Plume est nécessaire.", "text-error");
+        afficherFeedback(feedback, window.t?.('profile.pseudoRequired', {}, 'Un Nom de Plume est nécessaire.') || 'Un Nom de Plume est nécessaire.', "text-error");
         return;
     }
 
     const btn = document.getElementById('btn-save-identite');
     btn.disabled = true;
-    afficherFeedback(feedback, "Forgeage en cours...", "");
+    afficherFeedback(feedback, window.t?.('profile.forging', {}, 'Forgeage en cours...') || 'Forgeage en cours...', "");
 
     let finalAvatarUrl = null;
 
@@ -359,9 +363,9 @@ window.sauvegarderIdentite = async function() {
             finalAvatarUrl = urlData.publicUrl;
 
         } catch (err) {
-            afficherFeedback(feedback, "Échec de l'absorption du Portrait : " + err.message, "text-error");
+            afficherFeedback(feedback, (window.t?.('profile.avatarUploadError', {}, "Échec de l'absorption du Portrait :") || "Échec de l'absorption du Portrait :") + ' ' + err.message, "text-error");
             btn.disabled = false;
-            btn.innerText = "Sceller l'Identité";
+            btn.innerText = window.t?.('profile.saveIdentity', {}, "Sceller l'Identité") || "Sceller l'Identité";
             return;
         }
     }
@@ -374,9 +378,9 @@ window.sauvegarderIdentite = async function() {
     const { error: updateErr } = await safePartialUpdate(userId, updatePayload);
 
     if (updateErr) {
-        afficherFeedback(feedback, "Le pacte a été rejeté : " + updateErr.message, "text-error");
+        afficherFeedback(feedback, (window.t?.('profile.identitySaveError', {}, 'Le pacte a été rejeté :') || 'Le pacte a été rejeté :') + ' ' + updateErr.message, "text-error");
     } else {
-        afficherFeedback(feedback, "Identité forgée avec succès dans le marbre du Sanctuaire.", "text-success");
+        afficherFeedback(feedback, window.t?.('profile.identitySaved', {}, 'Identité forgée avec succès dans le marbre du Sanctuaire.') || 'Identité forgée avec succès dans le marbre du Sanctuaire.', "text-success");
         
         let metaDataPayload = { pseudo: pseudo };
         if (finalAvatarUrl) metaDataPayload.avatar_url = finalAvatarUrl;
@@ -394,7 +398,7 @@ window.sauvegarderIdentite = async function() {
     }
 
     btn.disabled = false;
-    btn.innerText = "Sceller l'Identité";
+    btn.innerText = window.t?.('profile.saveIdentity', {}, "Sceller l'Identité") || "Sceller l'Identité";
 };
 
 // =====================================
@@ -408,7 +412,7 @@ window.switcherPreference = async function(colonneSQL, valeurBool) {
     const session = authData?.session;
     if (!session) return;
 
-    afficherFeedback(feedback, "Gravure des lois...", "");
+    afficherFeedback(feedback, window.t?.('profile.preferenceSaving', {}, 'Gravure des lois...') || 'Gravure des lois...', "");
 
     const payload = {};
     payload[colonneSQL] = valeurBool;
@@ -416,9 +420,9 @@ window.switcherPreference = async function(colonneSQL, valeurBool) {
     const { error } = await safePartialUpdate(session.user.id, payload);
 
     if (error) {
-        afficherFeedback(feedback, "Échec du décret : " + error.message, "text-error", true);
+        afficherFeedback(feedback, (window.t?.('profile.preferenceError', {}, 'Échec du décret :') || 'Échec du décret :') + ' ' + error.message, "text-error", true);
     } else {
-        afficherFeedback(feedback, "Loi décrétée dans la base de données.", "text-success", true);
+        afficherFeedback(feedback, window.t?.('profile.preferenceSaved', {}, 'Loi décrétée dans la base de données.') || 'Loi décrétée dans la base de données.', "text-success", true);
         
         if (colonneSQL === 'mode_auteur') {
             await window._supabase.auth.updateUser({

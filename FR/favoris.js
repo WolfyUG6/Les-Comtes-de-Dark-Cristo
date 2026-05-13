@@ -57,12 +57,12 @@ async function chargerMesPactes() {
     const grille = document.getElementById('pactes-grid');
     if (!grille) return;
 
-    grille.innerHTML = '<p class="loading-text text-center">Interrogation des registres...</p>';
+    grille.innerHTML = `<p class="loading-text text-center">${window.t?.('favorites.loading', {}, 'Interrogation des registres...') || 'Interrogation des registres...'}</p>`;
 
     // 1. Vérifier que l'utilisateur est connecté
     const { data: { session } } = await window._supabase.auth.getSession();
     if (!session) {
-        grille.innerHTML = '<p class="text-error text-center">Vous devez avoir scellé un pacte avec le Sanctuaire (être connecté) pour voir vos lectures.</p>';
+        grille.innerHTML = `<p class="text-error text-center">${window.t?.('favorites.loginRequired', {}, 'Vous devez avoir scellé un pacte avec le Sanctuaire (être connecté) pour voir vos lectures.') || 'Vous devez avoir scellé un pacte avec le Sanctuaire (être connecté) pour voir vos lectures.'}</p>`;
         return;
     }
 
@@ -76,15 +76,15 @@ async function chargerMesPactes() {
         .eq('user_id', userId);
 
     if (errRefs) {
-        grille.innerHTML = `<p class="text-error text-center">Erreur lors de l'accès aux archives : ${errRefs.message}</p>`;
+        grille.innerHTML = `<p class="text-error text-center">${window.t?.('favorites.fetchErrorPrefix', {}, "Erreur lors de l'accès aux archives :") || "Erreur lors de l'accès aux archives :"} ${errRefs.message}</p>`;
         return;
     }
 
     if (!pactesRefs || pactesRefs.length === 0) {
         grille.innerHTML = `
             <div style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 50px;">
-                <h2 style="font-family: 'Cinzel', serif; color: var(--text-title); font-size: 2rem;">Le silence règne ici...</h2>
-                <p class="text-muted-italic text-center mt-10" style="font-size: 1.1rem;">Aucun pacte n'a encore été scellé.</p>
+                <h2 style="font-family: 'Cinzel', serif; color: var(--text-title); font-size: 2rem;">${window.t?.('favorites.emptyTitle', {}, 'Le silence règne ici...') || 'Le silence règne ici...'}</h2>
+                <p class="text-muted-italic text-center mt-10" style="font-size: 1.1rem;">${window.t?.('favorites.emptyText', {}, "Aucun pacte n'a encore été scellé.") || "Aucun pacte n'a encore été scellé."}</p>
             </div>
         `;
         return;
@@ -100,7 +100,7 @@ async function chargerMesPactes() {
         .in('id', idsHistoires);
 
     if (errHistoires) {
-        grille.innerHTML = `<p class="text-error text-center">Erreur lors de la lecture des grimoires : ${errHistoires.message}</p>`;
+        grille.innerHTML = `<p class="text-error text-center">${window.t?.('favorites.storyFetchErrorPrefix', {}, 'Erreur lors de la lecture des grimoires :') || 'Erreur lors de la lecture des grimoires :'} ${errHistoires.message}</p>`;
         return;
     }
 
@@ -174,8 +174,8 @@ async function chargerMesPactes() {
         const htmlImage = `<img src="${imageCouverture}" alt="Couverture" class="story-cover-image">`;
 
         const tagSensible = h.contenu_sensible 
-            ? `<span class="tag tag-sensible">⚠️ Sensible</span>` 
-            : `<span class="tag tag-sensible-off">Sensible</span>`;
+            ? `<span class="tag tag-sensible">${window.t?.('home.sensitiveOn', {}, '⚠️ Sensible') || '⚠️ Sensible'}</span>` 
+            : `<span class="tag tag-sensible-off">${window.t?.('home.sensitiveOff', {}, 'Sensible') || 'Sensible'}</span>`;
 
         // Nombre de favoris (Likes) pour cette histoire (données précalculées)
         const likes = likesParHistoire.get(h.id) || 0;
@@ -191,11 +191,11 @@ async function chargerMesPactes() {
         card.className = "story-card";
         
         // Raccourcir le synopsis s'il est trop long
-        let synopsisCourt = h.synopsis || "Aucun synopsis disponible.";
+        let synopsisCourt = h.synopsis || (window.t?.('favorites.noSynopsis', {}, 'Aucun synopsis disponible.') || 'Aucun synopsis disponible.');
         if (synopsisCourt.length > 150) synopsisCourt = synopsisCourt.substring(0, 150) + "...";
 
         // Date du pacte formatée pour l'esthétique
-        const dateAjout = h.date_pacte.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+        const dateAjout = h.date_pacte.toLocaleDateString(window.getLocaleAffichageSite?.() || 'fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
         const slugOeuvre = escapeJsStringFavoris(h.slug || '');
 
         card.innerHTML = `
@@ -204,28 +204,28 @@ async function chargerMesPactes() {
             </div>
             <div class="story-info">
                 <h3 class="story-title" onclick="window.ouvrirPageOeuvreDepuisLien(${h.id}, '${slugOeuvre}');" style="cursor:pointer;">${h.titre}</h3>
-                <span class="story-author">Par ${h.pseudo_auteur || h.auteur.split('@')[0]}</span>
+                <span class="story-author">${window.t?.('home.byAuthor', { pseudo: h.pseudo_auteur || h.auteur.split('@')[0] }, `Par Comte ${h.pseudo_auteur || h.auteur.split('@')[0]}`) || `Par Comte ${h.pseudo_auteur || h.auteur.split('@')[0]}`}</span>
                 
                 <div class="story-tags">
-                    <span class="tag tag-genre">${h.genre}</span>
-                    <span class="tag ${classeAge}">${h.classification || 'Tout public'}</span>
+                    <span class="tag tag-genre">${window.traduireGenreSite?.(h.genre) || h.genre}</span>
+                    <span class="tag ${classeAge}">${window.traduireClassificationSite?.(h.classification) || h.classification || 'Tout public'}</span>
                     ${tagSensible}
                 </div>
                 
                 <p class="story-synopsis">${synopsisCourt}</p>
                 
                 <div class="story-stats">
-                    <span title="Vues">👁️ ${h.vues || 0}</span>
-                    <span title="Pactes scellés">❤️ ${likes || 0}</span>
-                    <span title="Chapitres">📜 ${nbChapitres || 0}</span>
+                    <span title="${window.t?.('common.views', {}, 'vues') || 'vues'}">👁️ ${h.vues || 0}</span>
+                    <span title="${window.t?.('favorites.pactsSealed', {}, 'Pactes scellés') || 'Pactes scellés'}">❤️ ${likes || 0}</span>
+                    <span title="${window.t?.('common.chapters', {}, 'chapitres') || 'chapitres'}">📜 ${nbChapitres || 0}</span>
                 </div>
                 
                 <div class="text-center text-muted-italic text-small" style="margin-bottom: 10px;">
-                    Pacte scellé le : ${dateAjout}
+                    ${window.t?.('favorites.pactDate', { date: dateAjout }, `Pacte scellé le : ${dateAjout}`) || `Pacte scellé le : ${dateAjout}`}
                 </div>
 
                 <div style="display: flex; justify-content: center;">
-                    <button class="genre-btn btn-primary shadow-active btn-lire-oeuvre" onclick="window.ouvrirPageOeuvreDepuisLien(${h.id}, '${slugOeuvre}');">Reprendre la Lecture</button>
+                    <button class="genre-btn btn-primary shadow-active btn-lire-oeuvre" onclick="window.ouvrirPageOeuvreDepuisLien(${h.id}, '${slugOeuvre}');">${window.t?.('favorites.resume', {}, 'Reprendre la Lecture') || 'Reprendre la Lecture'}</button>
                 </div>
             </div>
         `;

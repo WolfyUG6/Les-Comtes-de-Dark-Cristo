@@ -10,12 +10,12 @@ window.chargerMesOeuvres = async function() {
     const conteneur = document.getElementById('mes-oeuvres-liste');
     if (!conteneur) return; 
 
-    conteneur.innerHTML = '<p class="loading-text">Recherche de vos créations dans l\'Abysse...</p>';
+    conteneur.innerHTML = `<p class="loading-text">${window.t?.('forge.loadingMine', {}, "Recherche de vos créations dans l'Abysse...") || "Recherche de vos créations dans l'Abysse..."}</p>`;
 
     const { data: { session } } = await window._supabase.auth.getSession();
     
     if (!session) {
-        conteneur.innerHTML = '<p class="text-error">Vous devez être connecté pour accéder à la Forge.</p>';
+        conteneur.innerHTML = `<p class="text-error">${window.t?.('forge.loginRequired', {}, 'Vous devez être connecté pour accéder à la Forge.') || 'Vous devez être connecté pour accéder à la Forge.'}</p>`;
         return;
     }
 
@@ -26,12 +26,12 @@ window.chargerMesOeuvres = async function() {
         .eq('auteur_user_id', session.user.id);
 
     if (error) {
-        conteneur.innerHTML = `<p class="text-error">Erreur : ${error.message}</p>`;
+        conteneur.innerHTML = `<p class="text-error">${window.t?.('errors.genericPrefix', {}, 'Erreur :') || 'Erreur :'} ${error.message}</p>`;
         return;
     }
 
     if (mesHistoires.length === 0) {
-        conteneur.innerHTML = '<p class="loading-text">Vous n\'avez encore forgé aucune œuvre.<br>Il est temps de noircir le parchemin.</p>';
+        conteneur.innerHTML = `<p class="loading-text">${window.t?.('forge.emptyMine', {}, "Vous n'avez encore forgé aucune œuvre.<br>Il est temps de noircir le parchemin.") || "Vous n'avez encore forgé aucune œuvre.<br>Il est temps de noircir le parchemin."}</p>`;
         return;
     }
 
@@ -74,14 +74,14 @@ window.afficherOeuvresTriees = function() {
             <div>
                 <h3 class="story-title-m0">${histoire.titre}</h3>
                 <div class="story-tags">
-                    <span class="tag tag-genre">${histoire.genre}</span>
-                    <span class="tag tag-statut">${histoire.statut || '✍️ En cours'}</span>
-                    <span class="tag tag-age">${histoire.classification || 'Tout public'}</span>
+                    <span class="tag tag-genre">${window.traduireGenreSite?.(histoire.genre) || histoire.genre}</span>
+                    <span class="tag tag-statut">${window.traduireStatutSite?.(histoire.statut) || histoire.statut || '✍️ En cours'}</span>
+                    <span class="tag tag-age">${window.traduireClassificationSite?.(histoire.classification) || histoire.classification || 'Tout public'}</span>
                 </div>
             </div>
             <div>
-                <button class="genre-btn btn-outline-blue" onclick="ouvrirGestionOeuvre(${histoire.id})">Gérer le Grimoire</button>
-                <button class="genre-btn btn-outline-red" title="Détruire cette œuvre" onclick="supprimerHistoire(${histoire.id})">Annihiler</button>
+                <button class="genre-btn btn-outline-blue" onclick="ouvrirGestionOeuvre(${histoire.id})">${window.t?.('forge.manageStory', {}, 'Gérer le Grimoire') || 'Gérer le Grimoire'}</button>
+                <button class="genre-btn btn-outline-red" title="${window.t?.('forge.destroyTitle', {}, 'Détruire cette œuvre') || 'Détruire cette œuvre'}" onclick="supprimerHistoire(${histoire.id})">${window.t?.('forge.destroyStory', {}, 'Annihiler') || 'Annihiler'}</button>
             </div>
         `;
         conteneur.appendChild(carte);
@@ -108,9 +108,9 @@ window.ouvrirModificationHistoire = function(idHistoire) {
 
 // --- LE POUVOIR DE DESTRUCTION MASSIVE ---
 window.supprimerHistoire = async function(idHistoire) {
-    const confirmation = await window.siteConfirm("Êtes-vous sûr de vouloir effacer ce Grimoire et tous ses chapitres de la mémoire du monde ? Cette action est irréversible.", {
-        confirmText: 'Annihiler',
-        cancelText: 'Annuler',
+    const confirmation = await window.siteConfirm(window.t?.('forge.destroyConfirm', {}, "Êtes-vous sûr de vouloir effacer ce Grimoire et tous ses chapitres de la mémoire du monde ? Cette action est irréversible.") || "Êtes-vous sûr de vouloir effacer ce Grimoire et tous ses chapitres de la mémoire du monde ? Cette action est irréversible.", {
+        confirmText: window.t?.('forge.destroyStory', {}, 'Annihiler') || 'Annihiler',
+        cancelText: window.t?.('common.cancel', {}, 'Annuler') || 'Annuler',
         danger: true
     });
     if (!confirmation) return;
@@ -119,7 +119,7 @@ window.supprimerHistoire = async function(idHistoire) {
     const { error: errChapitres } = await window._supabase.from('chapitres').delete().eq('histoire_id', idHistoire);
     
     if (errChapitres) {
-        await window.siteAlert("Erreur lors de la purge des chapitres : " + errChapitres.message, { danger: true });
+        await window.siteAlert((window.t?.('forge.deleteChaptersError', {}, 'Erreur lors de la purge des chapitres :') || 'Erreur lors de la purge des chapitres :') + ' ' + errChapitres.message, { danger: true });
         return;
     }
 
@@ -127,7 +127,7 @@ window.supprimerHistoire = async function(idHistoire) {
     const { error: errHistoire } = await window._supabase.from('histoires').delete().eq('id', idHistoire);
     
     if(errHistoire) {
-        await window.siteAlert("Supabase a bloqué la destruction du grimoire ! Erreur : " + errHistoire.message, { danger: true });
+        await window.siteAlert((window.t?.('forge.deleteStoryError', {}, 'Supabase a bloqué la destruction du grimoire ! Erreur :') || 'Supabase a bloqué la destruction du grimoire ! Erreur :') + ' ' + errHistoire.message, { danger: true });
     } else {
         // 3. Rafraîchissement total
         window.chargerMesOeuvres(); 

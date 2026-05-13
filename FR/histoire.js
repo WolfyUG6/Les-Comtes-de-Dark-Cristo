@@ -234,12 +234,7 @@ function traduireGenreHistoire(genre = '') {
 }
 
 function traduireStatutHistoire(statut = '') {
-    const statutNettoye = String(statut || '').replace('✍️', '').trim().toLowerCase();
-    if (!statutNettoye || statutNettoye === 'en cours') {
-        return window.t?.('story.statusInProgress', {}, '✍️ En cours') || '✍️ En cours';
-    }
-
-    return statut;
+    return window.traduireStatutSite?.(statut) || statut || window.t?.('story.statusInProgress', {}, '✍️ En cours') || '✍️ En cours';
 }
 
 function synchroniserLienHistoireDansUrl(histoire) {
