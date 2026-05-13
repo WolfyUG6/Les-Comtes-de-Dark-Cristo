@@ -468,6 +468,14 @@ function appliquerTraductionsCategorie(root = document) {
     const genre = localStorage.getItem('currentGenre') || '';
     setText('#genre-page-title', genre ? 'category.title' : 'category.unknownTitle', root, { genre: window.traduireGenreSite(genre) });
     setText('.welcome-content .text-muted', 'category.intro', root);
+    setText('label[for="category-sort"] span', 'category.sortLabel', root);
+    setOptionText('#category-sort option[value="published_desc"]', 'category.sortPublishedDesc', root);
+    setOptionText('#category-sort option[value="published_asc"]', 'category.sortPublishedAsc', root);
+    setOptionText('#category-sort option[value="name_asc"]', 'category.sortNameAsc', root);
+    setOptionText('#category-sort option[value="name_desc"]', 'category.sortNameDesc', root);
+    setOptionText('#category-sort option[value="author_asc"]', 'category.sortAuthorAsc', root);
+    setOptionText('#category-sort option[value="author_desc"]', 'category.sortAuthorDesc', root);
+    setOptionText('#category-sort option[value="updated_desc"]', 'category.sortUpdatedDesc', root);
 }
 
 window.appliquerTraductionsPage = function(page, root = document) {

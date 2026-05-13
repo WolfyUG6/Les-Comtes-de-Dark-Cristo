@@ -561,6 +561,14 @@
     "loading": "写本が深淵から這い出ています...",
     "error": "時の門が揺らぎました：",
     "empty": "<strong>{genre}</strong> の書架には、まだ魔導書が刻まれていません。最初の一冊になりますか？",
+    "sortLabel": "並び替え",
+    "sortNameAsc": "タイトル A - Z",
+    "sortNameDesc": "タイトル Z - A",
+    "sortAuthorAsc": "作者 A - Z",
+    "sortAuthorDesc": "作者 Z - A",
+    "sortPublishedDesc": "公開日（新しい順）",
+    "sortPublishedAsc": "公開日（古い順）",
+    "sortUpdatedDesc": "更新日（新しい順）",
     "forgeFirst": "最初の物語を鍛える"
   }
 }

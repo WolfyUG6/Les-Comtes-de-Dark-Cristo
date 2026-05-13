@@ -561,6 +561,14 @@
     "loading": "Les manuscrits s'extirpent des abysses...",
     "error": "Le portail temporel a vacillé :",
     "empty": "Aucun grimoire n'a encore été gravé dans le rayon <strong>{genre}</strong>. Serez-vous le premier ?",
+    "sortLabel": "Trier par",
+    "sortNameAsc": "Nom A - Z",
+    "sortNameDesc": "Nom Z - A",
+    "sortAuthorAsc": "Auteur A - Z",
+    "sortAuthorDesc": "Auteur Z - A",
+    "sortPublishedDesc": "Date de publication (plus récente)",
+    "sortPublishedAsc": "Date de publication (plus ancienne)",
+    "sortUpdatedDesc": "Date de mise à jour (plus récente)",
     "forgeFirst": "Forger le premier récit"
   }
 }

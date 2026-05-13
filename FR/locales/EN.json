@@ -561,6 +561,14 @@
     "loading": "The manuscripts crawl out of the depths...",
     "error": "The temporal portal flickered:",
     "empty": "No grimoire has yet been engraved in the <strong>{genre}</strong> shelf. Will you be the first?",
+    "sortLabel": "Sort by",
+    "sortNameAsc": "Name A - Z",
+    "sortNameDesc": "Name Z - A",
+    "sortAuthorAsc": "Author A - Z",
+    "sortAuthorDesc": "Author Z - A",
+    "sortPublishedDesc": "Publication date (newest first)",
+    "sortPublishedAsc": "Publication date (oldest first)",
+    "sortUpdatedDesc": "Update date (newest first)",
     "forgeFirst": "Forge the first tale"
   }
 }

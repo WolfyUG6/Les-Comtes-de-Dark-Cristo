@@ -8,6 +8,21 @@
     </div>
 
     <div class="my-stories-section">
+        <div class="category-toolbar">
+            <label class="chapter-page-size" for="category-sort">
+                <span>Trier par</span>
+                <select id="category-sort" class="custom-select">
+                    <option value="published_desc" selected>Date de publication (plus récente)</option>
+                    <option value="published_asc">Date de publication (plus ancienne)</option>
+                    <option value="name_asc">Nom A - Z</option>
+                    <option value="name_desc">Nom Z - A</option>
+                    <option value="author_asc">Auteur A - Z</option>
+                    <option value="author_desc">Auteur Z - A</option>
+                    <option value="updated_desc">Date de mise à jour (plus récente)</option>
+                </select>
+            </label>
+        </div>
+
         <div id="genre-stories-list" class="stories-grid">
             <!-- Les Grimoires apparaîtront ici grâce à categoriegenre.js -->
         </div>
