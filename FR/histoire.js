@@ -171,10 +171,10 @@ async function initialiserBoutonRetirerHistoire(idHistoire, session) {
     clone.classList.remove('hidden');
     clone.addEventListener('click', async () => {
         const confirmation = await window.siteConfirm(
-            "Confirmez-vous le retrait complet de cette histoire et de toutes ses dependances ? Cette action est irreversible.",
+            window.t?.('story.removeAdminConfirm', {}, "Confirmez-vous le retrait complet de cette histoire et de toutes ses dependances ? Cette action est irreversible.") || "Confirmez-vous le retrait complet de cette histoire et de toutes ses dependances ? Cette action est irreversible.",
             {
-                confirmText: "Retirer l'histoire",
-                cancelText: 'Annuler',
+                confirmText: window.t?.('story.removeAdmin', {}, "Retirer l'histoire") || "Retirer l'histoire",
+                cancelText: window.t?.('common.cancel', {}, 'Annuler') || 'Annuler',
                 danger: true
             }
         );
@@ -182,22 +182,22 @@ async function initialiserBoutonRetirerHistoire(idHistoire, session) {
         if (!confirmation) return;
 
         clone.disabled = true;
-        clone.innerText = "Retrait en cours...";
+        clone.innerText = window.t?.('story.removeAdminPending', {}, "Retrait en cours...") || "Retrait en cours...";
 
         const { error } = await window._supabase.rpc('retirer_histoire_admin', {
             p_histoire_id: idHistoire
         });
 
         if (error) {
-            await window.siteAlert("Le retrait de l'histoire a ete refuse : " + error.message, { danger: true });
+            await window.siteAlert(window.t?.('story.removeAdminDenied', { message: error.message }, "Le retrait de l'histoire a ete refuse : " + error.message) || ("Le retrait de l'histoire a ete refuse : " + error.message), { danger: true });
             clone.disabled = false;
-            clone.innerText = "Retirer l'histoire";
+            clone.innerText = window.t?.('story.removeAdmin', {}, "Retirer l'histoire") || "Retirer l'histoire";
             return;
         }
 
         localStorage.removeItem('currentOeuvreId');
         localStorage.removeItem('currentChapitreId');
-        await window.siteAlert("L'histoire a ete retiree avec succes.");
+        await window.siteAlert(window.t?.('story.removeAdminSuccess', {}, "L'histoire a ete retiree avec succes.") || "L'histoire a ete retiree avec succes.");
         window.changerDePage('accueil');
     });
 }
@@ -238,9 +238,9 @@ function initialiserBoutonPartageHistoire(histoire) {
 
         try {
             await navigator.clipboard.writeText(lien);
-            await window.siteAlert("Lien de l'histoire copié. Il ouvrira directement cette fiche.");
+            await window.siteAlert(window.t?.('story.shareCopied', {}, "Lien de l'histoire copié. Il ouvrira directement cette fiche.") || "Lien de l'histoire copié. Il ouvrira directement cette fiche.");
         } catch (erreur) {
-            await window.siteAlert(`Impossible de copier automatiquement. Voici le lien à partager :\n${lien}`, { danger: true });
+            await window.siteAlert(window.t?.('story.shareFallback', { link: lien }, `Impossible de copier automatiquement. Voici le lien à partager :\n${lien}`) || `Impossible de copier automatiquement. Voici le lien à partager :\n${lien}`, { danger: true });
         }
     });
 }
@@ -253,7 +253,7 @@ function getVolumesAffichablesHistoire(histoire, volumes = []) {
     return [
         {
             id: 'general',
-            titre: 'Générale',
+            titre: window.t?.('common.general', {}, 'Générale') || 'Générale',
             image_couverture: histoire?.image_couverture,
             estGeneral: true
         },
@@ -352,7 +352,7 @@ function dessinerChapitresHistoire(chapitres) {
     if (!chapitresListe) return;
 
     if (!chapitres || chapitres.length === 0) {
-        chapitresListe.innerHTML = '<p class="text-muted-italic text-center mt-15">Aucun chapitre n\'est disponible dans ce volume.</p>';
+        chapitresListe.innerHTML = `<p class="text-muted-italic text-center mt-15">${window.t?.('story.noChapterInVolume', {}, "Aucun chapitre n'est disponible dans ce volume.") || "Aucun chapitre n'est disponible dans ce volume."}</p>`;
         dessinerPaginationChapitresHistoire(0);
         return;
     }
@@ -373,11 +373,11 @@ function dessinerChapitresHistoire(chapitres) {
         div.className = 'chapter-item';
         div.innerHTML = `
             <div>
-                <strong class="chapter-title">Chapitre ${chap.numero} : ${escapeCommentaireHtml(chap.titre || '')}</strong>
-                <span class="published-date ml-10">(Publié le ${dateAffichee})</span>
+                <strong class="chapter-title">${window.t?.('story.chapterTitle', { number: chap.numero, title: escapeCommentaireHtml(chap.titre || '') }, `Chapitre ${chap.numero} : ${escapeCommentaireHtml(chap.titre || '')}`) || `Chapitre ${chap.numero} : ${escapeCommentaireHtml(chap.titre || '')}`}</strong>
+                <span class="published-date ml-10">${window.t?.('story.publishedDate', { date: dateAffichee }, `(Publié le ${dateAffichee})`) || `(Publié le ${dateAffichee})`}</span>
             </div>
             <div>
-                <button class="genre-btn btn-outline-blue btn-small" type="button" data-chapitre-read="${chap.id}" data-chapitre-slug="${escapeCommentaireHtml(chap.slug || '')}">Lire</button>
+                <button class="genre-btn btn-outline-blue btn-small" type="button" data-chapitre-read="${chap.id}" data-chapitre-slug="${escapeCommentaireHtml(chap.slug || '')}">${window.t?.('common.read', {}, 'Lire') || 'Lire'}</button>
             </div>
         `;
         chapitresListe.appendChild(div);
@@ -1235,7 +1235,7 @@ window.chargerPageHistoire = async function() {
         return;
     }
 
-    infoPanel.innerHTML = '<p class="loading-text">Déchiffrage des runes en cours...</p>';
+    infoPanel.innerHTML = `<p class="loading-text">${window.t?.('story.loading', {}, 'Déchiffrage des runes en cours...') || 'Déchiffrage des runes en cours...'}</p>`;
 
     // 1. Récupération des infos de l'histoire
     let requeteHistoire = window._supabase
@@ -1251,7 +1251,7 @@ window.chargerPageHistoire = async function() {
     const { data: histoire, error: errHistoire } = await requeteHistoire.maybeSingle();
 
     if (errHistoire || !histoire) {
-        infoPanel.innerHTML = `<p class="text-error text-center">Erreur : L'œuvre est introuvable dans les abysses.</p>`;
+        infoPanel.innerHTML = `<p class="text-error text-center">${window.t?.('story.notFound', {}, "Erreur : L'œuvre est introuvable dans les abysses.") || "Erreur : L'œuvre est introuvable dans les abysses."}</p>`;
         return;
     }
 
@@ -1269,15 +1269,15 @@ window.chargerPageHistoire = async function() {
     else if (histoire.classification === 'R18') classeAge += ' age-r18';
 
     const tagSensible = histoire.contenu_sensible 
-        ? `<span class="tag tag-sensible">⚠️ Sensible</span>` 
-        : `<span class="tag tag-sensible-off">Sensible</span>`;
+        ? `<span class="tag tag-sensible">${window.t?.('home.sensitiveOn', {}, '⚠️ Sensible') || '⚠️ Sensible'}</span>`
+        : `<span class="tag tag-sensible-off">${window.t?.('home.sensitiveOff', {}, 'Sensible') || 'Sensible'}</span>`;
 
     const imageCouverture = window.getStoryCoverUrl(histoire.image_couverture);
     const imgHtml = `<img src="${imageCouverture}" class="book-cover" alt="Couverture">`;
     const synopsisBrut = typeof histoire.synopsis === 'string' ? histoire.synopsis : '';
     const synopsisHtml = synopsisBrut.trim()
         ? escapeCommentaireHtml(synopsisBrut)
-        : "Cette oeuvre est nimbee de mysteres, son intrigue demeure cachee.";
+        : window.t?.('story.unknownSynopsis', {}, "Cette œuvre est nimbée de mystères, son intrigue demeure cachée.") || "Cette œuvre est nimbée de mystères, son intrigue demeure cachée.";
 
     const { data: { session } } = await window._supabase.auth.getSession();
 
@@ -1300,12 +1300,12 @@ window.chargerPageHistoire = async function() {
             </div>
             
             <div class="story-tags mb-15">
-                <span class="tag">👁️ ${histoire.vues || 0} Vues</span>
-                <span class="tag" id="histoire-likes-count">❤️ ${totalLikes || 0} Pactes</span>
-                <span class="tag">📝 <span id="histoire-mots-count">...</span> Mots</span>
+                <span class="tag">👁️ ${window.t?.('story.views', { count: histoire.vues || 0 }, `${histoire.vues || 0} Vues`) || `${histoire.vues || 0} Vues`}</span>
+                <span class="tag" id="histoire-likes-count">❤️ ${window.t?.('story.likes', { count: totalLikes || 0 }, `${totalLikes || 0} Pactes`) || `${totalLikes || 0} Pactes`}</span>
+                <span class="tag">📝 <span id="histoire-mots-count">...</span> ${window.t?.('common.words', {}, 'Mots') || 'Mots'}</span>
             </div>
             
-            <span class="text-small text-muted-italic mb-15">Auteur : Comte ${histoire.pseudo_auteur || histoire.auteur.split('@')[0]}</span>
+            <span class="text-small text-muted-italic mb-15">${window.t?.('story.author', { pseudo: histoire.pseudo_auteur || histoire.auteur.split('@')[0] }, `Auteur : Comte ${histoire.pseudo_auteur || histoire.auteur.split('@')[0]}`) || `Auteur : Comte ${histoire.pseudo_auteur || histoire.auteur.split('@')[0]}`}</span>
             
             <div class="book-synopsis story-synopsis-detail mt-15">${synopsisHtml}</div>
         </div>
@@ -1317,7 +1317,7 @@ window.chargerPageHistoire = async function() {
 
     const btnSuivre = document.getElementById('btn-suivre-histoire');
     if (btnSuivre) {
-        btnSuivre.innerText = "Soutenir l'œuvre";
+        btnSuivre.innerText = window.t?.('story.support', {}, "Soutenir l'œuvre") || "Soutenir l'œuvre";
         btnSuivre.className = "genre-btn btn-primary shadow-active"; // Reset classes
         btnSuivre.disabled = false;
         
@@ -1334,12 +1334,12 @@ window.chargerPageHistoire = async function() {
                 .maybeSingle();
 
             if (aDejaSoutenu) {
-                nouveauBtn.innerText = "Œuvre soutenue 🩸";
+                nouveauBtn.innerText = window.t?.('story.supported', {}, "Œuvre soutenue 🩸") || "Œuvre soutenue 🩸";
                 nouveauBtn.className = "genre-btn btn-danger shadow-active";
             }
 
             nouveauBtn.addEventListener('click', async () => {
-                nouveauBtn.innerText = "Pacte en cours...";
+                nouveauBtn.innerText = window.t?.('story.supportPending', {}, "Pacte en cours...") || "Pacte en cours...";
                 nouveauBtn.disabled = true; 
 
                 const { data: exist } = await window._supabase
@@ -1351,11 +1351,11 @@ window.chargerPageHistoire = async function() {
 
                 if (exist) {
                     await window._supabase.from('favoris').delete().eq('id', exist.id);
-                    nouveauBtn.innerText = "Soutenir l'œuvre";
+                    nouveauBtn.innerText = window.t?.('story.support', {}, "Soutenir l'œuvre") || "Soutenir l'œuvre";
                     nouveauBtn.className = "genre-btn btn-primary shadow-active";
                 } else {
                     await window._supabase.from('favoris').insert([{ user_id: session.user.id, histoire_id: idHistoire }]);
-                    nouveauBtn.innerText = "Œuvre soutenue 🩸";
+                    nouveauBtn.innerText = window.t?.('story.supported', {}, "Œuvre soutenue 🩸") || "Œuvre soutenue 🩸";
                     nouveauBtn.className = "genre-btn btn-danger shadow-active";
                 }
 
@@ -1366,7 +1366,7 @@ window.chargerPageHistoire = async function() {
                     .eq('histoire_id', idHistoire);
                 
                 const spanLikes = document.getElementById('histoire-likes-count');
-                if(spanLikes) spanLikes.innerHTML = `❤️ ${count || 0} Pactes`;
+                if(spanLikes) spanLikes.innerHTML = `❤️ ${window.t?.('story.likes', { count: count || 0 }, `${count || 0} Pactes`) || `${count || 0} Pactes`}`;
 
                 if (typeof window.actualiserNotificationsHeader === 'function') {
                     window.actualiserNotificationsHeader();
@@ -1376,7 +1376,7 @@ window.chargerPageHistoire = async function() {
             });
         } else {
             nouveauBtn.addEventListener('click', async () => {
-                await window.siteAlert("Les ombres refusent votre requête : vous devez être connecté pour soutenir une œuvre.", { danger: true });
+                await window.siteAlert(window.t?.('story.supportLoginRequired', {}, "Les ombres refusent votre requête : vous devez être connecté pour soutenir une œuvre.") || "Les ombres refusent votre requête : vous devez être connecté pour soutenir une œuvre.", { danger: true });
             });
         }
     }
@@ -1404,7 +1404,7 @@ async function chargerListeChapitres(idHistoire) {
     const chapitresListe = document.getElementById('lecteur-chapitres-liste');
     if (!chapitresListe) return;
 
-    chapitresListe.innerHTML = '<p class="loading-text">Recherche des écrits...</p>';
+    chapitresListe.innerHTML = `<p class="loading-text">${window.t?.('story.loadingChapters', {}, 'Recherche des écrits...') || 'Recherche des écrits...'}</p>`;
 
     const { data: chapitres, error } = await window._supabase
         .from('chapitres')
@@ -1419,7 +1419,7 @@ async function chargerListeChapitres(idHistoire) {
     }
 
     if (chapitres.length === 0) {
-        chapitresListe.innerHTML = '<p class="text-muted-italic text-center mt-15">Aucun chapitre n\'est disponible pour le moment.</p>';
+        chapitresListe.innerHTML = `<p class="text-muted-italic text-center mt-15">${window.t?.('story.noChapterAvailable', {}, "Aucun chapitre n'est disponible pour le moment.") || "Aucun chapitre n'est disponible pour le moment."}</p>`;
         const spanMots = document.getElementById('histoire-mots-count');
         if (spanMots) spanMots.innerText = "0";
         window._histoireVolumesState.chapitresPublies = [];
@@ -1455,7 +1455,7 @@ async function chargerListeChapitres(idHistoire) {
     
     // Si aucun chapitre n'est publié, on affiche un message dans la liste
     if (chapitresPublies.length === 0) {
-        chapitresListe.innerHTML = '<p class="text-muted-italic text-center mt-15">L\'œuvre n\'a pas encore de parchemin lisible.</p>';
+        chapitresListe.innerHTML = `<p class="text-muted-italic text-center mt-15">${window.t?.('story.noReadableChapter', {}, "L'œuvre n'a pas encore de parchemin lisible.") || "L'œuvre n'a pas encore de parchemin lisible."}</p>`;
     }
 
     // --- MISE À JOUR DE LA BOÎTE DE PROGRAMMATION ---
@@ -1464,12 +1464,12 @@ async function chargerListeChapitres(idHistoire) {
         if (prochainChapitre) {
             const dateAffichee = prochainChapitre.date.toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
             boxProchain.innerHTML = `
-                <div style="font-family: 'Cinzel', serif; color: var(--text-title); margin-bottom: 5px;">Prochaine publication :</div>
-                <div style="color: #ffd700; font-weight: bold; letter-spacing: 1px;">Le ${dateAffichee}</div>
+                <div style="font-family: 'Cinzel', serif; color: var(--text-title); margin-bottom: 5px;">${window.t?.('story.nextPublication', {}, 'Prochaine publication :') || 'Prochaine publication :'}</div>
+                <div style="color: #ffd700; font-weight: bold; letter-spacing: 1px;">${window.t?.('story.nextPublicationDate', { date: dateAffichee }, `Le ${dateAffichee}`) || `Le ${dateAffichee}`}</div>
             `;
         } else {
             boxProchain.innerHTML = `
-                <div style="color: var(--text-muted); font-style: italic;">Aucune publication programmée</div>
+                <div style="color: var(--text-muted); font-style: italic;">${window.t?.('story.noScheduledPublication', {}, 'Aucune publication programmée') || 'Aucune publication programmée'}</div>
             `;
         }
     }

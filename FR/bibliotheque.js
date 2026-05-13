@@ -23,7 +23,7 @@ function getStoryAgeClass(classification = '') {
 }
 
 function getStoryPseudo(histoire) {
-    return histoire.pseudo_auteur || histoire.auteur?.split('@')[0] || 'Auteur inconnu';
+    return histoire.pseudo_auteur || histoire.auteur?.split('@')[0] || window.t?.('common.unknownAuthor', {}, 'Auteur inconnu') || 'Auteur inconnu';
 }
 
 function getDefaultStoryStats() {
@@ -58,15 +58,15 @@ function creerBlocStatsCarte(histoire, options = {}) {
         <div class="story-card-stats" aria-label="Informations de l'œuvre">
             <div class="story-card-stat">
                 <span class="story-card-stat-value">${formaterNombreCarte(chapitres)}</span>
-                <span class="story-card-stat-label">${libellePluriel(chapitres, 'chapitre', 'chapitres')}</span>
+                <span class="story-card-stat-label">${libellePluriel(chapitres, window.t?.('common.chapter', {}, 'chapitre') || 'chapitre', window.t?.('common.chapters', {}, 'chapitres') || 'chapitres')}</span>
             </div>
             <div class="story-card-stat">
                 <span class="story-card-stat-value">${formaterNombreCarte(mots)}</span>
-                <span class="story-card-stat-label">${libellePluriel(mots, 'mot', 'mots')}</span>
+                <span class="story-card-stat-label">${libellePluriel(mots, window.t?.('common.word', {}, 'mot') || 'mot', window.t?.('common.words', {}, 'mots') || 'mots')}</span>
             </div>
             <div class="story-card-stat">
                 <span class="story-card-stat-value">${formaterNombreCarte(vues)}</span>
-                <span class="story-card-stat-label">${libellePluriel(vues, 'vue', 'vues')}</span>
+                <span class="story-card-stat-label">${libellePluriel(vues, window.t?.('common.view', {}, 'vue') || 'vue', window.t?.('common.views', {}, 'vues') || 'vues')}</span>
             </div>
         </div>
     `;
@@ -185,11 +185,11 @@ function creerCarteHistoire(histoire, options = {}) {
     const pseudo = getStoryPseudo(histoire);
     const ageClass = getStoryAgeClass(histoire.classification || 'Tout public');
     const tagSensible = histoire.contenu_sensible
-        ? `<span class="tag tag-sensible">⚠️ Sensible</span>`
-        : `<span class="tag tag-sensible-off">Sensible</span>`;
+        ? `<span class="tag tag-sensible">${window.t?.('home.sensitiveOn', {}, '⚠️ Sensible') || '⚠️ Sensible'}</span>`
+        : `<span class="tag tag-sensible-off">${window.t?.('home.sensitiveOff', {}, 'Sensible') || 'Sensible'}</span>`;
 
     card.innerHTML = `
-        ${miseEnAvant ? '<span class="story-highlight-kicker">Mise en avant hebdomadaire</span>' : ''}
+        ${miseEnAvant ? `<span class="story-highlight-kicker">${window.t?.('home.highlightKicker', {}, 'Mise en avant hebdomadaire') || 'Mise en avant hebdomadaire'}</span>` : ''}
         <img src="${imageCouverture}" alt="${histoire.titre}">
         <div class="story-tags">
             <span class="tag tag-genre">${histoire.genre}</span>
@@ -198,9 +198,9 @@ function creerCarteHistoire(histoire, options = {}) {
             ${tagSensible}
         </div>
         <h3>${histoire.titre}</h3>
-        <span class="text-small text-muted">Par Comte ${pseudo}</span>
+        <span class="text-small text-muted">${window.t?.('home.byAuthor', { pseudo }, `Par Comte ${pseudo}`) || `Par Comte ${pseudo}`}</span>
         ${creerBlocStatsCarte(histoire, { vues })}
-        <button class="genre-btn w-100 mt-15" type="button">${miseEnAvant ? "Découvrir l'œuvre" : "Lire l'œuvre"}</button>
+        <button class="genre-btn w-100 mt-15" type="button">${miseEnAvant ? (window.t?.('home.discoverStory', {}, "Découvrir l'œuvre") || "Découvrir l'œuvre") : (window.t?.('home.readStory', {}, "Lire l'œuvre") || "Lire l'œuvre")}</button>
     `;
 
     const image = card.querySelector('img');
@@ -258,18 +258,18 @@ async function chargerMisesEnAvantHebdomadairesAccueil() {
     if (!section || !container) return { ids: [], genres: [] };
 
     section.classList.remove('hidden');
-    container.innerHTML = '<p class="loading-text">Lecture des mises en avant hebdomadaires...</p>';
+    container.innerHTML = `<p class="loading-text">${window.t?.('home.weeklyHighlights.loading', {}, 'Lecture des mises en avant hebdomadaires...') || 'Lecture des mises en avant hebdomadaires...'}</p>`;
 
     const { data, error } = await window._supabase.rpc('get_mises_en_avant_hebdomadaires_courantes');
 
     if (error) {
         console.error('Erreur de mise en avant hebdomadaire :', error);
-        container.innerHTML = '<p class="loading-text">Les mises en avant hebdomadaires ne sont pas encore disponibles.</p>';
+        container.innerHTML = `<p class="loading-text">${window.t?.('home.weeklyHighlights.unavailable', {}, 'Les mises en avant hebdomadaires ne sont pas encore disponibles.') || 'Les mises en avant hebdomadaires ne sont pas encore disponibles.'}</p>`;
         return { ids: [], genres: [] };
     }
 
     if (!data || data.length === 0) {
-        container.innerHTML = '<p class="loading-text">Aucune mise en avant hebdomadaire n’a encore été calculée.</p>';
+        container.innerHTML = `<p class="loading-text">${window.t?.('home.weeklyHighlights.empty', {}, 'Aucune mise en avant hebdomadaire n’a encore été calculée.') || 'Aucune mise en avant hebdomadaire n’a encore été calculée.'}</p>`;
         return { ids: [], genres: [] };
     }
 
@@ -321,7 +321,7 @@ window.chargerVitrine = async function(genreFilter = null) {
 
     if (!storiesContainer) return;
 
-    storiesContainer.innerHTML = '<p class="loading-text">Ouverture des grimoires...</p>';
+    storiesContainer.innerHTML = `<p class="loading-text">${window.t?.('home.loadingStories', {}, 'Ouverture des grimoires...') || 'Ouverture des grimoires...'}</p>`;
 
     let chargementMiseEnAvant = Promise.resolve({ ids: [], genres: [] });
 
@@ -365,8 +365,8 @@ window.chargerVitrine = async function(genreFilter = null) {
 
     if (!histoiresAffichees || histoiresAffichees.length === 0) {
         storiesContainer.innerHTML = (!genreFilter || genreFilter === 'accueil')
-            ? '<p class="loading-text">Aucune autre œuvre n’est visible pour le moment.</p>'
-            : '<p class="loading-text">Aucune œuvre trouvée dans ces ténèbres pour le moment...</p>';
+            ? `<p class="loading-text">${window.t?.('home.noStories', {}, 'Aucune autre œuvre n’est visible pour le moment.') || 'Aucune autre œuvre n’est visible pour le moment.'}</p>`
+            : `<p class="loading-text">${window.t?.('home.categoryEmpty', {}, 'Aucune œuvre trouvée dans ces ténèbres pour le moment...') || 'Aucune œuvre trouvée dans ces ténèbres pour le moment...'}</p>`;
         return;
     }
 

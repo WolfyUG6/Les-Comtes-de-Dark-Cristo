@@ -46,13 +46,13 @@ window.actualiserBoutonInstallationApp = function(session = null) {
 async function afficherAideInstallationPwa() {
     if (estIosPwa()) {
         await window.siteAlert(
-            "Sur iPhone ou iPad, ouvrez le menu Partager de Safari, puis choisissez \"Sur l'écran d'accueil\"."
+            window.t?.('pwa.iosHelp', {}, "Sur iPhone ou iPad, ouvrez le menu Partager de Safari, puis choisissez \"Sur l'écran d'accueil\".") || "Sur iPhone ou iPad, ouvrez le menu Partager de Safari, puis choisissez \"Sur l'écran d'accueil\"."
         );
         return;
     }
 
     await window.siteAlert(
-        "Si l'installation ne s'ouvre pas automatiquement, utilisez le menu du navigateur puis \"Ajouter à l'écran d'accueil\"."
+        window.t?.('pwa.genericHelp', {}, "Si l'installation ne s'ouvre pas automatiquement, utilisez le menu du navigateur puis \"Ajouter à l'écran d'accueil\".") || "Si l'installation ne s'ouvre pas automatiquement, utilisez le menu du navigateur puis \"Ajouter à l'écran d'accueil\"."
     );
 }
 
@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./service-worker.js').catch((error) => {
-            console.error("Impossible d'activer l'installation mobile :", error);
+            console.error(window.t?.('pwa.registrationError', { message: error.message }, "Impossible d'activer l'installation mobile : " + error.message) || "Impossible d'activer l'installation mobile :", error);
         });
     });
 }

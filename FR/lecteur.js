@@ -48,8 +48,8 @@ window.lireChapitre = async function(idParam = null) {
         verifierPacteDeVue();
     }, 30000);
 
-    titreHeader.innerText = "Déchiffrement du parchemin...";
-    lecteurContenu.innerHTML = '<p class="loading-text">Les runes s\'assemblent...</p>';
+    titreHeader.innerText = window.t?.('reader.deciphering', {}, "Déchiffrement du parchemin...") || "Déchiffrement du parchemin...";
+    lecteurContenu.innerHTML = `<p class="loading-text">${window.t?.('reader.assembling', {}, "Les runes s'assemblent...") || "Les runes s'assemblent..."}</p>`;
 
     // 1. Récupération du chapitre actuel
     let histoireParente = null;
@@ -64,7 +64,7 @@ window.lireChapitre = async function(idParam = null) {
             .maybeSingle();
 
         if (erreurHistoireSlug || !histoireParSlug) {
-            lecteurContenu.innerHTML = `<p class="text-error text-center">Ce parchemin est introuvable ou illisible.</p>`;
+            lecteurContenu.innerHTML = `<p class="text-error text-center">${window.t?.('reader.notFound', {}, 'Ce parchemin est introuvable ou illisible.') || 'Ce parchemin est introuvable ou illisible.'}</p>`;
             return;
         }
 
@@ -91,7 +91,7 @@ window.lireChapitre = async function(idParam = null) {
     }
 
     if (error || !chapitre) {
-        lecteurContenu.innerHTML = `<p class="text-error text-center">Ce parchemin est introuvable ou illisible.</p>`;
+        lecteurContenu.innerHTML = `<p class="text-error text-center">${window.t?.('reader.notFound', {}, 'Ce parchemin est introuvable ou illisible.') || 'Ce parchemin est introuvable ou illisible.'}</p>`;
         return;
     }
 
@@ -102,7 +102,7 @@ window.lireChapitre = async function(idParam = null) {
     if (chapitre.slug) localStorage.setItem('currentChapitreSlug', chapitre.slug);
 
     // 2. Assemblage du contenu (Notes + Texte)
-    titreHeader.innerText = `Chapitre ${chapitre.numero} : ${chapitre.titre}`;
+    titreHeader.innerText = window.t?.('reader.chapterHeader', { number: chapitre.numero, title: chapitre.titre }, `Chapitre ${chapitre.numero} : ${chapitre.titre}`) || `Chapitre ${chapitre.numero} : ${chapitre.titre}`;
     let htmlLecture = "";
 
     const cleanNote = (note) => {
@@ -114,7 +114,7 @@ window.lireChapitre = async function(idParam = null) {
     if (cleanNote(chapitre.note_debut)) {
         htmlLecture += `
             <div class="note-auteur note-debut mb-15">
-                <span class="note-title">Mot de l'Auteur</span>
+                <span class="note-title">${window.t?.('reader.authorNoteStart', {}, "Mot de l'Auteur") || "Mot de l'Auteur"}</span>
                 <div class="note-content">${chapitre.note_debut}</div>
             </div>`;
     }
@@ -124,7 +124,7 @@ window.lireChapitre = async function(idParam = null) {
     if (cleanNote(chapitre.note_fin)) {
         htmlLecture += `
             <div class="note-auteur note-fin mt-15">
-                <span class="note-title">Mot de fin de l'Auteur</span>
+                <span class="note-title">${window.t?.('reader.authorNoteEnd', {}, "Mot de fin de l'Auteur") || "Mot de fin de l'Auteur"}</span>
                 <div class="note-content">${chapitre.note_fin}</div>
             </div>`;
     }
@@ -369,7 +369,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target.id === 'btn-mode-zen') {
             document.body.classList.toggle('mode-zen');
             const estZen = document.body.classList.contains('mode-zen');
-            e.target.innerText = estZen ? "✖ Quitter Plein Écran" : "👁️ Plein Écran";
+            e.target.innerText = estZen
+                ? (window.t?.('reader.exitFullscreen', {}, "✖ Quitter Plein Écran") || "✖ Quitter Plein Écran")
+                : (window.t?.('reader.fullscreen', {}, "👁️ Plein Écran") || "👁️ Plein Écran");
             e.target.classList.toggle('btn-outline-red', estZen);
             e.target.classList.toggle('btn-outline-blue', !estZen);
         }

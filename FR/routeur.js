@@ -232,10 +232,10 @@ function fermerDialogueSite(resultat) {
 }
 
 window.ouvrirDialogueSite = function({
-    title = 'Message du Sanctuaire',
+    title = window.t?.('dialog.defaultTitle', {}, 'Message du Sanctuaire') || 'Message du Sanctuaire',
     message = '',
-    confirmText = 'Valider',
-    cancelText = 'Annuler',
+    confirmText = window.t?.('common.confirm', {}, 'Valider') || 'Valider',
+    cancelText = window.t?.('common.cancel', {}, 'Annuler') || 'Annuler',
     showCancel = false,
     danger = false
 } = {}) {
@@ -371,7 +371,7 @@ function setNotificationsCount(nombreNonLues = 0) {
     compteur.classList.toggle('hidden', nombreNonLues <= 0);
 }
 
-function setNotificationsEmpty(message = 'Aucun parchemin ne vous est destinée') {
+function setNotificationsEmpty(message = window.t?.('notifications.empty', {}, 'Aucun parchemin ne vous est destinée') || 'Aucun parchemin ne vous est destinée') {
     const panneau = document.getElementById('notifications-panel');
     if (!panneau) return;
 
@@ -491,8 +491,8 @@ function creerBoutonSuppressionNotification(notificationId) {
     const bouton = document.createElement('button');
     bouton.type = 'button';
     bouton.className = 'notification-delete';
-    bouton.dataset.tooltip = 'Supprimer';
-    bouton.setAttribute('aria-label', 'Supprimer la notification');
+    bouton.dataset.tooltip = window.t?.('notifications.deleteTooltip', {}, 'Supprimer') || 'Supprimer';
+    bouton.setAttribute('aria-label', window.t?.('notifications.deleteAria', {}, 'Supprimer la notification') || 'Supprimer la notification');
     bouton.textContent = '×';
 
     bouton.addEventListener('click', async (event) => {
@@ -505,7 +505,7 @@ function creerBoutonSuppressionNotification(notificationId) {
             retirerNotificationAffichee(notificationId);
         } catch (error) {
             bouton.disabled = false;
-            await window.siteAlert("Impossible de supprimer la notification : " + error.message, { danger: true });
+            await window.siteAlert(window.t?.('notifications.deleteError', { message: error.message }, "Impossible de supprimer la notification : " + error.message) || ("Impossible de supprimer la notification : " + error.message), { danger: true });
         }
     });
 
@@ -556,7 +556,7 @@ function afficherNotificationsChapitres(notifications = []) {
         });
 
         const lienIci = creerLienNotification({
-            texte: 'ici',
+            texte: window.t?.('notifications.here', {}, 'ici') || 'ici',
             href: `#${window.getHashChapitre(notification.chapitreId, notification.slugChapitre, notification.slugHistoire)}`,
             notificationId: notification.id,
             destination: {
@@ -593,7 +593,7 @@ window.actualiserNotificationsHeader = async function() {
         return;
     }
 
-    panneau.innerHTML = '<p class="notifications-empty">Lecture des parchemins...</p>';
+    panneau.innerHTML = `<p class="notifications-empty">${window.t?.('notifications.loading', {}, 'Lecture des parchemins...') || 'Lecture des parchemins...'}</p>`;
 
     const { data: notificationsBrutes, error: erreurNotifications } = await window._supabase
         .from('notifications')
@@ -657,7 +657,7 @@ window.actualiserNotificationsHeader = async function() {
     const histoiresParId = new Map((histoires || []).map((histoire) => [
         Number(histoire.id),
         {
-            titre: normaliserTitreNotification(histoire.titre, 'Cette histoire'),
+            titre: normaliserTitreNotification(histoire.titre, window.t?.('notifications.fallbackStory', {}, 'Cette histoire') || 'Cette histoire'),
             slug: histoire.slug || ''
         }
     ]));
@@ -672,8 +672,8 @@ window.actualiserNotificationsHeader = async function() {
             histoireId,
             slugHistoire: histoireReference?.slug || '',
             slugChapitre: chapitre.slug || '',
-            titreHistoire: histoireReference?.titre || 'Cette histoire',
-            titreChapitre: normaliserTitreNotification(notification.titre_chapitre || chapitre.titre, 'Nouveau chapitre'),
+            titreHistoire: histoireReference?.titre || window.t?.('notifications.fallbackStory', {}, 'Cette histoire') || 'Cette histoire',
+            titreChapitre: normaliserTitreNotification(notification.titre_chapitre || chapitre.titre, window.t?.('notifications.fallbackChapter', {}, 'Nouveau chapitre') || 'Nouveau chapitre'),
             lue: notification.lu === true
         };
     });
@@ -716,9 +716,13 @@ window.addEventListener('hashchange', () => {
 window.chargerPageInterne = async function(pageDemandee) {
     const root = document.getElementById('sanctuaire-root');
     window._pageCourante = pageDemandee;
+
+    if (window.i18nReady) {
+        await window.i18nReady.catch(() => null);
+    }
     
     // Petit texte d'attente pendant que le fichier voyage
-    root.innerHTML = '<p class="text-center text-muted-italic p-50">Ouverture du parchemin...</p>';
+    root.innerHTML = `<p class="text-center text-muted-italic p-50">${window.t?.('errors.pageLoading', {}, 'Ouverture du parchemin...') || 'Ouverture du parchemin...'}</p>`;
 
     // L'Aiguilleur : on relie le mot-clé au bon fichier HTML
     const pages = {
@@ -741,19 +745,25 @@ window.chargerPageInterne = async function(pageDemandee) {
     const fichier = pages[pageDemandee];
 
     if (!fichier) {
-        root.innerHTML = '<p class="text-error text-center">Ce parchemin n\'existe pas.</p>';
+        root.innerHTML = `<p class="text-error text-center">${window.t?.('errors.missingPage', {}, "Ce parchemin n'existe pas.") || "Ce parchemin n'existe pas."}</p>`;
         return;
     }
 
     try {
-        // On aspire le contenu du fichier HTML
-        const reponse = await fetch(fichier);
-        if (!reponse.ok) throw new Error("Impossible de lire le fichier " + fichier);
-        
-        const html = await reponse.text();
+        const pageStatiqueTraduite = window.getPageStatiqueTraduite?.(pageDemandee);
+        let html = pageStatiqueTraduite;
+
+        if (!html) {
+            // On aspire le contenu du fichier HTML
+            const reponse = await fetch(fichier);
+            if (!reponse.ok) throw new Error("Impossible de lire le fichier " + fichier);
+
+            html = await reponse.text();
+        }
         
         // On l'injecte dans le Maître
         root.innerHTML = html;
+        window.appliquerTraductionsPage?.(pageDemandee, root);
 
         // --- 🌑 L'ÉCLIPSE DU LOGO & DU MENU (Nouveau Mécanisme) 🌑 ---
         const miniLogo = document.getElementById('mini-logo');

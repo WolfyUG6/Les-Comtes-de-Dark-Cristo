@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'dark-cristo-pwa-v1';
+const CACHE_VERSION = 'dark-cristo-pwa-v2';
 const APP_SHELL = [
     './',
     './maitre.html',
@@ -7,12 +7,14 @@ const APP_SHELL = [
     './theme-abysse.css',
     './theme-lumiere.css',
     './config.js',
+    './i18n.js',
     './routeur.js',
     './pwa.js',
     './auth.js',
     './bibliotheque.js',
     './histoire.js',
     './lecteur.js',
+    './locales/FR.json',
     './Logo.png',
     './default-avatar.png',
     './icons/icon-192.png',
