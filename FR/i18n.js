@@ -2,7 +2,14 @@
 // LANGUES DU SITE (i18n)
 // ==========================================
 
-window._siteLocale = localStorage.getItem('siteLocale') || 'FR';
+const SITE_LOCALES_DISPONIBLES = ['FR', 'EN', 'JP'];
+
+function normaliserLocaleSite(locale) {
+    const localeNormalisee = String(locale || 'FR').toUpperCase();
+    return SITE_LOCALES_DISPONIBLES.includes(localeNormalisee) ? localeNormalisee : 'FR';
+}
+
+window._siteLocale = normaliserLocaleSite(localStorage.getItem('siteLocale') || 'FR');
 window._siteTranslations = null;
 
 function getI18nValue(path, fallback = '') {
@@ -57,6 +64,7 @@ function appliquerTraductionsChrome() {
     if (!window._siteTranslations) return;
 
     document.documentElement.lang = window.tRaw('meta.locale', 'fr');
+    document.documentElement.dir = window.tRaw('meta.direction', 'ltr');
     document.title = window.tRaw('meta.siteName', document.title);
     const description = document.querySelector('meta[name="description"]');
     if (description) description.setAttribute('content', window.tRaw('meta.description', description.getAttribute('content') || ''));
@@ -232,7 +240,7 @@ window.getPageStatiqueTraduite = function(page) {
 };
 
 async function chargerLocaleSite(locale = 'FR') {
-    const localeNormalisee = String(locale || 'FR').toUpperCase();
+    const localeNormalisee = normaliserLocaleSite(locale);
 
     try {
         const response = await fetch(`locales/${localeNormalisee}.json`, { cache: 'no-cache' });
