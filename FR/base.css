@@ -981,6 +981,10 @@ body.modal-open {
 .dropdown-item:last-child { border-bottom: none; }
 .dropdown-item:hover { background-color: var(--bg-hover); color: var(--text-hover); }
 
+.pwa-install-btn {
+    color: var(--accent-blue);
+}
+
 /* =========================================
    NOUVELLES CLASSES COMPOSANTS (Forge, Gestion)
    ========================================= */

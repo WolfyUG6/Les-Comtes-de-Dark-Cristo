@@ -518,12 +518,18 @@ window._supabase.auth.onAuthStateChange((event, session) => {
             }
 
             actualiserStatutAdminDepuisSession(session);
+            if (typeof window.actualiserBoutonInstallationApp === 'function') {
+                window.actualiserBoutonInstallationApp(session);
+            }
             if (typeof window.actualiserNotificationsHeader === 'function') window.actualiserNotificationsHeader();
         } else {
             if (authContainer) authContainer.classList.remove('hidden');
             if (userContainer) userContainer.classList.add('hidden');
             if (btnForge) btnForge.style.display = "none";
             actualiserStatutAdminDepuisSession(null);
+            if (typeof window.actualiserBoutonInstallationApp === 'function') {
+                window.actualiserBoutonInstallationApp(null);
+            }
             if (typeof window.actualiserNotificationsHeader === 'function') window.actualiserNotificationsHeader();
         }
     } catch (e) {
