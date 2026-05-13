@@ -24,11 +24,13 @@ window.lireChapitre = async function(idParam = null) {
     window.scrollTo({ top: 0, behavior: 'auto' });
     
     // On prend l'ID en paramètre (via btn 'Suivant') ou dans le storage (via btn 'Lire' de la page Histoire)
+    const slugHistoireRoute = window.getRouteParam?.('histoireSlug');
+    const slugChapitreRoute = window.getRouteParam?.('chapitreSlug');
     const idChapitre = idParam || window.getRouteParam?.('id') || localStorage.getItem('currentChapitreId');
     const lecteurContenu = document.getElementById('lecture-contenu');
     const titreHeader = document.getElementById('lecture-titre');
     
-    if (!idChapitre || !lecteurContenu) {
+    if ((!idChapitre && (!slugHistoireRoute || !slugChapitreRoute)) || !lecteurContenu) {
         window.changerDePage('accueil');
         return;
     }
@@ -50,11 +52,43 @@ window.lireChapitre = async function(idParam = null) {
     lecteurContenu.innerHTML = '<p class="loading-text">Les runes s\'assemblent...</p>';
 
     // 1. Récupération du chapitre actuel
-    const { data: chapitre, error } = await window._supabase
-        .from('chapitres')
-        .select('*')
-        .eq('id', idChapitre)
-        .single();
+    let histoireParente = null;
+    let chapitre = null;
+    let error = null;
+
+    if (slugHistoireRoute && slugChapitreRoute && !idParam) {
+        const { data: histoireParSlug, error: erreurHistoireSlug } = await window._supabase
+            .from('histoires')
+            .select('*')
+            .eq('slug', slugHistoireRoute)
+            .maybeSingle();
+
+        if (erreurHistoireSlug || !histoireParSlug) {
+            lecteurContenu.innerHTML = `<p class="text-error text-center">Ce parchemin est introuvable ou illisible.</p>`;
+            return;
+        }
+
+        histoireParente = histoireParSlug;
+
+        const resultatChapitre = await window._supabase
+            .from('chapitres')
+            .select('*')
+            .eq('histoire_id', histoireParente.id)
+            .eq('slug', slugChapitreRoute)
+            .maybeSingle();
+
+        chapitre = resultatChapitre.data;
+        error = resultatChapitre.error;
+    } else {
+        const resultatChapitre = await window._supabase
+            .from('chapitres')
+            .select('*')
+            .eq('id', idChapitre)
+            .maybeSingle();
+
+        chapitre = resultatChapitre.data;
+        error = resultatChapitre.error;
+    }
 
     if (error || !chapitre) {
         lecteurContenu.innerHTML = `<p class="text-error text-center">Ce parchemin est introuvable ou illisible.</p>`;
@@ -63,6 +97,9 @@ window.lireChapitre = async function(idParam = null) {
 
     // On stocke l'ID de l'œuvre courante pour le bouton "Retour"
     window.currentOeuvreId = chapitre.histoire_id;
+    window.currentChapitreId = chapitre.id;
+    localStorage.setItem('currentChapitreId', chapitre.id);
+    if (chapitre.slug) localStorage.setItem('currentChapitreSlug', chapitre.slug);
 
     // 2. Assemblage du contenu (Notes + Texte)
     titreHeader.innerText = `Chapitre ${chapitre.numero} : ${chapitre.titre}`;
@@ -94,16 +131,28 @@ window.lireChapitre = async function(idParam = null) {
 
     lecteurContenu.innerHTML = htmlLecture;
 
-    const { data: histoireParente } = await window._supabase
-        .from('histoires')
-        .select('*')
-        .eq('id', chapitre.histoire_id)
-        .maybeSingle();
+    if (!histoireParente) {
+        const { data: histoireParId } = await window._supabase
+            .from('histoires')
+            .select('*')
+            .eq('id', chapitre.histoire_id)
+            .maybeSingle();
+
+        histoireParente = histoireParId;
+    }
 
     if (histoireParente?.slug) {
         localStorage.setItem('currentOeuvreSlug', histoireParente.slug);
     } else {
         localStorage.removeItem('currentOeuvreSlug');
+    }
+
+    if (histoireParente?.slug && chapitre.slug) {
+        window.history.replaceState(
+            {},
+            document.title,
+            `#${window.getHashChapitre(chapitre.id, chapitre.slug, histoireParente.slug)}`
+        );
     }
     
     // 3. Application des paramètres sauvegardés
@@ -145,7 +194,7 @@ async function configurerNavigation(chapitreActuel) {
     // Chapitre Précédent
     const { data: chapPrec } = await window._supabase
         .from('chapitres')
-        .select('id')
+        .select('id, slug')
         .eq('histoire_id', chapitreActuel.histoire_id)
         .eq('est_publie', true)
         .lt('numero', chapitreActuel.numero)
@@ -157,7 +206,7 @@ async function configurerNavigation(chapitreActuel) {
         [btnPrecHauts, btnPrecBas].forEach(btn => {
             if (btn) {
                 btn.classList.remove('hidden');
-                btn.onclick = () => lireNouveauChapitre(chapPrec.id);
+                btn.onclick = () => lireNouveauChapitre(chapPrec);
             }
         });
     }
@@ -166,7 +215,7 @@ async function configurerNavigation(chapitreActuel) {
     const maintenant = new Date().toISOString();
     const { data: chapSuiv } = await window._supabase
         .from('chapitres')
-        .select('id')
+        .select('id, slug')
         .eq('histoire_id', chapitreActuel.histoire_id)
         .eq('est_publie', true)
         .lte('date_publication', maintenant)
@@ -179,15 +228,18 @@ async function configurerNavigation(chapitreActuel) {
         [btnSuivHauts, btnSuivBas].forEach(btn => {
             if (btn) {
                 btn.classList.remove('hidden');
-                btn.onclick = () => lireNouveauChapitre(chapSuiv.id);
+                btn.onclick = () => lireNouveauChapitre(chapSuiv);
             }
         });
     }
 }
 
-function lireNouveauChapitre(id) {
-    localStorage.setItem('currentChapitreId', id);
-    window.changerDePage('lecture', { id });
+function lireNouveauChapitre(chapitre) {
+    window.ouvrirPageChapitre({
+        id: chapitre?.id,
+        slug: chapitre?.slug || '',
+        histoireSlug: localStorage.getItem('currentOeuvreSlug') || ''
+    });
 }
 
 // ==========================================

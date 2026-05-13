@@ -5,9 +5,12 @@
 function construireHashPage(pageDemandee, params = {}) {
     const recherche = new URLSearchParams();
     const slugOeuvre = pageDemandee === 'oeuvre' ? String(params?.slug || '').trim() : '';
+    const slugLectureHistoire = pageDemandee === 'lecture' ? String(params?.histoireSlug || '').trim() : '';
+    const slugLectureChapitre = pageDemandee === 'lecture' ? String(params?.chapitreSlug || params?.slug || '').trim() : '';
 
     Object.entries(params || {}).forEach(([cle, valeur]) => {
         if (cle === 'slug' && slugOeuvre) return;
+        if (pageDemandee === 'lecture' && ['histoireSlug', 'chapitreSlug', 'slug'].includes(cle) && slugLectureHistoire && slugLectureChapitre) return;
         if (valeur !== null && valeur !== undefined && valeur !== '') {
             recherche.set(cle, valeur);
         }
@@ -17,6 +20,10 @@ function construireHashPage(pageDemandee, params = {}) {
         return `oeuvre/${encodeURIComponent(slugOeuvre)}${recherche.toString() ? `?${recherche.toString()}` : ''}`;
     }
 
+    if (slugLectureHistoire && slugLectureChapitre) {
+        return `lecture/${encodeURIComponent(slugLectureHistoire)}/${encodeURIComponent(slugLectureChapitre)}${recherche.toString() ? `?${recherche.toString()}` : ''}`;
+    }
+
     return `${pageDemandee}${recherche.toString() ? `?${recherche.toString()}` : ''}`;
 }
 
@@ -24,6 +31,19 @@ function construireHashOeuvreDepuisDonnees(idHistoire, slugHistoire = '') {
     const slug = String(slugHistoire || '').trim();
     if (slug) return construireHashPage('oeuvre', { slug });
     return construireHashPage('oeuvre', { id: idHistoire });
+}
+
+function construireHashChapitreDepuisDonnees(idChapitre, slugChapitre = '', slugHistoire = '') {
+    const chapitreSlug = String(slugChapitre || '').trim();
+    const histoireSlug = String(slugHistoire || '').trim();
+    if (chapitreSlug && histoireSlug) {
+        return construireHashPage('lecture', {
+            histoireSlug,
+            chapitreSlug
+        });
+    }
+
+    return construireHashPage('lecture', { id: idChapitre });
 }
 
 // L'Aiguilleur (Modifie l'URL sans recharger la page)
@@ -63,6 +83,35 @@ window.getHashOeuvre = function(idHistoire, slugHistoire = '') {
     return construireHashOeuvreDepuisDonnees(idHistoire, slugHistoire);
 };
 
+window.ouvrirPageChapitre = function({ id, slug, histoireSlug } = {}) {
+    if (id !== null && id !== undefined && id !== '') {
+        window.currentChapitreId = id;
+        localStorage.setItem('currentChapitreId', id);
+    }
+
+    if (slug) {
+        localStorage.setItem('currentChapitreSlug', slug);
+    }
+
+    if (histoireSlug) {
+        localStorage.setItem('currentOeuvreSlug', histoireSlug);
+    }
+
+    if (histoireSlug && slug) {
+        window.changerDePage('lecture', {
+            histoireSlug,
+            chapitreSlug: slug
+        });
+        return;
+    }
+
+    window.changerDePage('lecture', { id });
+};
+
+window.getHashChapitre = function(idChapitre, slugChapitre = '', slugHistoire = '') {
+    return construireHashChapitreDepuisDonnees(idChapitre, slugChapitre, slugHistoire);
+};
+
 function estHashAuthSupabase(hashValue = window.location.hash) {
     const hashNettoye = (hashValue || '').replace(/^#/, '');
     if (!hashNettoye) return false;
@@ -95,6 +144,11 @@ function extraireRouteDepuisHash(hashValue = window.location.hash) {
         params.set('slug', decodeURIComponent(segmentsChemin.join('/')));
     }
 
+    if (pageBrute === 'lecture' && segmentsChemin.length >= 2) {
+        params.set('histoireSlug', decodeURIComponent(segmentsChemin[0]));
+        params.set('chapitreSlug', decodeURIComponent(segmentsChemin.slice(1).join('/')));
+    }
+
     return {
         page: pageBrute || 'accueil',
         params
@@ -118,9 +172,17 @@ function appliquerParamsRoute(route) {
 
     if (route.page === 'lecture') {
         const idChapitre = route.params.get('id') || route.params.get('chapitre');
+        const slugHistoire = route.params.get('histoireSlug');
+        const slugChapitre = route.params.get('chapitreSlug');
         if (idChapitre) {
             window.currentChapitreId = idChapitre;
             localStorage.setItem('currentChapitreId', idChapitre);
+        }
+        if (slugHistoire) {
+            localStorage.setItem('currentOeuvreSlug', slugHistoire);
+        }
+        if (slugChapitre) {
+            localStorage.setItem('currentChapitreSlug', slugChapitre);
         }
     }
 
@@ -414,8 +476,11 @@ function creerLienNotification({ texte, href, notificationId, destination }) {
                 slug: destination.slug
             });
         } else if (destination.type === 'chapitre') {
-            localStorage.setItem('currentChapitreId', destination.id);
-            window.changerDePage('lecture', { id: destination.id });
+            window.ouvrirPageChapitre({
+                id: destination.id,
+                slug: destination.slug,
+                histoireSlug: destination.histoireSlug
+            });
         }
     });
 
@@ -480,16 +545,26 @@ function afficherNotificationsChapitres(notifications = []) {
 
         const lienChapitre = creerLienNotification({
             texte: notification.titreChapitre,
-            href: `#lecture?id=${encodeURIComponent(notification.chapitreId)}`,
+            href: `#${window.getHashChapitre(notification.chapitreId, notification.slugChapitre, notification.slugHistoire)}`,
             notificationId: notification.id,
-            destination: { type: 'chapitre', id: notification.chapitreId }
+            destination: {
+                type: 'chapitre',
+                id: notification.chapitreId,
+                slug: notification.slugChapitre,
+                histoireSlug: notification.slugHistoire
+            }
         });
 
         const lienIci = creerLienNotification({
             texte: 'ici',
-            href: `#lecture?id=${encodeURIComponent(notification.chapitreId)}`,
+            href: `#${window.getHashChapitre(notification.chapitreId, notification.slugChapitre, notification.slugHistoire)}`,
             notificationId: notification.id,
-            destination: { type: 'chapitre', id: notification.chapitreId }
+            destination: {
+                type: 'chapitre',
+                id: notification.chapitreId,
+                slug: notification.slugChapitre,
+                histoireSlug: notification.slugHistoire
+            }
         });
 
         item.append(
@@ -548,7 +623,7 @@ window.actualiserNotificationsHeader = async function() {
 
     const { data: chapitres, error: erreurChapitres } = await window._supabase
         .from('chapitres')
-        .select('id, histoire_id, titre, date_publication')
+        .select('id, histoire_id, titre, slug, date_publication')
         .in('id', idsChapitres)
         .eq('est_publie', true)
         .lte('date_publication', maintenantIso)
@@ -596,6 +671,7 @@ window.actualiserNotificationsHeader = async function() {
             chapitreId: Number(chapitre.id),
             histoireId,
             slugHistoire: histoireReference?.slug || '',
+            slugChapitre: chapitre.slug || '',
             titreHistoire: histoireReference?.titre || 'Cette histoire',
             titreChapitre: normaliserTitreNotification(notification.titre_chapitre || chapitre.titre, 'Nouveau chapitre'),
             lue: notification.lu === true

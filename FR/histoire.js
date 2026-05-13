@@ -377,7 +377,7 @@ function dessinerChapitresHistoire(chapitres) {
                 <span class="published-date ml-10">(Publié le ${dateAffichee})</span>
             </div>
             <div>
-                <button class="genre-btn btn-outline-blue btn-small" type="button" data-chapitre-read="${chap.id}">Lire</button>
+                <button class="genre-btn btn-outline-blue btn-small" type="button" data-chapitre-read="${chap.id}" data-chapitre-slug="${escapeCommentaireHtml(chap.slug || '')}">Lire</button>
             </div>
         `;
         chapitresListe.appendChild(div);
@@ -1135,8 +1135,11 @@ if (!window.commentairesEventsHooked) {
         const boutonLecture = event.target.closest('[data-chapitre-read]');
         if (boutonLecture) {
             const chapitreId = boutonLecture.dataset.chapitreRead;
-            localStorage.setItem('currentChapitreId', chapitreId);
-            window.changerDePage('lecture', { id: chapitreId });
+            window.ouvrirPageChapitre({
+                id: chapitreId,
+                slug: boutonLecture.dataset.chapitreSlug || '',
+                histoireSlug: window._histoireVolumesState?.histoire?.slug || ''
+            });
             return;
         }
 
