@@ -74,6 +74,7 @@
   "navigation": {
     "home": "The Hall (Home)",
     "genres": {
+      "general": "General",
       "highLowFantasy": "High & Low Fantasy",
       "darkFantasyGrimdark": "Dark Fantasy & Grimdark",
       "romanceRomantasy": "Romance & Romantasy",
@@ -560,7 +561,11 @@
     "missingGenre": "No genre was specified. The soul wanders...",
     "loading": "The manuscripts crawl out of the depths...",
     "error": "The temporal portal flickered:",
+    "emptyTitle": "Silence reigns here...",
     "empty": "No grimoire has yet been engraved in the <strong>{genre}</strong> shelf. Will you be the first?",
+    "emptyGeneral": "No grimoire has yet been engraved in this language. Will you be the first?",
+    "searchPlaceholder": "Title, author...",
+    "searchEmpty": "No story matches this search.",
     "sortLabel": "Sort by",
     "sortNameAsc": "Name A - Z",
     "sortNameDesc": "Name Z - A",

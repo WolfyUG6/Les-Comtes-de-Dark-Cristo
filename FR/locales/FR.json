@@ -74,6 +74,7 @@
   "navigation": {
     "home": "Le Hall (Accueil)",
     "genres": {
+      "general": "Général",
       "highLowFantasy": "High & Low Fantasy",
       "darkFantasyGrimdark": "Dark Fantasy & Grimdark",
       "romanceRomantasy": "Romance et Romantasy",
@@ -560,7 +561,11 @@
     "missingGenre": "Aucun genre n'a été spécifié. L'âme vagabonde...",
     "loading": "Les manuscrits s'extirpent des abysses...",
     "error": "Le portail temporel a vacillé :",
+    "emptyTitle": "Le silence règne ici...",
     "empty": "Aucun grimoire n'a encore été gravé dans le rayon <strong>{genre}</strong>. Serez-vous le premier ?",
+    "emptyGeneral": "Aucun grimoire n'a encore été gravé dans cette langue. Serez-vous le premier ?",
+    "searchPlaceholder": "Titre, auteur...",
+    "searchEmpty": "Aucune histoire ne correspond à cette recherche.",
     "sortLabel": "Trier par",
     "sortNameAsc": "Nom A - Z",
     "sortNameDesc": "Nom Z - A",

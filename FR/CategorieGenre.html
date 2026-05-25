@@ -9,6 +9,20 @@
 
     <div class="my-stories-section">
         <div class="category-toolbar">
+            <label class="chapter-page-size category-search-field" for="category-search">
+                <span>Rechercher</span>
+                <input id="category-search" class="custom-input" type="search" placeholder="Titre, auteur...">
+            </label>
+
+            <label class="chapter-page-size" for="category-page-size">
+                <span>Afficher</span>
+                <select id="category-page-size" class="custom-select">
+                    <option value="15" selected>15</option>
+                    <option value="30">30</option>
+                    <option value="50">50</option>
+                </select>
+            </label>
+
             <label class="chapter-page-size" for="category-sort">
                 <span>Trier par</span>
                 <select id="category-sort" class="custom-select">
@@ -26,6 +40,7 @@
         <div id="genre-stories-list" class="stories-grid">
             <!-- Les Grimoires apparaîtront ici grâce à categoriegenre.js -->
         </div>
+        <div id="category-pagination" class="chapter-pagination hidden"></div>
     </div>
 
 </div>

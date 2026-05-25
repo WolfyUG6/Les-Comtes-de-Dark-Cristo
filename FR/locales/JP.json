@@ -74,6 +74,7 @@
   "navigation": {
     "home": "広間（ホーム）",
     "genres": {
+      "general": "総合",
       "highLowFantasy": "ハイ＆ロー・ファンタジー",
       "darkFantasyGrimdark": "ダークファンタジー＆グリムダーク",
       "romanceRomantasy": "恋愛・ロマンタジー",
@@ -560,7 +561,11 @@
     "missingGenre": "ジャンルが指定されていません。魂が彷徨っています...",
     "loading": "写本が深淵から這い出ています...",
     "error": "時の門が揺らぎました：",
+    "emptyTitle": "ここは静寂に包まれています...",
     "empty": "<strong>{genre}</strong> の書架には、まだ魔導書が刻まれていません。最初の一冊になりますか？",
+    "emptyGeneral": "この言語では、まだ魔導書が刻まれていません。最初の一冊になりますか？",
+    "searchPlaceholder": "タイトル、作者...",
+    "searchEmpty": "この検索に一致する物語はありません。",
     "sortLabel": "並び替え",
     "sortNameAsc": "タイトル A - Z",
     "sortNameDesc": "タイトル Z - A",

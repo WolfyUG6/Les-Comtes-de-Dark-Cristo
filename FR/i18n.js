@@ -82,6 +82,7 @@ window.getLocaleAffichageSite = function() {
 
 window.traduireGenreSite = function(genre) {
     const map = {
+        general: 'navigation.genres.general',
         'High & Low Fantasy': 'navigation.genres.highLowFantasy',
         'Dark Fantasy & Grimdark': 'navigation.genres.darkFantasyGrimdark',
         'Romance et Romantasy': 'navigation.genres.romanceRomantasy',
@@ -153,6 +154,7 @@ function appliquerTraductionsChrome() {
 
     const menuLabels = {
         accueil: 'navigation.home',
+        general: 'navigation.genres.general',
         'High & Low Fantasy': 'navigation.genres.highLowFantasy',
         'Dark Fantasy & Grimdark': 'navigation.genres.darkFantasyGrimdark',
         'Romance et Romantasy': 'navigation.genres.romanceRomantasy',
@@ -468,6 +470,9 @@ function appliquerTraductionsCategorie(root = document) {
     const genre = localStorage.getItem('currentGenre') || '';
     setText('#genre-page-title', genre ? 'category.title' : 'category.unknownTitle', root, { genre: window.traduireGenreSite(genre) });
     setText('.welcome-content .text-muted', 'category.intro', root);
+    setText('label[for="category-search"] span', 'common.search', root);
+    setAttr('#category-search', 'placeholder', 'category.searchPlaceholder', root);
+    setText('label[for="category-page-size"] span', 'story.pageSizeLabel', root);
     setText('label[for="category-sort"] span', 'category.sortLabel', root);
     setOptionText('#category-sort option[value="published_desc"]', 'category.sortPublishedDesc', root);
     setOptionText('#category-sort option[value="published_asc"]', 'category.sortPublishedAsc', root);
