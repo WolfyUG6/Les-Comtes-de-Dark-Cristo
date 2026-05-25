@@ -154,11 +154,16 @@
     "welcome": {
       "title": "Bienvenue dans l'Antre des Déchus",
       "paragraphs": [
-        "Ici, on se retrouve entre personnes à la recherche d'histoires sérieuses, celles que les sites habituels délaissent pour faire du clic facile.",
-        "Je ne peux pas vous promettre un havre de paix — vu les thèmes, on n'est pas là pour lire des \"bisounours\" — mais tant que le respect est là, la porte sera toujours ouverte. Vous trouverez ici de la romance et de l'intimité, mais nous ne gardons que les plumes qui traitent leurs récits avec un sérieux total.",
-        "Mon but est de réunir les auteurs qui font passer <strong>l'intrigue avant l'excitation</strong>. L'amour et la joie font partie de la vie, ça ne me pose aucun souci, mais ça doit être écrit avec profondeur.",
-        "Ce site est le projet d'un passionné d'histoires sombres. Elles ne trouvaient pas leur place ailleurs, alors elles ont fait naître ce Sanctuaire. Bienvenue dans le monde du WebNovel sérieux.",
-        "Pour commencer votre aventure, choisissez un genre, ou découvrez nos dernières œuvres."
+          "Ce petit site a vu le jour grâce à une personne qui voulait publier ses petites histoires. Elle a donc parcouru Internet à la recherche d’endroits où publier.",
+          "Mais entre les sites où tout est imposé, transformé en réseaux sociaux et autres, j’ai fini par comprendre une chose simple : on a oublié ce qu’une histoire devait faire.",
+          "Un auteur est humain, avec une idée. Que vous l’aimiez ou non, il fait tout pour lui donner vie. Mais trop de personnes écrivent pour le public et non pour elles-mêmes.",
+          "Ici, je cherche à créer un havre pour ces auteurs qui favorisent l’histoire qu’ils imaginent, qui insufflent la vie aux mots pour faire vibrer les lecteurs.",
+          "Je ne peux vous promettre que vous trouverez chaussure à votre pied, mais j’espère que découvrir des histoires redeviendra un plaisir.",
+          "Une histoire, c’est mille façons de s’évader, d’imaginer, de pleurer.",
+          "La seule limite est votre imagination.",
+          "Auteur, à votre forge pour faire ressentir vos idées.",
+          "Lecteur, profitez simplement de vos découvertes.",
+          "Mais n’oubliez jamais : le respect n’est jamais une option, que ce soit dans l’histoire ou dans vos échanges."
       ]
     },
     "weeklyHighlights": {
