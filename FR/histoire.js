@@ -225,7 +225,7 @@ function traduireGenreHistoire(genre = '') {
     const genres = {
         'High & Low Fantasy': 'navigation.genres.highLowFantasy',
         'Dark Fantasy & Grimdark': 'navigation.genres.darkFantasyGrimdark',
-        'Romantasy Tragique': 'navigation.genres.romantasyTragique',
+        'Romance et Romantasy': 'navigation.genres.romanceRomantasy',
         'Sci-Fi & Cyberpunk': 'navigation.genres.sciFiCyberpunk',
         'Horreur Psychologique': 'navigation.genres.horreurPsychologique'
     };

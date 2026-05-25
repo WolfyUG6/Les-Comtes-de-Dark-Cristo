@@ -6,7 +6,7 @@
 const HOME_GENRE_ORDER = [
     'High & Low Fantasy',
     'Dark Fantasy & Grimdark',
-    'Romantasy Tragique',
+    'Romance et Romantasy',
     'Sci-Fi & Cyberpunk',
     'Horreur Psychologique'
 ];

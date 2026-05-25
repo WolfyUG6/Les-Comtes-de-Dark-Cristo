@@ -84,7 +84,7 @@ window.traduireGenreSite = function(genre) {
     const map = {
         'High & Low Fantasy': 'navigation.genres.highLowFantasy',
         'Dark Fantasy & Grimdark': 'navigation.genres.darkFantasyGrimdark',
-        'Romantasy Tragique': 'navigation.genres.romantasyTragique',
+        'Romance et Romantasy': 'navigation.genres.romanceRomantasy',
         'Sci-Fi & Cyberpunk': 'navigation.genres.sciFiCyberpunk',
         'Horreur Psychologique': 'navigation.genres.horreurPsychologique'
     };
@@ -155,7 +155,7 @@ function appliquerTraductionsChrome() {
         accueil: 'navigation.home',
         'High & Low Fantasy': 'navigation.genres.highLowFantasy',
         'Dark Fantasy & Grimdark': 'navigation.genres.darkFantasyGrimdark',
-        'Romantasy Tragique': 'navigation.genres.romantasyTragique',
+        'Romance et Romantasy': 'navigation.genres.romanceRomantasy',
         'Sci-Fi & Cyberpunk': 'navigation.genres.sciFiCyberpunk',
         'Horreur Psychologique': 'navigation.genres.horreurPsychologique'
     };
@@ -367,7 +367,7 @@ function appliquerTraductionsCreationStory(root = document) {
     setOptionText('#story-genre option[value=""]', 'creationStory.genrePlaceholder', root);
     setOptionText('#story-genre option[value="High & Low Fantasy"]', 'navigation.genres.highLowFantasy', root);
     setOptionText('#story-genre option[value="Dark Fantasy & Grimdark"]', 'navigation.genres.darkFantasyGrimdark', root);
-    setOptionText('#story-genre option[value="Romantasy Tragique"]', 'navigation.genres.romantasyTragique', root);
+    setOptionText('#story-genre option[value="Romance et Romantasy"]', 'navigation.genres.romanceRomantasy', root);
     setOptionText('#story-genre option[value="Sci-Fi & Cyberpunk"]', 'navigation.genres.sciFiCyberpunk', root);
     setOptionText('#story-genre option[value="Horreur Psychologique"]', 'navigation.genres.horreurPsychologique', root);
     setText('label[for="story-age"]', 'creationStory.ageLabel', root);
