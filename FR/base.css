@@ -359,9 +359,10 @@ button:hover, .genre-btn:hover {
 
 .story-tags {
     display: flex;
-    gap: 10px;
+    gap: 7px 12px;
     align-self: flex-start;
     flex-wrap: wrap;
+    align-items: center;
 }
 
 .tag {
@@ -377,6 +378,27 @@ button:hover, .genre-btn:hover {
 .tag-sensible { background-color: var(--accent-red); color: white; border: 1px solid #ff0055; }
 .tag-sensible-off { background-color: transparent; color: var(--text-muted); border: 1px dotted var(--border-color); text-decoration: line-through; }
 .tag-highlight-score { background-color: var(--accent-blue); color: white; border: 1px solid var(--accent-blue); }
+
+.story-tags .tag {
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 0.68rem;
+    line-height: 1.35;
+    letter-spacing: 0.04em;
+}
+
+.story-tags .tag-genre { color: var(--accent-red); }
+.story-tags .tag-statut { color: var(--accent-blue); }
+.story-tags .tag-age:not(.age-tout-public):not(.age-r15):not(.age-r16):not(.age-r18) { color: var(--text-title); }
+.story-tags .tag-sensible { color: #ff5f8f; }
+.story-tags .tag-sensible-off {
+    color: var(--text-muted);
+    opacity: 0.58;
+    text-decoration: none;
+}
 
 /* =========================================
    L'EN-TÊTE (Header & Bandeau)
