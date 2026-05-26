@@ -1902,6 +1902,9 @@ body.modal-open {
 .lecture-nav-fixe { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; }
 .btn-lecture-nav-fixe { background: transparent; color: inherit; border: none; border-bottom: 1px solid currentColor; padding: 6px 4px; font-family: 'Segoe UI', sans-serif; font-weight: 600; font-size: 0.82rem; cursor: pointer; transition: 0.2s ease; text-transform: none; letter-spacing: 0; opacity: 0.82; box-shadow: none; }
 .btn-lecture-nav-fixe:hover { border-color: currentColor; color: var(--text-title); background: transparent; box-shadow: none; opacity: 1; }
+#btn-chap-prec-haut { order: 1; }
+#btn-retour-oeuvre-haut { order: 2; }
+#btn-chap-suiv-haut { order: 3; }
 
 /* Navigation Bas (Identique mais plus grand) */
 .nav-bas { justify-content: center; gap: 22px; }
@@ -1946,6 +1949,41 @@ body.modal-open {
 .theme-buttons { display: flex; gap: 5px; flex-wrap: wrap; }
 .size-buttons { display: flex; gap: 10px; }
 .pupitre-select { background: #111; color: #e0d7c6; border-color: #333; }
+.lecture-settings .genre-btn {
+    background: transparent;
+    color: #c4a484;
+    border: none;
+    border-bottom: 1px solid #333;
+    padding: 7px 4px;
+    box-shadow: none;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: 0;
+    opacity: 0.82;
+}
+.lecture-settings .genre-btn:hover {
+    background: transparent;
+    color: #fff;
+    border-bottom-color: #c4a484;
+    box-shadow: none;
+    opacity: 1;
+}
+.lecture-settings .btn-primary {
+    background: transparent;
+    color: #fff;
+    border-color: #8b0000;
+    box-shadow: none;
+    opacity: 1;
+}
+.lecture-settings .btn-outline-blue { color: #9dbbff; border-color: #333; }
+.lecture-settings .btn-outline-red { color: #d48787; border-color: #333; }
+.lecture-settings .size-buttons .genre-btn { flex: 1 1 0; }
+.lecture-settings #btn-mode-zen,
+.lecture-settings [data-retour-oeuvre] {
+    width: 100%;
+}
 
 /* Boutons grisés s'ils sont désactivés */
 .genre-btn:disabled, .btn-scroll:disabled { opacity: 0.3 !important; cursor: not-allowed !important; pointer-events: none; }
