@@ -46,6 +46,77 @@ function construireHashChapitreDepuisDonnees(idChapitre, slugChapitre = '', slug
     return construireHashPage('lecture', { id: idChapitre });
 }
 
+const RETOUR_OEUVRE_STORAGE_KEY = 'retourOeuvreContexte';
+const PAGES_RETOUR_OEUVRE = new Set(['accueil', 'categorie-genre', 'lectures']);
+
+function lireContexteRetourOeuvre() {
+    try {
+        return JSON.parse(localStorage.getItem(RETOUR_OEUVRE_STORAGE_KEY) || 'null');
+    } catch (error) {
+        localStorage.removeItem(RETOUR_OEUVRE_STORAGE_KEY);
+        return null;
+    }
+}
+
+function contexteRetourCorrespondOeuvre(contexte) {
+    if (!contexte) return false;
+
+    const idContexte = String(contexte.histoireId || '');
+    const slugContexte = String(contexte.slug || '');
+    const idCourant = String(window.currentOeuvreId || localStorage.getItem('currentOeuvreId') || '');
+    const slugCourant = String(localStorage.getItem('currentOeuvreSlug') || '');
+
+    if (!idContexte && !slugContexte) return true;
+    if (idContexte && idCourant && idContexte === idCourant) return true;
+    return Boolean(slugContexte && slugCourant && slugContexte === slugCourant);
+}
+
+function allerAccueilDepuisRetourOeuvre() {
+    window.changerDePage('accueil');
+}
+
+window.memoriserRetourOeuvre = function({ page, params = {}, histoireId = '', slug = '' } = {}) {
+    const pageSource = page || window._pageCourante;
+    if (!PAGES_RETOUR_OEUVRE.has(pageSource)) return;
+
+    const contexte = {
+        page: pageSource,
+        histoireId: histoireId !== null && histoireId !== undefined ? String(histoireId) : '',
+        slug: String(slug || ''),
+        savedAt: Date.now()
+    };
+
+    if (pageSource === 'categorie-genre') {
+        const genre = params.genre || localStorage.getItem('currentGenre') || '';
+        if (!genre) return;
+        contexte.genre = genre;
+    }
+
+    localStorage.setItem(RETOUR_OEUVRE_STORAGE_KEY, JSON.stringify(contexte));
+};
+
+window.retournerOrigineOeuvre = function() {
+    const contexte = lireContexteRetourOeuvre();
+
+    if (!contexteRetourCorrespondOeuvre(contexte)) {
+        allerAccueilDepuisRetourOeuvre();
+        return;
+    }
+
+    if (contexte.page === 'categorie-genre' && contexte.genre) {
+        localStorage.setItem('currentGenre', contexte.genre);
+        window.changerDePage('categorie-genre', { genre: contexte.genre });
+        return;
+    }
+
+    if (contexte.page === 'lectures') {
+        window.changerDePage('lectures');
+        return;
+    }
+
+    allerAccueilDepuisRetourOeuvre();
+};
+
 // L'Aiguilleur (Modifie l'URL sans recharger la page)
 window.changerDePage = function(pageDemandee, params = {}) {
     const hash = construireHashPage(pageDemandee, params);
@@ -61,6 +132,13 @@ window.changerDePage = function(pageDemandee, params = {}) {
 };
 
 window.ouvrirPageOeuvre = function({ id, slug } = {}) {
+    window.memoriserRetourOeuvre?.({
+        page: window._pageCourante,
+        params: { genre: localStorage.getItem('currentGenre') || '' },
+        histoireId: id,
+        slug
+    });
+
     if (id !== null && id !== undefined && id !== '') {
         window.currentOeuvreId = id;
         localStorage.setItem('currentOeuvreId', id);
