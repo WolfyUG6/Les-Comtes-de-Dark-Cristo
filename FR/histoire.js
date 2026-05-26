@@ -1338,70 +1338,142 @@ window.chargerPageHistoire = async function() {
     initialiserBoutonPartageHistoire(histoire);
 
     const btnSuivre = document.getElementById('btn-suivre-histoire');
-    if (btnSuivre) {
-        btnSuivre.innerText = window.t?.('story.support', {}, "Soutenir l'œuvre") || "Soutenir l'œuvre";
-        btnSuivre.className = "genre-btn btn-primary shadow-active"; // Reset classes
-        btnSuivre.disabled = false;
-        
-        // On détache les anciens event listeners (technique du clone)
-        const nouveauBtn = btnSuivre.cloneNode(true);
-        btnSuivre.parentNode.replaceChild(nouveauBtn, btnSuivre);
+    const btnArchiver = document.getElementById('btn-archiver-histoire');
+    const remplacerBoutonFavori = (bouton) => {
+        if (!bouton) return null;
+        const clone = bouton.cloneNode(true);
+        bouton.parentNode.replaceChild(clone, bouton);
+        return clone;
+    };
+    const boutonSuivre = remplacerBoutonFavori(btnSuivre);
+    const boutonArchiver = remplacerBoutonFavori(btnArchiver);
+    let favoriLecteur = null;
 
-        if (session) {
-            const { data: aDejaSoutenu } = await window._supabase
+    const definirBoutonFavori = (bouton, texte, classes, disabled = false) => {
+        if (!bouton) return;
+        bouton.innerText = texte;
+        bouton.className = classes;
+        bouton.disabled = disabled;
+    };
+
+    const afficherEtatFavori = () => {
+        const estArchive = Boolean(favoriLecteur?.est_archive);
+
+        if (!favoriLecteur) {
+            definirBoutonFavori(boutonSuivre, window.t?.('story.support', {}, "Soutenir l'œuvre") || "Soutenir l'œuvre", 'genre-btn btn-primary shadow-active');
+            definirBoutonFavori(boutonArchiver, window.t?.('story.archive', {}, "Archiver l'œuvre") || "Archiver l'œuvre", 'genre-btn btn-outline-blue');
+            return;
+        }
+
+        if (estArchive) {
+            definirBoutonFavori(boutonSuivre, window.t?.('story.moveToPacts', {}, 'Ranger dans Mes Pactes') || 'Ranger dans Mes Pactes', 'genre-btn btn-outline-blue');
+            definirBoutonFavori(boutonArchiver, window.t?.('story.archived', {}, 'Œuvre archivée') || 'Œuvre archivée', 'genre-btn btn-primary shadow-active');
+            return;
+        }
+
+        definirBoutonFavori(boutonSuivre, window.t?.('story.supported', {}, 'Œuvre soutenue') || 'Œuvre soutenue', 'genre-btn btn-danger shadow-active');
+        definirBoutonFavori(boutonArchiver, window.t?.('story.archive', {}, "Archiver l'œuvre") || "Archiver l'œuvre", 'genre-btn btn-outline-blue');
+    };
+
+    const definirAttenteFavori = (boutonActif, texte) => {
+        [boutonSuivre, boutonArchiver].forEach((bouton) => {
+            if (!bouton) return;
+            bouton.disabled = true;
+        });
+        if (boutonActif) boutonActif.innerText = texte;
+    };
+
+    const actualiserCompteurPactes = async () => {
+        const { count } = await window._supabase
+            .from('favoris')
+            .select('*', { count: 'exact', head: true })
+            .eq('histoire_id', idHistoire);
+
+        const spanLikes = document.getElementById('histoire-likes-count');
+        if (spanLikes) {
+            spanLikes.innerHTML = `❤️ ${window.t?.('story.likes', { count: count || 0 }, `${count || 0} Pactes`) || `${count || 0} Pactes`}`;
+        }
+    };
+
+    const changerEtatFavori = async (archiveSouhaitee, boutonActif) => {
+        if (!session) {
+            await window.siteAlert(window.t?.('story.supportLoginRequired', {}, "Les ombres refusent votre requête : vous devez être connecté pour soutenir une œuvre.") || "Les ombres refusent votre requête : vous devez être connecté pour soutenir une œuvre.", { danger: true });
+            return;
+        }
+
+        definirAttenteFavori(
+            boutonActif,
+            archiveSouhaitee
+                ? (window.t?.('story.archivePending', {}, 'Archivage en cours...') || 'Archivage en cours...')
+                : (window.t?.('story.supportPending', {}, 'Pacte en cours...') || 'Pacte en cours...')
+        );
+
+        try {
+            const { data: exist, error: erreurLecture } = await window._supabase
                 .from('favoris')
-                .select('id')
+                .select('id, est_archive')
                 .eq('user_id', session.user.id)
                 .eq('histoire_id', idHistoire)
                 .maybeSingle();
 
-            if (aDejaSoutenu) {
-                nouveauBtn.innerText = window.t?.('story.supported', {}, "Œuvre soutenue 🩸") || "Œuvre soutenue 🩸";
-                nouveauBtn.className = "genre-btn btn-danger shadow-active";
+            if (erreurLecture) throw erreurLecture;
+
+            if (exist && Boolean(exist.est_archive) === archiveSouhaitee) {
+                const { error } = await window._supabase
+                    .from('favoris')
+                    .delete()
+                    .eq('id', exist.id);
+                if (error) throw error;
+                favoriLecteur = null;
+            } else if (exist) {
+                const { data, error } = await window._supabase
+                    .from('favoris')
+                    .update({ est_archive: archiveSouhaitee })
+                    .eq('id', exist.id)
+                    .select('id, est_archive')
+                    .single();
+                if (error) throw error;
+                favoriLecteur = data;
+            } else {
+                const { data, error } = await window._supabase
+                    .from('favoris')
+                    .insert([{
+                        user_id: session.user.id,
+                        histoire_id: idHistoire,
+                        est_archive: archiveSouhaitee
+                    }])
+                    .select('id, est_archive')
+                    .single();
+                if (error) throw error;
+                favoriLecteur = data;
             }
 
-            nouveauBtn.addEventListener('click', async () => {
-                nouveauBtn.innerText = window.t?.('story.supportPending', {}, "Pacte en cours...") || "Pacte en cours...";
-                nouveauBtn.disabled = true; 
+            await actualiserCompteurPactes();
 
-                const { data: exist } = await window._supabase
-                    .from('favoris')
-                    .select('id')
-                    .eq('user_id', session.user.id)
-                    .eq('histoire_id', idHistoire)
-                    .maybeSingle();
-
-                if (exist) {
-                    await window._supabase.from('favoris').delete().eq('id', exist.id);
-                    nouveauBtn.innerText = window.t?.('story.support', {}, "Soutenir l'œuvre") || "Soutenir l'œuvre";
-                    nouveauBtn.className = "genre-btn btn-primary shadow-active";
-                } else {
-                    await window._supabase.from('favoris').insert([{ user_id: session.user.id, histoire_id: idHistoire }]);
-                    nouveauBtn.innerText = window.t?.('story.supported', {}, "Œuvre soutenue 🩸") || "Œuvre soutenue 🩸";
-                    nouveauBtn.className = "genre-btn btn-danger shadow-active";
-                }
-
-                // Maj du compteur
-                const { count } = await window._supabase
-                    .from('favoris')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('histoire_id', idHistoire);
-                
-                const spanLikes = document.getElementById('histoire-likes-count');
-                if(spanLikes) spanLikes.innerHTML = `❤️ ${window.t?.('story.likes', { count: count || 0 }, `${count || 0} Pactes`) || `${count || 0} Pactes`}`;
-
-                if (typeof window.actualiserNotificationsHeader === 'function') {
-                    window.actualiserNotificationsHeader();
-                }
-
-                nouveauBtn.disabled = false;
-            });
-        } else {
-            nouveauBtn.addEventListener('click', async () => {
-                await window.siteAlert(window.t?.('story.supportLoginRequired', {}, "Les ombres refusent votre requête : vous devez être connecté pour soutenir une œuvre.") || "Les ombres refusent votre requête : vous devez être connecté pour soutenir une œuvre.", { danger: true });
-            });
+            if (typeof window.actualiserNotificationsHeader === 'function') {
+                window.actualiserNotificationsHeader();
+            }
+        } catch (error) {
+            await window.siteAlert(window.t?.('story.favoriteUpdateError', { message: error.message }, `Impossible de mettre à jour ce pacte : ${error.message}`) || `Impossible de mettre à jour ce pacte : ${error.message}`, { danger: true });
+        } finally {
+            afficherEtatFavori();
         }
+    };
+
+    if (session) {
+        const { data: favoriActuel } = await window._supabase
+            .from('favoris')
+            .select('id, est_archive')
+            .eq('user_id', session.user.id)
+            .eq('histoire_id', idHistoire)
+            .maybeSingle();
+
+        favoriLecteur = favoriActuel || null;
     }
+
+    afficherEtatFavori();
+    if (boutonSuivre) boutonSuivre.addEventListener('click', () => changerEtatFavori(false, boutonSuivre));
+    if (boutonArchiver) boutonArchiver.addEventListener('click', () => changerEtatFavori(true, boutonArchiver));
 
     // 6. Chargement des volumes et chapitres
     await initialiserVolumesHistoire(histoire, idHistoire);

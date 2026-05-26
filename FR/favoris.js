@@ -9,8 +9,9 @@ window.chargerFavoris = async function() {
     // 1. Gestion des onglets
     initialiserOngletsFavoris();
 
-    // 2. Charger les pactes (Favoris)
+    // 2. Charger les pactes et archives
     await chargerMesPactes();
+    await chargerArchives();
 
     // 3. Ecouteur de tri
     const sortSelect = document.getElementById('sort-pactes');
@@ -45,47 +46,24 @@ function initialiserOngletsFavoris() {
     });
 }
 
-async function chargerMesPactes() {
-    const grille = document.getElementById('pactes-grid');
-    if (!grille) return;
+function trierOeuvresFavoris(oeuvres = [], sortBy = 'recent') {
+    return [...oeuvres].sort((a, b) => {
+        if (sortBy === 'recent') {
+            return b.date_pacte - a.date_pacte;
+        } else if (sortBy === 'ancien') {
+            return a.date_pacte - b.date_pacte;
+        } else if (sortBy === 'az') {
+            return a.titre.localeCompare(b.titre);
+        } else if (sortBy === 'za') {
+            return b.titre.localeCompare(a.titre);
+        }
+        return 0;
+    });
+}
 
-    grille.innerHTML = `<p class="loading-text text-center">${window.t?.('favorites.loading', {}, 'Interrogation des registres...') || 'Interrogation des registres...'}</p>`;
-
-    // 1. Vérifier que l'utilisateur est connecté
-    const { data: { session } } = await window._supabase.auth.getSession();
-    if (!session) {
-        grille.innerHTML = `<p class="text-error text-center">${window.t?.('favorites.loginRequired', {}, 'Vous devez avoir scellé un pacte avec le Sanctuaire (être connecté) pour voir vos lectures.') || 'Vous devez avoir scellé un pacte avec le Sanctuaire (être connecté) pour voir vos lectures.'}</p>`;
-        return;
-    }
-
-    const userId = session.user.id;
-
-    // 2. Récupérer les données des oeuvres favorites de l'utilisateur
-    // On récupère "histoire_id" et "created_at" (qui représente la date du pacte)
-    const { data: pactesRefs, error: errRefs } = await window._supabase
-        .from('favoris')
-        .select('histoire_id, created_at')
-        .eq('user_id', userId);
-
-    if (errRefs) {
-        grille.innerHTML = `<p class="text-error text-center">${window.t?.('favorites.fetchErrorPrefix', {}, "Erreur lors de l'accès aux archives :") || "Erreur lors de l'accès aux archives :"} ${errRefs.message}</p>`;
-        return;
-    }
-
-    if (!pactesRefs || pactesRefs.length === 0) {
-        grille.innerHTML = `
-            <div style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 50px;">
-                <h2 style="font-family: 'Cinzel', serif; color: var(--text-title); font-size: 2rem;">${window.t?.('favorites.emptyTitle', {}, 'Le silence règne ici...') || 'Le silence règne ici...'}</h2>
-                <p class="text-muted-italic text-center mt-10" style="font-size: 1.1rem;">${window.t?.('favorites.emptyText', {}, "Aucun pacte n'a encore été scellé.") || "Aucun pacte n'a encore été scellé."}</p>
-            </div>
-        `;
-        return;
-    }
-
-    // Extraction de la liste des IDs pour faire une seconde requête ciblée
+async function dessinerCartesFavoris(grille, pactesRefs, sortBy = 'recent') {
     const idsHistoires = pactesRefs.map(p => p.histoire_id);
 
-    // 3. Récupérer le détail des histoires correspondantes
     const { data: histoires, error: errHistoires } = await window._supabase
         .from('histoires')
         .select('*')
@@ -96,7 +74,6 @@ async function chargerMesPactes() {
         return;
     }
 
-    // 4. Fusionner les données pour le tri (Histoires + Date d'ajout)
     let oeuvresFusionnees = histoires.map(h => {
         const reference = pactesRefs.find(p => p.histoire_id === h.id);
         return {
@@ -105,24 +82,8 @@ async function chargerMesPactes() {
         };
     });
 
-    // 5. Appliquer le tri selon le Selecteur
-    const sortSelect = document.getElementById('sort-pactes');
-    const sortBy = sortSelect ? sortSelect.value : 'recent';
+    oeuvresFusionnees = trierOeuvresFavoris(oeuvresFusionnees, sortBy);
 
-    oeuvresFusionnees.sort((a, b) => {
-        if (sortBy === 'recent') {
-            return b.date_pacte - a.date_pacte; // Du plus récent au plus ancien
-        } else if (sortBy === 'ancien') {
-            return a.date_pacte - b.date_pacte; // Du plus ancien au plus récent
-        } else if (sortBy === 'az') {
-            return a.titre.localeCompare(b.titre); // Alphabétique
-        } else if (sortBy === 'za') {
-            return b.titre.localeCompare(a.titre); // Anti-Alphabétique
-        }
-        return 0;
-    });
-
-    // 6. Dessiner les cartes
     grille.innerHTML = '';
     grille.className = 'stories-grid';
 
@@ -150,4 +111,84 @@ async function chargerMesPactes() {
     oeuvresAvecStats.forEach((histoire) => {
         grille.appendChild(window.creerCarteHistoire(histoire));
     });
+}
+
+async function chargerMesPactes() {
+    const grille = document.getElementById('pactes-grid');
+    if (!grille) return;
+
+    grille.innerHTML = `<p class="loading-text text-center">${window.t?.('favorites.loading', {}, 'Interrogation des registres...') || 'Interrogation des registres...'}</p>`;
+
+    // 1. Vérifier que l'utilisateur est connecté
+    const { data: { session } } = await window._supabase.auth.getSession();
+    if (!session) {
+        grille.innerHTML = `<p class="text-error text-center">${window.t?.('favorites.loginRequired', {}, 'Vous devez avoir scellé un pacte avec le Sanctuaire (être connecté) pour voir vos lectures.') || 'Vous devez avoir scellé un pacte avec le Sanctuaire (être connecté) pour voir vos lectures.'}</p>`;
+        return;
+    }
+
+    const userId = session.user.id;
+
+    // 2. Récupérer les données des oeuvres favorites de l'utilisateur
+    // On récupère "histoire_id" et "created_at" (qui représente la date du pacte)
+    const { data: pactesRefs, error: errRefs } = await window._supabase
+        .from('favoris')
+        .select('histoire_id, created_at')
+        .eq('user_id', userId)
+        .eq('est_archive', false);
+
+    if (errRefs) {
+        grille.innerHTML = `<p class="text-error text-center">${window.t?.('favorites.fetchErrorPrefix', {}, "Erreur lors de l'accès aux archives :") || "Erreur lors de l'accès aux archives :"} ${errRefs.message}</p>`;
+        return;
+    }
+
+    if (!pactesRefs || pactesRefs.length === 0) {
+        grille.innerHTML = `
+            <div style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 50px;">
+                <h2 style="font-family: 'Cinzel', serif; color: var(--text-title); font-size: 2rem;">${window.t?.('favorites.emptyTitle', {}, 'Le silence règne ici...') || 'Le silence règne ici...'}</h2>
+                <p class="text-muted-italic text-center mt-10" style="font-size: 1.1rem;">${window.t?.('favorites.emptyText', {}, "Aucun pacte n'a encore été scellé.") || "Aucun pacte n'a encore été scellé."}</p>
+            </div>
+        `;
+        return;
+    }
+
+    const sortSelect = document.getElementById('sort-pactes');
+    const sortBy = sortSelect ? sortSelect.value : 'recent';
+
+    await dessinerCartesFavoris(grille, pactesRefs, sortBy);
+}
+
+async function chargerArchives() {
+    const grille = document.getElementById('archives-grid');
+    if (!grille) return;
+
+    grille.innerHTML = `<p class="loading-text text-center">${window.t?.('favorites.loadingArchives', {}, 'Ouverture des archives...') || 'Ouverture des archives...'}</p>`;
+
+    const { data: { session } } = await window._supabase.auth.getSession();
+    if (!session) {
+        grille.innerHTML = `<p class="text-error text-center">${window.t?.('favorites.loginRequired', {}, 'Vous devez avoir scellé un pacte avec le Sanctuaire (être connecté) pour voir vos lectures.') || 'Vous devez avoir scellé un pacte avec le Sanctuaire (être connecté) pour voir vos lectures.'}</p>`;
+        return;
+    }
+
+    const { data: archivesRefs, error: errRefs } = await window._supabase
+        .from('favoris')
+        .select('histoire_id, created_at')
+        .eq('user_id', session.user.id)
+        .eq('est_archive', true);
+
+    if (errRefs) {
+        grille.innerHTML = `<p class="text-error text-center">${window.t?.('favorites.fetchErrorPrefix', {}, "Erreur lors de l'accès aux archives :") || "Erreur lors de l'accès aux archives :"} ${errRefs.message}</p>`;
+        return;
+    }
+
+    if (!archivesRefs || archivesRefs.length === 0) {
+        grille.innerHTML = `
+            <div style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 50px;">
+                <h2 style="font-family: 'Cinzel', serif; color: var(--text-title); font-size: 2rem;">${window.t?.('favorites.emptyArchivesTitle', {}, 'Aucune archive pour le moment.') || 'Aucune archive pour le moment.'}</h2>
+                <p class="text-muted-italic text-center mt-10" style="font-size: 1.1rem;">${window.t?.('favorites.emptyArchivesText', {}, "Les œuvres rangées de côté apparaîtront ici.") || "Les œuvres rangées de côté apparaîtront ici."}</p>
+            </div>
+        `;
+        return;
+    }
+
+    await dessinerCartesFavoris(grille, archivesRefs, 'recent');
 }

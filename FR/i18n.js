@@ -303,6 +303,7 @@ function appliquerTraductionsHistoire(root = document) {
     setTextById('btn-retour-bibliotheque', 'story.backToLibrary');
     setTextById('btn-retirer-histoire', 'story.removeAdmin');
     setTextById('btn-suivre-histoire', 'story.support');
+    setTextById('btn-archiver-histoire', 'story.archive');
     setTextById('btn-partager-histoire', 'story.share');
     setAttrById('volumes-scroll-left', 'aria-label', 'story.volumePrevious');
     setAttrById('volumes-scroll-right', 'aria-label', 'story.volumeNext');
