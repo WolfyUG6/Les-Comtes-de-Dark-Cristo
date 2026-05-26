@@ -423,7 +423,6 @@ function appliquerTraductionsFavoris(root = document) {
     setText('.accueil-header h1', 'favorites.title', root);
     setText('.accueil-header p', 'favorites.subtitle', root);
     setText('[data-tab="tab-pactes"]', 'favorites.tabPacts', root);
-    setText('[data-tab="tab-lectures"]', 'favorites.tabReadings', root);
     setText('[data-tab="tab-archives"]', 'favorites.tabArchives', root);
     setText('.favoris-sort label', 'favorites.sortLabel', root);
     setOptionText('#sort-pactes option[value="recent"]', 'favorites.sortRecent', root);
@@ -431,8 +430,6 @@ function appliquerTraductionsFavoris(root = document) {
     setOptionText('#sort-pactes option[value="az"]', 'favorites.sortAz', root);
     setOptionText('#sort-pactes option[value="za"]', 'favorites.sortZa', root);
     setText('.favoris-toolbar .btn-outline-blue', 'favorites.returnHome', root);
-    setText('#tab-lectures h2', 'favorites.readingsTitle', root);
-    setText('#tab-lectures p', 'favorites.readingsText', root);
     setText('#tab-archives h2', 'favorites.archivesTitle', root);
     setText('#tab-archives p', 'favorites.archivesText', root);
 }
