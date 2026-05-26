@@ -1899,14 +1899,14 @@ body.modal-open {
 .lecture-header-fixe[data-theme-lecture="sepia"] .btn-lecture-nav-fixe { color: #3b3024; border-color: #a88a68; }
 
 /* Navigation Précédent/Suivant intégrée au bandeau */
-.lecture-nav-fixe { flex: 0 0 auto; display: flex; gap: 15px; }
-.btn-lecture-nav-fixe { background: transparent; color: inherit; border: 1px solid currentColor; padding: 8px 20px; font-family: 'Cinzel', serif; font-weight: bold; font-size: 0.9rem; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; }
-.btn-lecture-nav-fixe:hover { border-color: #8b0000; color: #fff; background: rgba(139, 0, 0, 0.8); box-shadow: 0 0 10px rgba(139, 0, 0, 0.5); }
+.lecture-nav-fixe { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; }
+.btn-lecture-nav-fixe { background: transparent; color: inherit; border: none; border-bottom: 1px solid currentColor; padding: 6px 4px; font-family: 'Segoe UI', sans-serif; font-weight: 600; font-size: 0.82rem; cursor: pointer; transition: 0.2s ease; text-transform: none; letter-spacing: 0; opacity: 0.82; box-shadow: none; }
+.btn-lecture-nav-fixe:hover { border-color: currentColor; color: var(--text-title); background: transparent; box-shadow: none; opacity: 1; }
 
 /* Navigation Bas (Identique mais plus grand) */
-.nav-bas { justify-content: center; gap: 30px; }
-.nav-bas .btn-lecture-nav-fixe { padding: 15px 40px; font-size: 1.1rem; border-color: var(--border-color); color: var(--text-main); }
-.nav-bas .btn-lecture-nav-fixe:hover { border-color: #8b0000; color: #fff; background: rgba(139, 0, 0, 0.5); }
+.nav-bas { justify-content: center; gap: 22px; }
+.nav-bas .btn-lecture-nav-fixe { padding: 8px 4px; font-size: 0.92rem; border-color: var(--border-color); color: var(--text-main); }
+.nav-bas .btn-lecture-nav-fixe:hover { color: var(--text-title); background: transparent; }
 
 /* --- Jauge de sang (Progression) --- */
 .lecture-progress-container { position: fixed; top: 0; left: 0; width: 100%; height: 5px; background: rgba(0,0,0,0.5); z-index: 9999; }
@@ -1981,12 +1981,8 @@ body.mode-zen .page-lecteur { padding-top: 90px; }
         overflow: hidden;
     }
 
-    .lecture-nav-fixe {
-        gap: 6px;
-    }
-
     .btn-lecture-nav-fixe {
-        padding: 7px 8px;
+        padding: 5px 2px;
         font-size: 0.72rem;
         letter-spacing: 0;
         white-space: nowrap;
