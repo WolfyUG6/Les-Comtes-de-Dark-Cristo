@@ -352,20 +352,27 @@ button:hover, .genre-btn:hover {
 }
 
 .story-card-stats {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 8px;
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 10px;
     margin-top: auto;
-    padding-top: 10px;
+    padding-top: 12px;
     border-top: 1px dashed var(--border-color);
 }
 
 .story-card-stat {
+    flex: 1 1 0;
     min-width: 0;
-    padding: 8px 6px;
-    background: rgba(0, 0, 0, 0.18);
-    border: 1px solid var(--border-color);
-    text-align: center;
+    padding: 0;
+    background: transparent;
+    border: none;
+    text-align: left;
+}
+
+.story-card-stat + .story-card-stat {
+    padding-left: 10px;
+    border-left: 1px solid var(--border-color);
 }
 
 .story-card-stat-value,
@@ -378,7 +385,7 @@ button:hover, .genre-btn:hover {
 .story-card-stat-value {
     color: var(--text-title);
     font-family: 'Cinzel', serif;
-    font-size: 1rem;
+    font-size: 0.98rem;
     font-weight: 700;
     line-height: 1.2;
 }
@@ -387,7 +394,8 @@ button:hover, .genre-btn:hover {
     margin-top: 3px;
     color: var(--text-muted);
     font-family: 'Segoe UI', sans-serif;
-    font-size: 0.68rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
 }
 
