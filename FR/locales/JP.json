@@ -379,8 +379,6 @@
     "storyFetchError": "魔導書を読む際にエラーが発生しました：{message}",
     "emptyTitle": "ここには静寂だけが残っています...",
     "emptyText": "まだ契約は結ばれていません。",
-    "resume": "読書を再開",
-    "pactDate": "契約日：{date}",
     "sortRecent": "新しい順",
     "sortOld": "古い順",
     "sortAz": "AからZ",
@@ -394,9 +392,7 @@
     "archivesTitle": "記録庫",
     "archivesText": "読み終えた物語はここで眠ります。",
     "fetchErrorPrefix": "記録庫へのアクセス中にエラーが発生しました：",
-    "storyFetchErrorPrefix": "魔導書の読み込み中にエラーが発生しました：",
-    "noSynopsis": "あらすじはありません。",
-    "pactsSealed": "結ばれた契約"
+    "storyFetchErrorPrefix": "魔導書の読み込み中にエラーが発生しました："
   },
   "profile": {
     "pageTitle": "自室",

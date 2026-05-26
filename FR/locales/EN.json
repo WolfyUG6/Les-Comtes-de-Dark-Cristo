@@ -379,8 +379,6 @@
     "storyFetchError": "Error while reading the grimoires: {message}",
     "emptyTitle": "Silence reigns here...",
     "emptyText": "No pact has been sealed yet.",
-    "resume": "Resume Reading",
-    "pactDate": "Pact sealed on: {date}",
     "sortRecent": "Newest first",
     "sortOld": "Oldest first",
     "sortAz": "A to Z",
@@ -394,9 +392,7 @@
     "archivesTitle": "The Archives",
     "archivesText": "The stories you have finished will rest here.",
     "fetchErrorPrefix": "Error while accessing the archives:",
-    "storyFetchErrorPrefix": "Error while reading the grimoires:",
-    "noSynopsis": "No synopsis available.",
-    "pactsSealed": "Sealed pacts"
+    "storyFetchErrorPrefix": "Error while reading the grimoires:"
   },
   "profile": {
     "pageTitle": "Your Quarters",

@@ -1,6 +1,6 @@
 // ==========================================
 // L'ESPACE PERSONNEL (favoris.js)
-// Gestion des pactes, lectures en cours et archives
+// Gestion des pactes et archives
 // ==========================================
 
 window.chargerFavoris = async function() {
@@ -43,14 +43,6 @@ function initialiserOngletsFavoris() {
             }
         });
     });
-}
-
-function escapeJsStringFavoris(value = '') {
-    return String(value)
-        .replace(/\\/g, '\\\\')
-        .replace(/'/g, "\\'")
-        .replace(/\r/g, '\\r')
-        .replace(/\n/g, '\\n');
 }
 
 async function chargerMesPactes() {
@@ -104,32 +96,6 @@ async function chargerMesPactes() {
         return;
     }
 
-    // 3.5 Pré-calculer les likes et chapitres pour éviter les requêtes N+1
-    const { data: allLikes } = await window._supabase
-        .from('favoris')
-        .select('histoire_id')
-        .in('histoire_id', idsHistoires);
-        
-    const { data: allChapitres } = await window._supabase
-        .from('chapitres')
-        .select('histoire_id')
-        .in('histoire_id', idsHistoires)
-        .eq('est_publie', true);
-
-    const likesParHistoire = new Map();
-    if (allLikes) {
-        allLikes.forEach(like => {
-            likesParHistoire.set(like.histoire_id, (likesParHistoire.get(like.histoire_id) || 0) + 1);
-        });
-    }
-
-    const chapitresParHistoire = new Map();
-    if (allChapitres) {
-        allChapitres.forEach(chap => {
-            chapitresParHistoire.set(chap.histoire_id, (chapitresParHistoire.get(chap.histoire_id) || 0) + 1);
-        });
-    }
-
     // 4. Fusionner les données pour le tri (Histoires + Date d'ajout)
     let oeuvresFusionnees = histoires.map(h => {
         const reference = pactesRefs.find(p => p.histoire_id === h.id);
@@ -158,79 +124,30 @@ async function chargerMesPactes() {
 
     // 6. Dessiner les cartes
     grille.innerHTML = '';
-    grille.className = 'stories-grid'; // Re-base class standard de base.css pour la grille
+    grille.className = 'stories-grid';
 
-    for (const h of oeuvresFusionnees) {
-        if (!h) continue; 
-
-        // Style pour l'âge (comme sur la page d'accueil)
-        let classeAge = 'tag-age';
-        if (h.classification === 'Tout public') classeAge += ' age-tout-public';
-        else if (h.classification === 'R15') classeAge += ' age-r15';
-        else if (h.classification === 'R16') classeAge += ' age-r16';
-        else if (h.classification === 'R18') classeAge += ' age-r18';
-
-        const imageCouverture = window.getStoryCoverUrl(h.image_couverture);
-        const htmlImage = `<img src="${imageCouverture}" alt="Couverture" class="story-cover-image">`;
-
-        const tagSensible = h.contenu_sensible 
-            ? `<span class="tag tag-sensible">${window.t?.('home.sensitiveOn', {}, '⚠️ Sensible') || '⚠️ Sensible'}</span>` 
-            : `<span class="tag tag-sensible-off">${window.t?.('home.sensitiveOff', {}, 'Sensible') || 'Sensible'}</span>`;
-
-        // Nombre de favoris (Likes) pour cette histoire (données précalculées)
-        const likes = likesParHistoire.get(h.id) || 0;
-
-        // Nombre de chapitres publiés (données précalculées)
-        const nbChapitres = chapitresParHistoire.get(h.id) || 0;
-
-        // -- CORRECTION CSS -- (Ajout de l'encapsulateur story-card-wrapper)
-        const wrapper = document.createElement('div');
-        wrapper.className = "story-card-wrapper";
-        
-        const card = document.createElement('div');
-        card.className = "story-card";
-        
-        // Raccourcir le synopsis s'il est trop long
-        let synopsisCourt = h.synopsis || (window.t?.('favorites.noSynopsis', {}, 'Aucun synopsis disponible.') || 'Aucun synopsis disponible.');
-        if (synopsisCourt.length > 150) synopsisCourt = synopsisCourt.substring(0, 150) + "...";
-
-        // Date du pacte formatée pour l'esthétique
-        const dateAjout = h.date_pacte.toLocaleDateString(window.getLocaleAffichageSite?.() || 'fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
-        const slugOeuvre = escapeJsStringFavoris(h.slug || '');
-
-        card.innerHTML = `
-            <div class="story-cover" onclick="window.ouvrirPageOeuvreDepuisLien(${h.id}, '${slugOeuvre}');" style="cursor:pointer;">
-                ${htmlImage}
-            </div>
-            <div class="story-info">
-                <h3 class="story-title" onclick="window.ouvrirPageOeuvreDepuisLien(${h.id}, '${slugOeuvre}');" style="cursor:pointer;">${h.titre}</h3>
-                <span class="story-author">${window.t?.('home.byAuthor', { pseudo: h.pseudo_auteur || h.auteur.split('@')[0] }, `Par Comte ${h.pseudo_auteur || h.auteur.split('@')[0]}`) || `Par Comte ${h.pseudo_auteur || h.auteur.split('@')[0]}`}</span>
-                
-                <div class="story-tags">
-                    <span class="tag tag-genre">${window.traduireGenreSite?.(h.genre) || h.genre}</span>
-                    <span class="tag ${classeAge}">${window.traduireClassificationSite?.(h.classification) || h.classification || 'Tout public'}</span>
-                    ${tagSensible}
-                </div>
-                
-                <p class="story-synopsis">${synopsisCourt}</p>
-                
-                <div class="story-stats">
-                    <span title="${window.t?.('common.views', {}, 'vues') || 'vues'}">👁️ ${h.vues || 0}</span>
-                    <span title="${window.t?.('favorites.pactsSealed', {}, 'Pactes scellés') || 'Pactes scellés'}">❤️ ${likes || 0}</span>
-                    <span title="${window.t?.('common.chapters', {}, 'chapitres') || 'chapitres'}">📜 ${nbChapitres || 0}</span>
-                </div>
-                
-                <div class="text-center text-muted-italic text-small" style="margin-bottom: 10px;">
-                    ${window.t?.('favorites.pactDate', { date: dateAjout }, `Pacte scellé le : ${dateAjout}`) || `Pacte scellé le : ${dateAjout}`}
-                </div>
-
-                <div style="display: flex; justify-content: center;">
-                    <button class="genre-btn btn-primary shadow-active btn-lire-oeuvre" onclick="window.ouvrirPageOeuvreDepuisLien(${h.id}, '${slugOeuvre}');">${window.t?.('favorites.resume', {}, 'Reprendre la Lecture') || 'Reprendre la Lecture'}</button>
-                </div>
-            </div>
-        `;
-        
-        wrapper.appendChild(card);
-        grille.appendChild(wrapper);
+    if (typeof window.creerCarteHistoire !== 'function') {
+        grille.innerHTML = `<p class="text-error text-center">${window.t?.('favorites.storyFetchErrorPrefix', {}, 'Erreur lors de la lecture des grimoires :') || 'Erreur lors de la lecture des grimoires :'} affichage indisponible.</p>`;
+        return;
     }
+
+    const [statsParHistoire, vuesParHistoire] = await Promise.all([
+        typeof window.chargerStatsCartesHistoires === 'function'
+            ? window.chargerStatsCartesHistoires(oeuvresFusionnees)
+            : new Map(),
+        typeof window.chargerVuesActuellesHistoires === 'function'
+            ? window.chargerVuesActuellesHistoires(oeuvresFusionnees)
+            : new Map()
+    ]);
+
+    const oeuvresAvecVues = typeof window.ajouterVuesActuellesAuxHistoires === 'function'
+        ? window.ajouterVuesActuellesAuxHistoires(oeuvresFusionnees, vuesParHistoire)
+        : oeuvresFusionnees;
+    const oeuvresAvecStats = typeof window.ajouterStatsAuxHistoires === 'function'
+        ? window.ajouterStatsAuxHistoires(oeuvresAvecVues, statsParHistoire)
+        : oeuvresAvecVues;
+
+    oeuvresAvecStats.forEach((histoire) => {
+        grille.appendChild(window.creerCarteHistoire(histoire));
+    });
 }

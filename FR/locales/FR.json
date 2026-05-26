@@ -379,8 +379,6 @@
     "storyFetchError": "Erreur lors de la lecture des grimoires : {message}",
     "emptyTitle": "Le silence règne ici...",
     "emptyText": "Aucun pacte n'a encore été scellé.",
-    "resume": "Reprendre la Lecture",
-    "pactDate": "Pacte scellé le : {date}",
     "sortRecent": "Plus récents",
     "sortOld": "Plus anciens",
     "sortAz": "A à Z",
@@ -394,9 +392,7 @@
     "archivesTitle": "Les Archives",
     "archivesText": "Les histoires que vous avez terminées reposent ici.",
     "fetchErrorPrefix": "Erreur lors de l'accès aux archives :",
-    "storyFetchErrorPrefix": "Erreur lors de la lecture des grimoires :",
-    "noSynopsis": "Aucun synopsis disponible.",
-    "pactsSealed": "Pactes scellés"
+    "storyFetchErrorPrefix": "Erreur lors de la lecture des grimoires :"
   },
   "profile": {
     "pageTitle": "Vos Quartiers",
