@@ -474,7 +474,7 @@ button:hover, .genre-btn:hover {
     display: flex;
     gap: 10px;
     align-items: center;
-    z-index: 1000;
+    z-index: 2200;
 }
 
 #user-name,
@@ -1126,7 +1126,7 @@ body.modal-open {
     min-width: 180px;
     box-shadow: var(--shadow-box);
     border: 1px solid var(--text-title);
-    z-index: 1000;
+    z-index: 2300;
     flex-direction: column;
 }
 

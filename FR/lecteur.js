@@ -130,6 +130,7 @@ window.lireChapitre = async function(idParam = null) {
     }
 
     lecteurContenu.innerHTML = htmlLecture;
+    requestAnimationFrame(() => window.dispatchEvent(new Event('scroll')));
 
     if (!histoireParente) {
         const { data: histoireParId } = await window._supabase
@@ -191,16 +192,33 @@ async function configurerNavigation(chapitreActuel) {
         if (btn) btn.classList.add('hidden');
     });
 
-    // Chapitre Précédent
-    const { data: chapPrec } = await window._supabase
+    const maintenant = new Date();
+    const { data: chapitres, error } = await window._supabase
         .from('chapitres')
-        .select('id, slug')
+        .select('id, numero, slug, date_publication')
         .eq('histoire_id', chapitreActuel.histoire_id)
         .eq('est_publie', true)
-        .lt('numero', chapitreActuel.numero)
-        .order('numero', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+        .order('numero', { ascending: true });
+
+    if (error) {
+        console.error('Erreur de navigation des chapitres :', error);
+        return;
+    }
+
+    const chapitresDisponibles = (chapitres || []).filter((chapitre) => {
+        if (!chapitre.date_publication) return true;
+        return new Date(chapitre.date_publication) <= maintenant;
+    });
+
+    const indexActuel = chapitresDisponibles.findIndex((chapitre) => {
+        return String(chapitre.id) === String(chapitreActuel.id)
+            || Number(chapitre.numero) === Number(chapitreActuel.numero);
+    });
+
+    if (indexActuel === -1) return;
+
+    const chapPrec = chapitresDisponibles[indexActuel - 1] || null;
+    const chapSuiv = chapitresDisponibles[indexActuel + 1] || null;
 
     if (chapPrec) {
         [btnPrecHauts, btnPrecBas].forEach(btn => {
@@ -210,19 +228,6 @@ async function configurerNavigation(chapitreActuel) {
             }
         });
     }
-
-    // Chapitre Suivant (seulement ceux déjà parus)
-    const maintenant = new Date().toISOString();
-    const { data: chapSuiv } = await window._supabase
-        .from('chapitres')
-        .select('id, slug')
-        .eq('histoire_id', chapitreActuel.histoire_id)
-        .eq('est_publie', true)
-        .lte('date_publication', maintenant)
-        .gt('numero', chapitreActuel.numero)
-        .order('numero', { ascending: true })
-        .limit(1)
-        .maybeSingle();
 
     if (chapSuiv) {
         [btnSuivHauts, btnSuivBas].forEach(btn => {
@@ -256,19 +261,25 @@ function verifierPacteDeVue() {
     }
 }
 
+function getPourcentageLectureChapitre() {
+    const contenu = document.getElementById('lecture-contenu');
+    if (!contenu) return 0;
+
+    const rect = contenu.getBoundingClientRect();
+    const debutLecture = window.scrollY + rect.top;
+    const finLecture = debutLecture + contenu.scrollHeight;
+    const plageLecture = Math.max(1, finLecture - debutLecture - window.innerHeight);
+    const progression = ((window.scrollY - debutLecture) / plageLecture) * 100;
+
+    if (window.scrollY + window.innerHeight >= finLecture) return 100;
+    return Math.max(0, Math.min(100, progression));
+}
+
 window.addEventListener('scroll', function() {
     // Si la page contient le lecteur, on gère son scroll
     if (document.getElementById('lecture-progress-container')) {
         const hauteurDefilee = window.scrollY;
-        const scrollHauteurComplete = document.documentElement.scrollHeight - window.innerHeight;
-        
-        // Jauge de sang principale
-        let pourcentage = 0;
-        if (scrollHauteurComplete > 0) {
-            pourcentage = (hauteurDefilee / scrollHauteurComplete) * 100;
-        }
-        
-        pourcentage = Math.max(0, Math.min(100, pourcentage));
+        const pourcentage = getPourcentageLectureChapitre();
         
         const progressBar = document.getElementById('lecture-progress-bar');
         if (progressBar) progressBar.style.width = pourcentage + '%';
@@ -353,7 +364,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         // Bouton Retour
-        if (e.target.id === 'btn-retour-oeuvre') {
+        if (e.target.closest('[data-retour-oeuvre]')) {
             document.body.classList.remove('mode-zen');
             if (window.currentOeuvreId) {
                 window.ouvrirPageOeuvre({

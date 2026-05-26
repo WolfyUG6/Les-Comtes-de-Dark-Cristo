@@ -235,9 +235,10 @@
     "fontLabel": "Calligraphie",
     "fullscreen": "👁️ Plein Écran",
     "exitFullscreen": "✖ Quitter Plein Écran",
-    "top": "⬆️ Sommet",
-    "bottom": "⬇️ Abysses",
-    "quitReading": "← Quitter la lecture",
+      "top": "⬆️ Sommet",
+      "bottom": "⬇️ Abysses",
+      "quitReadingShort": "← Quitter",
+      "quitReading": "← Quitter la lecture",
     "viewError": "Erreur de vue : {message}",
     "toggleSettings": "Afficher/Masquer les réglages"
   },

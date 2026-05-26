@@ -235,9 +235,10 @@
     "fontLabel": "Script",
     "fullscreen": "👁️ Full Screen",
     "exitFullscreen": "✖ Exit Full Screen",
-    "top": "⬆️ Top",
-    "bottom": "⬇️ Depths",
-    "quitReading": "← Leave reading",
+      "top": "⬆️ Top",
+      "bottom": "⬇️ Depths",
+      "quitReadingShort": "← Exit",
+      "quitReading": "← Leave reading",
     "viewError": "View error: {message}",
     "toggleSettings": "Show/Hide settings"
   },

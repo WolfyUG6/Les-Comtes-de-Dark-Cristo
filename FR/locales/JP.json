@@ -235,9 +235,10 @@
     "fontLabel": "書体",
     "fullscreen": "👁️ 全画面",
     "exitFullscreen": "✖ 全画面を終了",
-    "top": "⬆️ 上へ",
-    "bottom": "⬇️ 深部へ",
-    "quitReading": "← 読書を離れる",
+      "top": "⬆️ 上へ",
+      "bottom": "⬇️ 深部へ",
+      "quitReadingShort": "← 戻る",
+      "quitReading": "← 読書を離れる",
     "viewError": "閲覧エラー：{message}",
     "toggleSettings": "設定を表示/非表示"
   },

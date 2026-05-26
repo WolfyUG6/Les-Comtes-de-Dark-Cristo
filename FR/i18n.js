@@ -251,6 +251,10 @@ function appliquerTraductionsLecteur(root = document) {
     root.querySelectorAll('#btn-chap-suiv-haut, #btn-chap-suiv-bas').forEach((button) => {
         button.textContent = window.t('reader.next', {}, button.textContent);
     });
+    root.querySelectorAll('[data-retour-oeuvre]').forEach((button) => {
+        const key = button.id === 'btn-retour-oeuvre-haut' ? 'reader.quitReadingShort' : 'reader.quitReading';
+        button.textContent = window.t(key, {}, button.textContent);
+    });
 
     const pupitreTitle = root.querySelector('.pupitre-title');
     if (pupitreTitle) pupitreTitle.textContent = window.t('reader.pupitreTitle', {}, pupitreTitle.textContent);
@@ -267,7 +271,6 @@ function appliquerTraductionsLecteur(root = document) {
     setTextById('btn-mode-zen', 'reader.fullscreen');
     setTextById('btn-pupitre-scroll-top', 'reader.top');
     setTextById('btn-pupitre-scroll-bottom', 'reader.bottom');
-    setTextById('btn-retour-oeuvre', 'reader.quitReading');
     setAttrById('btn-toggle-pupitre', 'aria-label', 'reader.toggleSettings');
 }
 
