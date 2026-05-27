@@ -118,7 +118,7 @@ function appliquerTraductionsChrome() {
 
     document.documentElement.lang = window.tRaw('meta.locale', 'fr');
     document.documentElement.dir = window.tRaw('meta.direction', 'ltr');
-    document.title = window.tRaw('meta.siteName', document.title);
+    document.title = window.tRaw('meta.seoTitle', window.tRaw('meta.siteName', document.title));
     const description = document.querySelector('meta[name="description"]');
     if (description) description.setAttribute('content', window.tRaw('meta.description', description.getAttribute('content') || ''));
 
