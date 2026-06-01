@@ -128,7 +128,10 @@ window.getTitreCompletChapitre = function(chapitre = {}) {
     const titre = String(chapitre.titre || '').trim();
     const type = String(chapitre.type_chapitre || 'chapitre').trim();
     const libelle = window.getLibelleTypeChapitre(type);
-    const numero = String(chapitre.numero_affichage ?? chapitre.numero ?? '').trim();
+    const numeroAffichage = chapitre.numero_affichage == null ? '' : String(chapitre.numero_affichage).trim();
+    const numero = type === 'chapitre'
+        ? (numeroAffichage || String(chapitre.numero ?? '').trim())
+        : numeroAffichage;
 
     if (type === 'chapitre') {
         return numero ? `${libelle} ${numero} : ${titre}` : `${libelle} : ${titre}`;
@@ -453,6 +456,9 @@ function appliquerTraductionsEditeur(root = document) {
     setOptionText('#chapitre-type option[value="hors_serie"]', 'editor.typeBonus', root);
     setText('label[for="chapitre-numero"]', 'editor.numberLabel', root);
     setAttr('#chapitre-numero', 'placeholder', 'editor.numberPlaceholder', root);
+    if (typeof window.actualiserLabelNumeroChapitre === 'function') {
+        window.actualiserLabelNumeroChapitre();
+    }
     setText('label[for="chapitre-titre"]', 'editor.titleLabel', root);
     setAttr('#chapitre-titre', 'placeholder', 'editor.titlePlaceholder', root);
     setText('label[for="chapitre-volume"]', 'editor.volumeLabel', root);

@@ -84,6 +84,22 @@ function normaliserNumeroAffichage(numero) {
     return String(numero || '').trim().replace(',', '.');
 }
 
+function actualiserLabelNumeroChapitre() {
+    const typeChapitre = normaliserTypeChapitre(document.getElementById('chapitre-type')?.value);
+    const labelNumero = document.querySelector('label[for="chapitre-numero"]');
+    const champNumero = document.getElementById('chapitre-numero');
+    if (!labelNumero || !champNumero) return;
+
+    const estChapitre = typeChapitre === 'chapitre';
+    labelNumero.textContent = estChapitre
+        ? (window.t?.('editor.numberLabel', {}, 'Numero affiche') || 'Numero affiche')
+        : (window.t?.('editor.numberLabelOptional', {}, 'Numero affiche (optionnel)') || 'Numero affiche (optionnel)');
+    champNumero.placeholder = estChapitre
+        ? (window.t?.('editor.numberPlaceholder', {}, 'Ex: 1 ou 1.1') || 'Ex: 1 ou 1.1')
+        : (window.t?.('editor.numberPlaceholderOptional', {}, 'Optionnel') || 'Optionnel');
+}
+window.actualiserLabelNumeroChapitre = actualiserLabelNumeroChapitre;
+
 function estNumeroChapitreValide(numero) {
     return /^\d+(?:\.\d{1,3})?$/.test(numero);
 }
@@ -167,6 +183,7 @@ window.chargerEditeurChapitre = async function() {
     // 2. Nettoyage de l'ardoise (très important quand on ouvre l'éditeur)
     document.getElementById('chapitre-type').value = 'chapitre';
     document.getElementById('chapitre-numero').value = '';
+    actualiserLabelNumeroChapitre();
     document.getElementById('chapitre-titre').value = '';
     quill.root.innerHTML = '';
     quillNoteDebut.root.innerHTML = '';
@@ -263,8 +280,12 @@ async function recupererDonneesChapitre(id) {
     }
 
     if (chapitre) {
-        document.getElementById('chapitre-type').value = normaliserTypeChapitre(chapitre.type_chapitre);
-        document.getElementById('chapitre-numero').value = chapitre.numero_affichage || chapitre.numero || '';
+        const typeChapitre = normaliserTypeChapitre(chapitre.type_chapitre);
+        document.getElementById('chapitre-type').value = typeChapitre;
+        document.getElementById('chapitre-numero').value = typeChapitre === 'chapitre'
+            ? (chapitre.numero_affichage || chapitre.numero || '')
+            : (chapitre.numero_affichage || '');
+        actualiserLabelNumeroChapitre();
         document.getElementById('chapitre-titre').value = chapitre.titre || '';
         
         quill.clipboard.dangerouslyPasteHTML(chapitre.contenu || '');
@@ -391,3 +412,9 @@ if (!window.editeurEventHooked) {
 
     window.editeurEventHooked = true;
 }
+
+document.addEventListener('change', (e) => {
+    if (e.target && e.target.id === 'chapitre-type') {
+        actualiserLabelNumeroChapitre();
+    }
+});
