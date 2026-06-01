@@ -302,18 +302,38 @@ function getTaillePageChapitresHistoire() {
     return [15, 30, 50].includes(valeur) ? valeur : 15;
 }
 
+function getVolumeOrdreHistoire(volumeId) {
+    if (!volumeId) return 0;
+    const volume = (window._histoireVolumesState.volumes || []).find((item) => String(item.id) === String(volumeId));
+    return Number(volume?.ordre) || Number.MAX_SAFE_INTEGER;
+}
+
+function getOrdreChapitreHistoire(chapitre) {
+    return Number(chapitre?.ordre_lecture ?? ((Number(chapitre?.numero) || 0) * 1000));
+}
+
+function trierChapitresHistoire(chapitres = []) {
+    return [...chapitres].sort((a, b) => {
+        const volumeA = getVolumeOrdreHistoire(a.volume_id);
+        const volumeB = getVolumeOrdreHistoire(b.volume_id);
+        if (volumeA !== volumeB) return volumeA - volumeB;
+
+        const ordreA = getOrdreChapitreHistoire(a);
+        const ordreB = getOrdreChapitreHistoire(b);
+        if (ordreA !== ordreB) return ordreA - ordreB;
+
+        return Number(a.id) - Number(b.id);
+    });
+}
+
 function getChapitresFiltresHistoire() {
     const state = window._histoireVolumesState;
 
     if (state.volumeActif === 'general') {
-        return [...state.chapitresPublies].sort((a, b) => {
-            const dateA = a.date_publication ? new Date(a.date_publication).getTime() : 0;
-            const dateB = b.date_publication ? new Date(b.date_publication).getTime() : 0;
-            return dateA - dateB;
-        });
+        return trierChapitresHistoire(state.chapitresPublies);
     }
 
-    return state.chapitresPublies.filter((chapitre) => String(chapitre.volume_id) === String(state.volumeActif));
+    return trierChapitresHistoire(state.chapitresPublies.filter((chapitre) => String(chapitre.volume_id) === String(state.volumeActif)));
 }
 
 function getPagesPagination(totalPages, pageCourante) {
@@ -390,11 +410,12 @@ function dessinerChapitresHistoire(chapitres) {
     chapitresPage.forEach((chap) => {
         const dateChap = chap.date_publication ? new Date(chap.date_publication) : new Date();
         const dateAffichee = dateChap.toLocaleDateString(getLocaleAffichageSite());
+        const titreChapitre = escapeCommentaireHtml(window.getTitreCompletChapitre?.(chap) || `Chapitre ${chap.numero} : ${chap.titre || ''}`);
         const div = document.createElement('div');
         div.className = 'chapter-item';
         div.innerHTML = `
             <div>
-                <strong class="chapter-title">${window.t?.('story.chapterTitle', { number: chap.numero, title: escapeCommentaireHtml(chap.titre || '') }, `Chapitre ${chap.numero} : ${escapeCommentaireHtml(chap.titre || '')}`) || `Chapitre ${chap.numero} : ${escapeCommentaireHtml(chap.titre || '')}`}</strong>
+                <strong class="chapter-title">${titreChapitre}</strong>
                 <span class="published-date ml-10">${window.t?.('story.publishedDate', { date: dateAffichee }, `(Publié le ${dateAffichee})`) || `(Publié le ${dateAffichee})`}</span>
             </div>
             <div>
@@ -1505,7 +1526,8 @@ async function chargerListeChapitres(idHistoire) {
         .select('*')
         .eq('histoire_id', idHistoire)
         .eq('est_publie', true) // Uniquement les chapitres marqués comme "Publiés" par l'auteur
-        .order('numero', { ascending: true }); // Tri par numéro
+        .order('ordre_lecture', { ascending: true })
+        .order('id', { ascending: true });
 
     if (error) {
         chapitresListe.innerHTML = `<p class="text-error">Erreur de lecture : ${error.message}</p>`;

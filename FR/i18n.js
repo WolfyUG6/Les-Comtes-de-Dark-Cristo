@@ -113,6 +113,51 @@ window.traduireClassificationSite = function(classification) {
     return window.t(map[valeur] || '', {}, valeur);
 };
 
+window.getLibelleTypeChapitre = function(typeChapitre = 'chapitre') {
+    const type = String(typeChapitre || 'chapitre').trim();
+    const map = {
+        prologue: window.t?.('editor.typePrologue', {}, 'Prologue') || 'Prologue',
+        chapitre: window.t?.('editor.typeChapter', {}, 'Chapitre') || 'Chapitre',
+        epilogue: window.t?.('editor.typeEpilogue', {}, 'Epilogue') || 'Epilogue',
+        hors_serie: window.t?.('editor.typeBonus', {}, 'Hors-serie') || 'Hors-serie'
+    };
+    return map[type] || map.chapitre;
+};
+
+window.getTitreCompletChapitre = function(chapitre = {}) {
+    const titre = String(chapitre.titre || '').trim();
+    const type = String(chapitre.type_chapitre || 'chapitre').trim();
+    const libelle = window.getLibelleTypeChapitre(type);
+    const numero = String(chapitre.numero_affichage ?? chapitre.numero ?? '').trim();
+
+    if (type === 'chapitre') {
+        return numero ? `${libelle} ${numero} : ${titre}` : `${libelle} : ${titre}`;
+    }
+
+    return numero ? `${libelle} ${numero} : ${titre}` : `${libelle} : ${titre}`;
+};
+
+window.getOrdreLectureDepuisChamps = function(typeChapitre = 'chapitre', numeroAffichage = '') {
+    const type = String(typeChapitre || 'chapitre').trim();
+    const numero = String(numeroAffichage || '').trim().replace(',', '.');
+    const match = numero.match(/^(\d+)(?:\.(\d{1,3}))?$/);
+    const base = match ? (Number(match[1]) * 1000) + Number(match[2] || 0) : 0;
+
+    if (type === 'prologue') return -1000000 + base;
+    if (type === 'epilogue') return 100000000 + base;
+    if (type === 'hors_serie') return 200000000 + base;
+    return base;
+};
+
+window.getNumeroLegacyChapitre = function(typeChapitre = 'chapitre', numeroAffichage = '') {
+    const numero = String(numeroAffichage || '').trim().replace(',', '.');
+    const entier = Number.parseInt(numero, 10);
+    if (Number.isFinite(entier)) return entier;
+    if (typeChapitre === 'prologue') return 0;
+    if (typeChapitre === 'epilogue') return 9999;
+    return 0;
+};
+
 function appliquerTraductionsChrome() {
     if (!window._siteTranslations) return;
 
@@ -401,7 +446,13 @@ function appliquerTraductionsEditeur(root = document) {
     setText('#close-chapitre-modal', 'editor.cancel', root);
     setText('.editor-header h2', 'editor.workshopTitle', root);
     setText('#submit-chapitre', 'editor.submitCreate', root);
+    setText('label[for="chapitre-type"]', 'editor.typeLabel', root);
+    setOptionText('#chapitre-type option[value="chapitre"]', 'editor.typeChapter', root);
+    setOptionText('#chapitre-type option[value="prologue"]', 'editor.typePrologue', root);
+    setOptionText('#chapitre-type option[value="epilogue"]', 'editor.typeEpilogue', root);
+    setOptionText('#chapitre-type option[value="hors_serie"]', 'editor.typeBonus', root);
     setText('label[for="chapitre-numero"]', 'editor.numberLabel', root);
+    setAttr('#chapitre-numero', 'placeholder', 'editor.numberPlaceholder', root);
     setText('label[for="chapitre-titre"]', 'editor.titleLabel', root);
     setAttr('#chapitre-titre', 'placeholder', 'editor.titlePlaceholder', root);
     setText('label[for="chapitre-volume"]', 'editor.volumeLabel', root);

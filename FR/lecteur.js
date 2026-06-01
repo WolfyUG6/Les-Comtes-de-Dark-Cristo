@@ -20,6 +20,36 @@ function updateWidthButtons() {
     if (btnPlus) btnPlus.disabled = largeurParcheminActuelle >= 75;
 }
 
+async function getOrdresVolumesLecture(histoireId) {
+    const { data, error } = await window._supabase
+        .from('volumes')
+        .select('id, ordre')
+        .eq('histoire_id', histoireId)
+        .order('ordre', { ascending: true })
+        .order('id', { ascending: true });
+
+    if (error) {
+        console.error('Erreur de navigation des volumes :', error);
+        return new Map();
+    }
+
+    return new Map((data || []).map((volume) => [String(volume.id), Number(volume.ordre) || Number.MAX_SAFE_INTEGER]));
+}
+
+function trierChapitresLecture(chapitres = [], ordresVolumes = new Map()) {
+    return [...chapitres].sort((a, b) => {
+        const volumeA = a.volume_id ? (ordresVolumes.get(String(a.volume_id)) ?? Number.MAX_SAFE_INTEGER) : 0;
+        const volumeB = b.volume_id ? (ordresVolumes.get(String(b.volume_id)) ?? Number.MAX_SAFE_INTEGER) : 0;
+        if (volumeA !== volumeB) return volumeA - volumeB;
+
+        const ordreA = Number(a.ordre_lecture ?? ((Number(a.numero) || 0) * 1000));
+        const ordreB = Number(b.ordre_lecture ?? ((Number(b.numero) || 0) * 1000));
+        if (ordreA !== ordreB) return ordreA - ordreB;
+
+        return Number(a.id) - Number(b.id);
+    });
+}
+
 window.lireChapitre = async function(idParam = null) {
     window.scrollTo({ top: 0, behavior: 'auto' });
     
@@ -102,7 +132,7 @@ window.lireChapitre = async function(idParam = null) {
     if (chapitre.slug) localStorage.setItem('currentChapitreSlug', chapitre.slug);
 
     // 2. Assemblage du contenu (Notes + Texte)
-    titreHeader.innerText = window.t?.('reader.chapterHeader', { number: chapitre.numero, title: chapitre.titre }, `Chapitre ${chapitre.numero} : ${chapitre.titre}`) || `Chapitre ${chapitre.numero} : ${chapitre.titre}`;
+    titreHeader.innerText = window.getTitreCompletChapitre?.(chapitre) || `Chapitre ${chapitre.numero} : ${chapitre.titre}`;
     let htmlLecture = "";
 
     const cleanNote = (note) => {
@@ -195,24 +225,25 @@ async function configurerNavigation(chapitreActuel) {
     const maintenant = new Date();
     const { data: chapitres, error } = await window._supabase
         .from('chapitres')
-        .select('id, numero, slug, date_publication')
+        .select('id, numero, slug, date_publication, volume_id, ordre_lecture')
         .eq('histoire_id', chapitreActuel.histoire_id)
         .eq('est_publie', true)
-        .order('numero', { ascending: true });
+        .order('ordre_lecture', { ascending: true })
+        .order('id', { ascending: true });
 
     if (error) {
         console.error('Erreur de navigation des chapitres :', error);
         return;
     }
 
-    const chapitresDisponibles = (chapitres || []).filter((chapitre) => {
+    const ordresVolumes = await getOrdresVolumesLecture(chapitreActuel.histoire_id);
+    const chapitresDisponibles = trierChapitresLecture((chapitres || []).filter((chapitre) => {
         if (!chapitre.date_publication) return true;
         return new Date(chapitre.date_publication) <= maintenant;
-    });
+    }), ordresVolumes);
 
     const indexActuel = chapitresDisponibles.findIndex((chapitre) => {
-        return String(chapitre.id) === String(chapitreActuel.id)
-            || Number(chapitre.numero) === Number(chapitreActuel.numero);
+        return String(chapitre.id) === String(chapitreActuel.id);
     });
 
     if (indexActuel === -1) return;

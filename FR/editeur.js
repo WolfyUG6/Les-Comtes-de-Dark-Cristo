@@ -75,6 +75,78 @@ function initialiserCalendrierChapitre() {
     }
 }
 
+function normaliserTypeChapitre(typeChapitre) {
+    const typesValides = ['prologue', 'chapitre', 'epilogue', 'hors_serie'];
+    return typesValides.includes(typeChapitre) ? typeChapitre : 'chapitre';
+}
+
+function normaliserNumeroAffichage(numero) {
+    return String(numero || '').trim().replace(',', '.');
+}
+
+function estNumeroChapitreValide(numero) {
+    return /^\d+(?:\.\d{1,3})?$/.test(numero);
+}
+
+async function recupererOrdresUtilises(volumeSelectionne) {
+    let requete = window._supabase
+        .from('chapitres')
+        .select('id, ordre_lecture')
+        .eq('histoire_id', window.currentOeuvreId);
+
+    if (volumeSelectionne) {
+        requete = requete.eq('volume_id', volumeSelectionne);
+    } else {
+        requete = requete.is('volume_id', null);
+    }
+
+    if (window.currentChapitreId) {
+        requete = requete.neq('id', window.currentChapitreId);
+    }
+
+    const { data, error } = await requete;
+    if (error) throw error;
+
+    return new Set((data || []).map((chapitre) => Number(chapitre.ordre_lecture)));
+}
+
+async function resoudreOrdreLecture(typeChapitre, numeroAffichage, volumeSelectionne) {
+    const ordresUtilises = await recupererOrdresUtilises(volumeSelectionne);
+    const ordreVoulu = window.getOrdreLectureDepuisChamps(typeChapitre, numeroAffichage);
+
+    if (!ordresUtilises.has(ordreVoulu)) {
+        return { numeroAffichage, ordreLecture: ordreVoulu, aAjuste: false };
+    }
+
+    if (typeChapitre === 'chapitre') {
+        const match = numeroAffichage.match(/^(\d+)(?:\.(\d{1,3}))?$/);
+        const numeroPrincipal = Number(match?.[1] || 0);
+        const sousNumeroInitial = Number(match?.[2] || 0) + 1;
+
+        for (let sousNumero = sousNumeroInitial; sousNumero <= 999; sousNumero++) {
+            const ordreLecture = (numeroPrincipal * 1000) + sousNumero;
+            if (!ordresUtilises.has(ordreLecture)) {
+                return {
+                    numeroAffichage: `${numeroPrincipal}.${sousNumero}`,
+                    ordreLecture,
+                    aAjuste: true
+                };
+            }
+        }
+
+        throw new Error(window.t?.('editor.orderConflictError', {}, "Impossible de trouver une position libre dans ce volume.") || "Impossible de trouver une position libre dans ce volume.");
+    }
+
+    for (let decalage = 1; decalage <= 999; decalage++) {
+        const ordreLecture = ordreVoulu + decalage;
+        if (!ordresUtilises.has(ordreLecture)) {
+            return { numeroAffichage, ordreLecture, aAjuste: true };
+        }
+    }
+
+    throw new Error(window.t?.('editor.orderConflictError', {}, "Impossible de trouver une position libre dans ce volume.") || "Impossible de trouver une position libre dans ce volume.");
+}
+
 window.chargerEditeurChapitre = async function() {
     // 0. Restauration des IDs après un F5
     if (!window.currentOeuvreId) window.currentOeuvreId = localStorage.getItem('currentOeuvreId');
@@ -93,6 +165,7 @@ window.chargerEditeurChapitre = async function() {
     initialiserPlumes();
 
     // 2. Nettoyage de l'ardoise (très important quand on ouvre l'éditeur)
+    document.getElementById('chapitre-type').value = 'chapitre';
     document.getElementById('chapitre-numero').value = '';
     document.getElementById('chapitre-titre').value = '';
     quill.root.innerHTML = '';
@@ -190,7 +263,8 @@ async function recupererDonneesChapitre(id) {
     }
 
     if (chapitre) {
-        document.getElementById('chapitre-numero').value = chapitre.numero || '';
+        document.getElementById('chapitre-type').value = normaliserTypeChapitre(chapitre.type_chapitre);
+        document.getElementById('chapitre-numero').value = chapitre.numero_affichage || chapitre.numero || '';
         document.getElementById('chapitre-titre').value = chapitre.titre || '';
         
         quill.clipboard.dangerouslyPasteHTML(chapitre.contenu || '');
@@ -219,7 +293,8 @@ if (!window.editeurEventHooked) {
         if (e.target && e.target.id === 'submit-chapitre') {
             const btnSubmit = document.getElementById('submit-chapitre');
             
-            const numero = document.getElementById('chapitre-numero').value;
+            const typeChapitre = normaliserTypeChapitre(document.getElementById('chapitre-type')?.value);
+            const numeroDemande = normaliserNumeroAffichage(document.getElementById('chapitre-numero').value);
             const titre = document.getElementById('chapitre-titre').value;
             const contenu = quill.root.innerHTML;
 
@@ -235,8 +310,18 @@ if (!window.editeurEventHooked) {
             const datePublication = champDate ? new Date(champDate).toISOString() : new Date().toISOString();
             const volumeSelectionne = document.getElementById('chapitre-volume')?.value || null;
 
-            if (!numero || !titre || contenu === '<p><br></p>' || !contenu) {
-                await window.siteAlert(window.t?.('editor.requiredError', {}, 'Les Ténèbres exigent un Numéro, un Titre et un Contenu pour ce chapitre !') || 'Les Ténèbres exigent un Numéro, un Titre et un Contenu pour ce chapitre !', { danger: true });
+            if (typeChapitre === 'chapitre' && !numeroDemande) {
+                await window.siteAlert(window.t?.('editor.numberRequiredError', {}, 'Un chapitre doit avoir un numero.') || 'Un chapitre doit avoir un numero.', { danger: true });
+                return;
+            }
+
+            if (numeroDemande && !estNumeroChapitreValide(numeroDemande)) {
+                await window.siteAlert(window.t?.('editor.numberFormatError', {}, 'Le numero doit utiliser le format 1 ou 1.1.') || 'Le numero doit utiliser le format 1 ou 1.1.', { danger: true });
+                return;
+            }
+
+            if (!titre || contenu === '<p><br></p>' || !contenu) {
+                await window.siteAlert(window.t?.('editor.requiredError', {}, 'Les Ténèbres exigent un Titre et un Contenu pour ce chapitre !') || 'Les Ténèbres exigent un Titre et un Contenu pour ce chapitre !', { danger: true });
                 return;
             }
 
@@ -244,39 +329,43 @@ if (!window.editeurEventHooked) {
             btnSubmit.disabled = true;
 
             let erreurGravure = null;
+            let ordreResolue = null;
 
-            if (window.currentChapitreId) {
+            try {
+                ordreResolue = await resoudreOrdreLecture(typeChapitre, numeroDemande, volumeSelectionne);
+            } catch (error) {
+                erreurGravure = error;
+            }
+
+            const payloadChapitre = ordreResolue ? {
+                numero: window.getNumeroLegacyChapitre(typeChapitre, ordreResolue.numeroAffichage),
+                type_chapitre: typeChapitre,
+                numero_affichage: ordreResolue.numeroAffichage || null,
+                ordre_lecture: ordreResolue.ordreLecture,
+                titre,
+                contenu,
+                note_debut: contenuDebut,
+                note_fin: contenuFin,
+                nombre_mots: compteMots,
+                est_publie: estPublie,
+                date_publication: datePublication,
+                volume_id: volumeSelectionne
+            } : null;
+
+            if (!erreurGravure && window.currentChapitreId) {
                 // Modification
                 const { error } = await window._supabase
                     .from('chapitres')
-                    .update({ 
-                        numero: parseInt(numero), 
-                        titre, 
-                        contenu,
-                        note_debut: contenuDebut,
-                        note_fin: contenuFin,
-                        nombre_mots: compteMots,
-                        est_publie: estPublie,
-                        date_publication: datePublication,
-                        volume_id: volumeSelectionne
-                    })
+                    .update(payloadChapitre)
                     .eq('id', window.currentChapitreId);
                 erreurGravure = error;
-            } else {
+            } else if (!erreurGravure) {
                 // Création
                 const { error } = await window._supabase
                     .from('chapitres')
                     .insert([{ 
-                        histoire_id: window.currentOeuvreId, 
-                        numero: parseInt(numero), 
-                        titre, 
-                        contenu,
-                        note_debut: contenuDebut,
-                        note_fin: contenuFin,
-                        nombre_mots: compteMots,
-                        est_publie: estPublie,
-                        date_publication: datePublication,
-                        volume_id: volumeSelectionne
+                        histoire_id: window.currentOeuvreId,
+                        ...payloadChapitre
                     }]);
                 erreurGravure = error;
             }
@@ -287,7 +376,10 @@ if (!window.editeurEventHooked) {
                 await window.siteAlert(window.t?.('editor.saveError', { message: erreurGravure.message }, 'Le parchemin a pris feu : ' + erreurGravure.message) || 'Le parchemin a pris feu : ' + erreurGravure.message, { danger: true });
                 btnSubmit.innerText = window.currentChapitreId ? (window.t?.('editor.submitEdit', {}, 'Graver les modifications') || 'Graver les modifications') : (window.t?.('editor.submitCreate', {}, 'Graver le Chapitre') || 'Graver le Chapitre');
             } else {
-                await window.siteAlert(window.currentChapitreId ? (window.t?.('editor.updated', {}, 'Modifications gravées !') || 'Modifications gravées !') : (window.t?.('editor.created', {}, 'Chapitre ajouté !') || 'Chapitre ajouté !'));
+                const messageAjustement = ordreResolue?.aAjuste && typeChapitre === 'chapitre'
+                    ? ` ${window.t?.('editor.numberAdjusted', { number: ordreResolue.numeroAffichage }, `Le numero existait deja dans ce volume, il a ete place en ${ordreResolue.numeroAffichage}.`) || `Le numero existait deja dans ce volume, il a ete place en ${ordreResolue.numeroAffichage}.`}`
+                    : '';
+                await window.siteAlert((window.currentChapitreId ? (window.t?.('editor.updated', {}, 'Modifications gravées !') || 'Modifications gravées !') : (window.t?.('editor.created', {}, 'Chapitre ajouté !') || 'Chapitre ajouté !')) + messageAjustement);
                 window.changerDePage('gestion');
             }
         }

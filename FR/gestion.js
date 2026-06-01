@@ -31,6 +31,30 @@ function getVolumeTitle(volumeId) {
     return volume?.titre || window.t?.('volumes.general', {}, 'Générale') || 'Générale';
 }
 
+function getVolumeOrdreGestion(volumeId) {
+    if (!volumeId) return 0;
+    const volume = (window.volumesOeuvreCache || []).find((item) => Number(item.id) === Number(volumeId));
+    return Number(volume?.ordre) || Number.MAX_SAFE_INTEGER;
+}
+
+function getOrdreChapitreGestion(chapitre) {
+    return Number(chapitre?.ordre_lecture ?? ((Number(chapitre?.numero) || 0) * 1000));
+}
+
+function trierChapitresGestion(chapitres = []) {
+    return [...chapitres].sort((a, b) => {
+        const volumeA = getVolumeOrdreGestion(a.volume_id);
+        const volumeB = getVolumeOrdreGestion(b.volume_id);
+        if (volumeA !== volumeB) return volumeA - volumeB;
+
+        const ordreA = getOrdreChapitreGestion(a);
+        const ordreB = getOrdreChapitreGestion(b);
+        if (ordreA !== ordreB) return ordreA - ordreB;
+
+        return Number(a.id) - Number(b.id);
+    });
+}
+
 function getNomFichierVolumeCover(file, session, histoireId) {
     const nomNettoye = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
     return `${session.user.id}/histoire-${histoireId}/${Date.now()}-${nomNettoye}`;
@@ -360,9 +384,10 @@ function dessinerPaginationGestion(type, totalItems) {
 function creerElementChapitreGestion(chap, infoDate) {
     const div = document.createElement('div');
     div.className = "chapter-item";
+    const titreChapitre = escapeGestionHtml(window.getTitreCompletChapitre?.(chap) || `Chapitre ${chap.numero} : ${chap.titre}`);
     div.innerHTML = `
         <div>
-            <strong class="chapter-title">${window.t?.('story.chapterTitle', { number: chap.numero, title: escapeGestionHtml(chap.titre) }, `Chapitre ${chap.numero} : ${escapeGestionHtml(chap.titre)}`) || `Chapitre ${chap.numero} : ${escapeGestionHtml(chap.titre)}`}</strong>
+            <strong class="chapter-title">${titreChapitre}</strong>
             <span class="tag tag-volume">${escapeGestionHtml(getVolumeTitle(chap.volume_id))}</span>
             ${infoDate}
         </div>
@@ -420,7 +445,8 @@ window.chargerChapitresCategories = async function() {
         .from('chapitres')
         .select('*')
         .eq('histoire_id', window.currentOeuvreId)
-        .order('numero', { ascending: true }); // On trie par numéro de chapitre (1, 2, 3...)
+        .order('ordre_lecture', { ascending: true })
+        .order('id', { ascending: true });
 
     if (error) {
         listeBrouillons.innerHTML = `<p class="text-error">${window.t?.('errors.genericPrefix', {}, 'Erreur :') || 'Erreur :'} ${error.message}</p>`;
@@ -440,7 +466,7 @@ window.chargerChapitresCategories = async function() {
 
     const maintenant = new Date(); // L'heure exacte actuelle
 
-    chapitres.forEach(chap => {
+    trierChapitresGestion(chapitres || []).forEach(chap => {
         const dateChap = chap.date_publication ? new Date(chap.date_publication) : new Date();
         let infoDate = '';
 

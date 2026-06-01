@@ -11,8 +11,17 @@
         
         <div style="display: flex; gap: 20px;">
             <div class="form-group" style="flex: 1;">
-                <label for="chapitre-numero">Numéro du Chapitre</label>
-                <input type="number" id="chapitre-numero" class="custom-input" placeholder="Ex: 1">
+                <label for="chapitre-type">Type</label>
+                <select id="chapitre-type" class="custom-input custom-select">
+                    <option value="chapitre" selected>Chapitre</option>
+                    <option value="prologue">Prologue</option>
+                    <option value="epilogue">Epilogue</option>
+                    <option value="hors_serie">Hors-serie</option>
+                </select>
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label for="chapitre-numero">Numero affiche</label>
+                <input type="text" id="chapitre-numero" class="custom-input" placeholder="Ex: 1 ou 1.1">
             </div>
             <div class="form-group" style="flex: 3;">
                 <label for="chapitre-titre">Titre du Chapitre</label>
